@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
@@ -36,6 +37,17 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 app.post('/register', async (req, res) => {
     const { dni, matricula, nombre, apellido, especialidad, password } = req.body;
+
+    // Verificar la matrícula y el DNI
+    try {
+        const verifyResponse = await axios.post('http://localhost:5000/verify', { dni, matricula });
+        if (!verifyResponse.data.valid) {
+            return res.status(400).send('Matrícula o DNI no válido');
+        }
+    } catch (err) {
+        return res.status(500).send('Error verificando matrícula o DNI');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newDoctor = new Doctor({ dni, matricula, nombre, apellido, especialidad, password: hashedPassword });
     try {
