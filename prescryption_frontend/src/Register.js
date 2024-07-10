@@ -11,7 +11,7 @@ function Register() {
 
     const handleRegister = async () => {
         try {
-            await axios.post('http://localhost:3000/register', { dni, matricula, nombre, apellido, especialidad, password });
+            await axios.post('http://localhost:3001/register', { dni, matricula, nombre, apellido, especialidad, password });
             alert('Doctor registered successfully');
         } catch (error) {
             console.error(error);

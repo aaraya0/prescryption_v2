@@ -9,7 +9,7 @@ function Login() {
 
     const handleLogin = async () => {
         try {
-            const response = await axios.post('http://localhost:3000/login', { dni, matricula, password });
+            const response = await axios.post('http://localhost:3001/login', { dni, matricula, password });
             setToken(response.data.token);
             alert('Login successful');
         } catch (error) {
