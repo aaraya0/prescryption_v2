@@ -38,14 +38,20 @@ const SECRET_KEY = process.env.SECRET_KEY;
 app.post('/register', async (req, res) => {
     const { dni, matricula, nombre, apellido, especialidad, password } = req.body;
 
-    // Verificar la matrícula y el DNI
+    // Verificar si ya existe un doctor con el mismo DNI
+    const existingDoctor = await Doctor.findOne({ dni });
+    if (existingDoctor) {
+        return res.status(400).send('A doctor with this DNI is already registered');
+    }
+
+    // Verificar la matrícula y el DNI mediante el servicio mockup o real
     try {
         const verifyResponse = await axios.post('http://localhost:5000/verify', { dni, matricula });
         if (!verifyResponse.data.valid) {
             return res.status(400).send('Matrícula o DNI no válido');
         }
     } catch (err) {
-        return res.status(500).send('Error verificando matrícula o DNI');
+        return res.status(500).send('Error verifying matricula or DNI');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

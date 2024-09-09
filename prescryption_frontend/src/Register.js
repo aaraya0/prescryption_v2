@@ -14,8 +14,12 @@ function Register() {
             await axios.post('http://localhost:3001/register', { dni, matricula, nombre, apellido, especialidad, password });
             alert('Doctor registered successfully');
         } catch (error) {
-            console.error(error);
-            alert('Error registering doctor');
+            // Verifica si hay un mensaje de error específico desde el backend
+            if (error.response && error.response.data) {
+                alert(error.response.data);  // Muestra el mensaje exacto del backend
+            } else {
+                alert('Error registering doctor');
+            }
         }
     };
 
