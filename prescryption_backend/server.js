@@ -9,9 +9,9 @@ require('dotenv').config();
 
 const app = express();
 
-// Configurar CORS
+// CORS configuration
 app.use(cors({
-    origin: 'http://localhost:3000', // Reemplaza con la URL de tu frontend
+    origin: 'http://localhost:3000', // frontend url
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
@@ -22,68 +22,187 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error(err));
 
+// Schemas for different user types
 const doctorSchema = new mongoose.Schema({
-    dni: { type: String, required: true, unique: true },
-    matricula: { type: String, required: true },
-    nombre: { type: String, required: true },
-    apellido: { type: String, required: true },
-    especialidad: { type: String, required: true },
-    password: { type: String, required: true }
+    nid: { type: String, required: true, unique: true },
+    license: { type: String, required: true },
+    name: { type: String, required: true },
+    surname: { type: String, required: true },
+    specialty: { type: String, required: true },
+    password: { type: String, required: true },
+    mail: { type: String, required: true }
+});
+
+const pharmacistSchema = new mongoose.Schema({
+    nid: { type: String, required: true, unique: true },
+    license: { type: String, required: true },
+    name: { type: String, required: true },
+    surname: { type: String, required: true },
+    farmacia: { type: String, required: true },
+    cuit_farmacia: { type: String, required: true },
+    password: { type: String, required: true },
+    mail: { type: String, required: true }
+});
+
+const patientSchema = new mongoose.Schema({
+    nid: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    surname: { type: String, required: true },
+    fecha_nacimiento: { type: Date, required: true },
+    obra_social: { type: String, required: true },
+    plan_os: { type: String, required: true },
+    num_afiliado: { type: String, required: true },
+    password: { type: String, required: true },
+    mail: { type: String, required: true }
+});
+
+const insuranceSchema = new mongoose.Schema({
+    nid: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    surname: { type: String, required: true },
+    razon_social: { type: String, required: true },
+    cuit_os: { type: String, required: true },
+    password: { type: String, required: true },
+    mail: { type: String, required: true }
 });
 
 const Doctor = mongoose.model('Doctor', doctorSchema);
+const Pharmacist = mongoose.model('Pharmacist', pharmacistSchema);
+const Patient = mongoose.model('Patient', patientSchema);
+const Insurance = mongoose.model('Insurance', insuranceSchema);
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
-app.post('/register', async (req, res) => {
-    const { dni, matricula, nombre, apellido, especialidad, password } = req.body;
+// Registro de usuarios
 
-    // Verificar si ya existe un doctor con el mismo DNI
-    const existingDoctor = await Doctor.findOne({ dni });
-    if (existingDoctor) {
-        return res.status(400).send('A doctor with this DNI is already registered');
-    }
+// Registro de pacientes
+app.post('/register_paciente', async (req, res) => {
+    const { name, surname, nid, fecha_nacimiento, obra_social, plan_os, num_afiliado, mail, password } = req.body;
 
-    // Verificar la matrícula y el DNI mediante el servicio mockup o real
-    try {
-        const verifyResponse = await axios.post('http://localhost:5000/verify', { dni, matricula });
-        if (!verifyResponse.data.valid) {
-            return res.status(400).send('Matrícula o DNI no válido');
-        }
-    } catch (err) {
-        return res.status(500).send('Error verifying matricula or DNI');
+    // Verifica si ya existe un paciente con el mismo DNI
+    const existingPatient = await Patient.findOne({ nid });
+    if (existingPatient) {
+        return res.status(400).send('Un paciente con este DNI ya está registrado.');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newDoctor = new Doctor({ dni, matricula, nombre, apellido, especialidad, password: hashedPassword });
+    const newPatient = new Patient({ name, surname, nid, fecha_nacimiento, obra_social, plan_os, num_afiliado, mail, password: hashedPassword });
     try {
-        await newDoctor.save();
-        res.send('Doctor registered');
+        await newPatient.save();
+        res.send('Paciente registrado.');
     } catch (err) {
         res.status(400).send(err);
     }
 });
 
-app.post('/login', async (req, res) => {
-    const { dni, matricula, password } = req.body;
-    const doctor = await Doctor.findOne({ dni, matricula });
-    if (doctor && await bcrypt.compare(password, doctor.password)) {
-        const token = jwt.sign({ dni, matricula }, SECRET_KEY);
-        res.json({ token });
-    } else {
-        res.status(401).send('Invalid credentials');
+// Registro de médicos (con verificación de matrícula)
+app.post('/register_medico', async (req, res) => {
+    const { nid, license, name, surname, specialty, password, mail } = req.body;
+
+    // Verificación de matrícula
+    try {
+        const verifyResponse = await axios.post('http://localhost:5000/verify', { nid, license });
+        if (!verifyResponse.data.valid) {
+            return res.status(400).send('Matrícula o DNI no válido.');
+        }
+    } catch (err) {
+        return res.status(500).send('Error verificando matrícula.');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newDoctor = new Doctor({ nid, license, name, surname, specialty, password: hashedPassword, mail });
+    try {
+        await newDoctor.save();
+        res.send('Médico registrado.');
+    } catch (err) {
+        res.status(400).send(err);
     }
 });
 
+// Registro de farmacéuticos (con verificación de matrícula)
+app.post('/register_farmaceutico', async (req, res) => {
+    const { nid, license, name, surname, farmacia, cuit_farmacia, mail, password } = req.body;
+
+    // Verificación de matrícula
+    try {
+        const verifyResponse = await axios.post('http://localhost:5000/verify', { license });
+        if (!verifyResponse.data.valid) {
+            return res.status(400).send('Matrícula no válida.');
+        }
+    } catch (err) {
+        return res.status(500).send('Error verificando matrícula.');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newPharmacist = new Pharmacist({ nid, license, name, surname, farmacia, cuit_farmacia, mail, password: hashedPassword });
+    try {
+        await newPharmacist.save();
+        res.send('Farmacéutico registrado.');
+    } catch (err) {
+        res.status(400).send(err);
+    }
+});
+
+// Registro de obras sociales
+app.post('/register_obra_social', async (req, res) => {
+    const { name, surname, nid, razon_social, cuit_os, mail, password } = req.body;
+
+    // Verifica si ya existe una obra social con el mismo DNI
+    const existingInsurance = await Insurance.findOne({ nid });
+    if (existingInsurance) {
+        return res.status(400).send('Una obra social con este DNI ya está registrada.');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newInsurance = new Insurance({ name, surname, nid, razon_social, cuit_os, mail, password: hashedPassword });
+    try {
+        await newInsurance.save();
+        res.send('Obra social registrada.');
+    } catch (err) {
+        res.status(400).send(err);
+    }
+});
+
+// Login
+app.post('/login', async (req, res) => {
+    const { nid, password, userType } = req.body;
+
+    let user;
+    switch (userType) {
+        case 'medico':
+            user = await Doctor.findOne({ nid });
+            break;
+        case 'farmaceutico':
+            user = await Pharmacist.findOne({ nid });
+            break;
+        case 'paciente':
+            user = await Patient.findOne({ nid });
+            break;
+        case 'obra_social':
+            user = await Insurance.findOne({ nid });
+            break;
+        default:
+            return res.status(400).send('Tipo de usuario inválido');
+    }
+
+    if (user && await bcrypt.compare(password, user.password)) {
+        const token = jwt.sign({ nid }, SECRET_KEY);
+        res.json({ token });
+    } else {
+        res.status(401).send('Credenciales inválidas');
+    }
+});
+
+// Middleware para verificar el token
 const verifyToken = (req, res, next) => {
     const token = req.headers['authorization'];
-    if (!token) return res.status(403).send('Token is required');
+    if (!token) return res.status(403).send('Token requerido');
     try {
         const decoded = jwt.verify(token, SECRET_KEY);
-        req.doctor = decoded;
+        req.user = decoded;
         next();
     } catch (err) {
-        return res.status(401).send('Invalid Token');
+        return res.status(401).send('Token inválido');
     }
 };
 
