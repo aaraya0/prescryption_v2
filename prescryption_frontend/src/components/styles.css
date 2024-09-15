@@ -6,34 +6,20 @@ body, html {
     align-items: center; 
 }
 
+
+/* Menu options styles*/
 .formUserOptions {
     background-color: white; 
-    padding: 40px;
+    padding: 50px;
     border-radius: 5px; 
     display: flex; 
     flex-direction: column; 
-    gap: 10px; 
-    width: 250px; 
-    margin: 0 auto; 
-}
-
-.formLogin {
-    background-color: white; 
-    padding: 40px;
-    border-radius: 5px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-    width: 300px; 
+    gap: 15px; 
+    width: 320px; 
     margin: 0 auto; 
 }
 
 .formUserOptions .buttons {
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-}
-.formlogin .loginButton{
     display: flex; 
     flex-direction: column; 
     gap: 10px; 
@@ -43,16 +29,6 @@ body, html {
     font-size: 18px;
     font-weight: normal;
     text-align: center;
-}
-
-.formLogin .loginTitle {
-    font-size: 28px;
-    font-weight: bold;
-    text-align: center;
-}
-.formLogin .buttonTitle {
-    font-size: 18px;
-    font-weight: bolder;
 }
 
 .formUserOptions button {
@@ -82,4 +58,77 @@ body, html {
 
 .formUserOptions button:hover {
     font-weight: bolder; 
+}
+
+/*login styles*/
+.formLogin {
+    background-color: white; 
+    padding: 50px;
+    border-radius: 5px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
+    gap: 1px; 
+    width: 300px; 
+}
+
+.formLogin input.loginInput {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #9f9f9f;
+    width: 258px;
+    margin-bottom: 15px;
+}
+
+.formLogin .loginButton {
+    background-color: #8A88DB;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 280px;
+    margin: 10px;
+}
+
+.formLogin .loginButton:hover {
+    background-color: #706EC1;
+}
+
+.formLogin .loginTitle {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+.formLogin .RegistrateButton {
+    border: none;
+    background-color: white;
+    font-size: 15px;
+    cursor: pointer;
+}
+.formLogin .RegistrateButton:hover {
+    text-decoration: underline;
+}
+
+.formLogin .RecordarButton {
+    border: none;
+    background-color: white;
+    font-size: 15px;
+    cursor: pointer;
+    padding-top: 20px;
+}
+
+.formLogin .RecordarButton:hover {
+    text-decoration: underline;
+}
+
+.formLogin .inputTitle {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #000;
+    text-align: left;
+    width: 92%;
 }
