@@ -1,0 +1,85 @@
+body, html {
+    height: 100%;
+    margin: 0; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+}
+
+.formUserOptions {
+    background-color: white; 
+    padding: 40px;
+    border-radius: 5px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    width: 250px; 
+    margin: 0 auto; 
+}
+
+.formLogin {
+    background-color: white; 
+    padding: 40px;
+    border-radius: 5px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    width: 300px; 
+    margin: 0 auto; 
+}
+
+.formUserOptions .buttons {
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+}
+.formlogin .loginButton{
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+}
+
+.formUserOptions .title {
+    font-size: 18px;
+    font-weight: normal;
+    text-align: center;
+}
+
+.formLogin .loginTitle {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+}
+.formLogin .buttonTitle {
+    font-size: 18px;
+    font-weight: bolder;
+}
+
+.formUserOptions button {
+    border: none; 
+    border-radius: 5px; 
+    padding: 10px 10px;
+    font-size: 16px; 
+    cursor: pointer; 
+    color: black;
+}
+
+.formUserOptions .doctorsButton {
+    background-color: #D8B7AF;
+}
+
+.formUserOptions .patientButton {
+    background-color: #F3DDDE;
+}
+
+.formUserOptions .pharmacistButton {
+    background-color: #A6C4CA;
+}
+
+.formUserOptions .osButton {
+    background-color: #B0AFE2;
+}
+
+.formUserOptions button:hover {
+    font-weight: bolder; 
+}

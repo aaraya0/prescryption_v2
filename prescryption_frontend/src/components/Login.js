@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import "./styles.css"
 
 function Login() {
     const [nid, setNid] = useState('');
@@ -50,13 +51,15 @@ function Login() {
     };
 
     return (
-        <div>
-            <h2>Login</h2>
-            <input type="text" placeholder="DNI" value={nid} onChange={e => setNid(e.target.value)} />
-            <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-            <button onClick={handleLogin}>Login</button>
+        <div className="formLogin">
+            <h2 className="loginTitle">Iniciar Sesión</h2>
+            <p className="buttonTitle">DNI</p>
+            <input className="loginButton" type="text" placeholder="DNI (sin puntos)" value={nid} onChange={e => setNid(e.target.value)} />
+            <p className="buttonTitle">Contraseña</p>
+            <input type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)} />
+            <button className="loginButton" onClick={handleLogin}>Ingresar</button>
             <p>
-                ¿No tienes cuenta? <button onClick={handleRegister}>Regístrate</button>
+                ¿No tenés una cuenta? <button onClick={handleRegister}>Registrate</button>
             </p>
         </div>
     );
