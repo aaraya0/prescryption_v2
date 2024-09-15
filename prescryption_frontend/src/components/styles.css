@@ -16,7 +16,8 @@ body, html {
     flex-direction: column; 
     gap: 15px; 
     width: 320px; 
-    margin: 0 auto; 
+    margin: 0 auto;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);    
 }
 
 .formUserOptions .buttons {
@@ -70,6 +71,7 @@ body, html {
     align-items: center;
     gap: 1px; 
     width: 300px; 
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .formLogin input.loginInput {
@@ -131,4 +133,76 @@ body, html {
     color: #000;
     text-align: left;
     width: 92%;
+}
+
+
+/* Register styles*/
+
+.register-container {
+   width: 100%;
+    max-width: 350px;
+    background-color: #FFFFFF;
+    margin-top: 80px;
+    margin-bottom: 10px;
+    padding: 10px 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+.form-header h2 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+.form-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.form-input {
+    width: 94%;
+    padding: 10px;
+    border: 1px solid #9f9f9f;
+    border-radius: 5px;
+    font-size: 14px;
+}
+.form-radio {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+.form-radio label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+.register-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #ED83B1;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.register-button:hover {
+    background-color: #c76d94;
+}
+
+.register-container p {
+    text-align: center;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    border: none;
+    background-color: #FFF;
+    cursor: pointer;
+}
+
+.login-link:hover {
+    text-decoration: underline;
 }
