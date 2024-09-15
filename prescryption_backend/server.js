@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const axios = require('axios');
+// Rutas de receta
+const recetaRoutes = require('./prescriptionRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -17,6 +19,26 @@ app.use(cors({
 }));
 
 app.use(bodyParser.json());
+
+// Middleware para verificar el token
+const verifyToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) return res.status(403).send('Token requerido');
+
+    const token = authHeader.split(' ')[1]; // Aquí se elimina el prefijo "Bearer"
+    if (!token) return res.status(403).send('Token requerido');
+
+    try {
+        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        return res.status(401).send('Token inválido');
+    }
+};
+
+// Usar las rutas de recetas con verificación de token
+app.use('/api', verifyToken, recetaRoutes);
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected'))
@@ -166,7 +188,6 @@ app.post('/register_obra_social', async (req, res) => {
 // Login
 app.post('/login', async (req, res) => {
     const { nid, password, userType } = req.body;
-
     let user;
     switch (userType) {
         case 'medico':
@@ -186,24 +207,14 @@ app.post('/login', async (req, res) => {
     }
 
     if (user && await bcrypt.compare(password, user.password)) {
-        const token = jwt.sign({ nid }, SECRET_KEY);
+        const token = jwt.sign({ nid, userType }, SECRET_KEY);
         res.json({ token });
     } else {
         res.status(401).send('Credenciales inválidas');
     }
 });
 
-// Middleware para verificar el token
-const verifyToken = (req, res, next) => {
-    const token = req.headers['authorization'];
-    if (!token) return res.status(403).send('Token requerido');
-    try {
-        const decoded = jwt.verify(token, SECRET_KEY);
-        req.user = decoded;
-        next();
-    } catch (err) {
-        return res.status(401).send('Token inválido');
-    }
-};
+
+
 
 app.listen(3001, () => console.log('Server running on port 3001'));

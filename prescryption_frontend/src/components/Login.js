@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import "./styles.css"
-
 function Login() {
     const [nid, setNid] = useState('');
     const [password, setPassword] = useState('');
-    const [token, setToken] = useState('');
     const navigate = useNavigate();
 
     const handleLogin = async () => {
@@ -22,8 +20,10 @@ function Login() {
 
         try {
             const response = await axios.post('http://localhost:3001/login', { nid, password, userType });
-            setToken(response.data.token);
+            const token = response.data.token;
+            localStorage.setItem('token', token); // Guarda el token en localStorage
             alert('Login exitoso');
+
             switch (userType) {
                 case 'paciente':
                     navigate('/dashboard/paciente');

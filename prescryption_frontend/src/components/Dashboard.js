@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Dashboard({ userType }) {
     const navigate = useNavigate();
 
+    // Verificar si hay un token en localStorage al cargar el componente
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('No estás autenticado. Por favor, inicia sesión.');
+            navigate('/login');
+        }
+    }, [navigate]);
+
     const handleLogout = () => {
-        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        // Eliminar el token de localStorage y cookies
+        localStorage.removeItem('token');
+        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; // Elimina cookie de token
         navigate('/login');
     };
 
@@ -14,7 +25,13 @@ function Dashboard({ userType }) {
             case 'paciente':
                 return <p>Bienvenido al menú del paciente.</p>;
             case 'medico':
-                return <p>Bienvenido al menú del médico.</p>;
+                return (
+                    <div>
+                        <p>Bienvenido al menú del médico.</p>
+                        {/* Botón para emitir receta solo para el médico */}
+                        <button onClick={() => navigate('/emitir-receta')}>Emitir Receta</button>
+                    </div>
+                );
             case 'farmaceutico':
                 return <p>Bienvenido al menú del farmacéutico.</p>;
             case 'obra_social':
