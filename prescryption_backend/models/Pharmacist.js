@@ -6,8 +6,8 @@ const pharmacistSchema = new mongoose.Schema({
     license: { type: String, required: true },
     name: { type: String, required: true },
     surname: { type: String, required: true },
-    farmacia: { type: String, required: true },
-    cuit_farmacia: { type: String, required: true },
+    pharmacy_name: { type: String, required: true },
+    pharmacy_nid: { type: String, required: true },
     password: { type: String, required: true },
     mail: { type: String, required: true }
 });

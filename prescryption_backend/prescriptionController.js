@@ -3,145 +3,142 @@ const path = require('path');
 const { Web3 } = require('web3');
 const Doctor = require('./models/Doctor');
 
-// Configurar web3 y conectar a Ganache
+// Web3 config
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 
-// Cargar el ABI compilado del contrato y la dirección
-const contractPath = path.resolve(__dirname, '../prescryption_solidity/build/contracts', 'RecetaContract.json');
+// Compiled contract and address ABI
+const contractPath = path.resolve(__dirname, '../prescryption_solidity/build/contracts', 'PrescriptionContract.json');
 const contractJSON = JSON.parse(fs.readFileSync(contractPath, 'utf8'));
-const contratoAddress = "0x8989133E73FAD80b39fFEcAa2F602Da9282ACB47"; // Dirección del contrato en Ganache
-const recetaContract = new web3.eth.Contract(contractJSON.abi, contratoAddress);
+const contractAddress = "0x8989133E73FAD80b39fFEcAa2F602Da9282ACB47"; // Ganache contract address
+const prescriptionContract = new web3.eth.Contract(contractJSON.abi, contractAddress);
 
-exports.emitirReceta = async (req, res) => {
+exports.issuePrescription = async (req, res) => {
     const {
-        nombrePaciente,
-        dniPaciente,
-        numAfiliado,
-        obraSocial,
-        planObraSocial,
-        medicamento1,
-        cantidad1,
-        medicamento2,
-        cantidad2,
-        diagnostico,
+        patientName,
+        patientNid,
+        affiliateNum,
+        insuranceName,
+        insurancePlan,
+        med1,
+        quantity1,
+        med2,
+        quantity2,
+        diagnosis,
     } = req.body;
 
-    const { nid } = req.user; // Información del usuario logueado
+    const { nid } = req.user; // Logged user info
 
-    // Registro de datos recibidos para depuración
-    console.log('Datos recibidos:', req.body);
+    // Debugging
+    console.log('Received data:', req.body);
 
     try {
-        // Validación de datos del formulario
-        if (!nombrePaciente || !dniPaciente || !numAfiliado || !obraSocial || !planObraSocial || !medicamento1 || !cantidad1 || !diagnostico) {
-            console.warn('Datos faltantes en la solicitud:', {
-                nombrePaciente,
-                dniPaciente,
-                numAfiliado,
-                obraSocial,
-                planObraSocial,
-                medicamento1,
-                cantidad1,
-                medicamento2,
-                cantidad2,
-                diagnostico
+        // Form data validation
+        if (!patientName || !patientNid || !affiliateNum|| !insuranceName || !insurancePlan || !med1 || !quantity1 || !diagnosis) {
+            console.warn('Missing data:', {
+                patientName,
+                patientNid,
+                affiliateNum,
+                insuranceName,
+                insurancePlan,
+                med1,
+                quantity1,
+                med2,
+                quantity2,
+                diagnosis,
             });
-            return res.status(400).send('Faltan datos necesarios para emitir la receta.');
+            return res.status(400).send('Missing necessary data.');
         }
 
-        // Buscar al médico en la base de datos
-        const medico = await Doctor.findOne({ nid });
-        if (!medico) {
-            return res.status(404).send('Médico no encontrado.');
+        // Search doctor in DB
+        const doctor = await Doctor.findOne({ nid });
+        if (!doctor) {
+            return res.status(404).send('Doctor not found.');
         }
 
-        // Emitir receta y guardarla en la blockchain
+        // issue prescription and save it on blockchain
         const accounts = await web3.eth.getAccounts();
         const fromAccount = accounts[0];
 
-        console.log('Enviando transacción con los siguientes datos:', {
-            nombrePaciente,
-            dniPaciente,
-            numAfiliado,
-            obraSocial,
-            planObraSocial,
-            medicamento1,
-            cantidad1,
-            medicamento2,
-            cantidad2,
-            diagnostico,
-            medicoName: medico.name,
-            medicoSurname: medico.surname,
-            medicoNid: medico.nid,
-            medicoLicense: medico.license,
-            medicoSpecialty: medico.specialty,
+        console.log('Sending transaction with the following data:', {
+            patientName,
+            patientNid,
+            affiliateNum,
+            insuranceName,
+            insurancePlan,
+            med1,
+            quantity1,
+            med2,
+            quantity2,
+            diagnosis,
+            doctorName: doctor.name,
+            doctorSurname: doctor.surname,
+            doctorNid: doctor.nid,
+            doctorLicense: doctor.license,
+            doctorSpecialty: doctor.specialty,
             fromAccount: fromAccount
         });
 
-        // Enviar transacción a la blockchain y recibir el recibo de la transacción
-        const receipt = await recetaContract.methods
-            .emitirReceta(
-                nombrePaciente,
-                dniPaciente,
-                numAfiliado,
-                obraSocial,
-                planObraSocial,
-                medicamento1,
-                cantidad1,
-                medicamento2,
-                cantidad2,
-                diagnostico,
-                medico.name, // Nombre del médico logueado
-                medico.license // Matrícula del médico logueado
+        // Send transaction to blockchain and get transaction receipt
+        const receipt = await prescriptionContract.methods
+            .issuePrescription(
+                patientName,
+                patientNid,
+                affiliateNum,
+                insuranceName,
+                insurancePlan,
+                med1,
+                quantity1,
+                med2,
+                quantity2,
+                diagnosis,
+                doctor.name, // logged doctor name
+                doctor.license // logged doctor license
             )
-            .send({ from: accounts[0], gas: '1000000' }); // Ajusta la cantidad de gas aquí
+            .send({ from: accounts[0], gas: '1000000' }); // Adjust ammount of gas
 
-        // Verificar si la transacción fue exitosa
+        // Verify successful transaction
         if (receipt.status) {
             res.send({
-                message: 'Receta emitida y almacenada en la blockchain',
+                message: 'Prescription issued and saved in blockchain',
                 transactionHash: receipt.transactionHash,
                 blockNumber: receipt.blockNumber.toString(), // BigInt to string
                 gasUsed: receipt.gasUsed.toString() // BigInt to string
             });
         } else {
-            res.status(500).send('Error al emitir la receta en la blockchain');
+            res.status(500).send('Error issuing prescription in blockchain');
         }
     } catch (error) {
-        console.error('Error al emitir receta:', error);
-        res.status(500).send('Error al emitir la receta. Detalles del error: ' + error.message);
+        console.error('Error issuing prescription:', error);
+        res.status(500).send('Error issuing prescription. Details: ' + error.message);
     }
 };
 
-exports.obtenerRecetasPorMedico = async (req, res) => {
+exports.getPresbyDoctorNid = async (req, res) => {
     try {
-        const { nid } = req.user; // Obtener el nid del token del usuario logueado
+        const { nid } = req.user; 
 
-        // Buscar al médico en la base de datos
-        const medico = await Doctor.findOne({ nid });
-        if (!medico) {
-            return res.status(404).send('Médico no encontrado.');
+        const doctor = await Doctor.findOne({ nid });
+        if (!doctor) {
+            return res.status(404).send('Doctor not found.');
         }
 
-        // Obtener las cuentas de la blockchain
         const accounts = await web3.eth.getAccounts();
-        const fromAccount = accounts[0]; // Primera cuenta de Ganache
+        const fromAccount = accounts[0]; // First Ganache acc
 
-        // Llamar a la función del contrato inteligente para obtener las recetas
-        const recetas = await recetaContract.methods.getRecetasPorMedico(medico.nid).call({ from: fromAccount });
+        // Call smart contract function
+        const prescriptions = await prescriptionContract.methods.getPresbyDoctorNid(doctor.nid).call({ from: fromAccount });
 
-        // Verificar si se encontraron recetas
-        if (recetas.length === 0) {
-            return res.status(404).send('No se encontraron recetas para este médico.');
+        if (prescriptions.length === 0) {
+            return res.status(404).send('Prescriptions not found for this doctor.');
         }
 
-        // Devolver las recetas al frontend
+        // Prescriptions for frontend
         res.json({
-            message: 'Recetas obtenidas con éxito',
-            recetas: recetas
+            message: 'Prescriptions obtained successfully',
+            prescriptions: prescriptions
         });
     } catch (error) {
-        console.error('Error al obtener recetas:', error);
-        res.status(500).send('Error al obtener las recetas. Detalles del error: ' + error.message);
+        console.error('Error obtaining prescriptions:', error);
+        res.status(500).send('Error obtaining prescriptions. Details: ' + error.message);
     }
 };

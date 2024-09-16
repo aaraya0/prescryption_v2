@@ -1,5 +1,5 @@
-const RecetaContract = artifacts.require("RecetaContract");
+const PrescriptionContract = artifacts.require("PrescriptionContract");
 
 module.exports = function(deployer) {
-    deployer.deploy(RecetaContract);
+    deployer.deploy(PrescriptionContract);
 };

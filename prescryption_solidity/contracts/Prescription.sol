@@ -1,134 +1,134 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract RecetaContract {
-    struct Receta {
-        string nombrePaciente;
-        string dniPaciente;
-        string numAfiliado;
-        string obraSocial;
-        string planObraSocial;
-        string medicamento1;
-        uint cantidad1;
-        string medicamento2;
-        uint cantidad2;
-        string diagnostico;
-        string dniMedico; // Almacenar solo el DNI del médico
+contract PrescriptionContract {
+    struct Prescription {
+        string patientName;
+        string patientNid;
+        string affiliateNum;
+        string insuranceName;
+        string insurancePlan;
+        string med1;
+        uint quantity1;
+        string med2;
+        uint quantity2;
+        string diagnosis;
+        string doctorNid; 
     }
 
-    Receta[] public recetas;
-    mapping(string => Medico) public medicos; // Mapeo para almacenar datos de médicos
+    Prescription[] public prescriptions;
+    mapping(string => Doctor) public doctors; 
 
-    struct Medico {
-        string nombreMedico;
-        string matriculaMedico;
-        string especialidadMedico;
+    struct Doctor {
+        string doctorName;
+        string doctorLicense;
+        string doctorSpecialty;
     }
 
-    uint public recetaCount;
+    uint public prescriptionCount;
 
-    event RecetaEmitida(
-        string nombrePaciente,
-        string dniPaciente,
-        string numAfiliado,
-        string obraSocial,
-        string planObraSocial,
-        string medicamento1,
-        uint cantidad1,
-        string medicamento2,
-        uint cantidad2,
-        string diagnostico,
-        string dniMedico
+    event IssuedPrescription(
+        string patientName,
+        string patientNid,
+        string affiliateNum,
+        string insuranceName,
+        string insurancePlan,
+        string med1,
+        uint quantity1,
+        string med2,
+        uint quantity2,
+        string diagnosis,
+        string doctorNid
     );
 
-    // Función para registrar médicos
-    function registrarMedico(
-        string memory _dniMedico,
-        string memory _nombreMedico,
-        string memory _matriculaMedico,
-        string memory _especialidadMedico
+    // Register function
+    function registerDoctor(
+        string memory _doctorNid,
+        string memory _doctorName,
+        string memory _doctorLicense,
+        string memory _doctorSpecialty
     ) public {
-        medicos[_dniMedico] = Medico({
-            nombreMedico: _nombreMedico,
-            matriculaMedico: _matriculaMedico,
-            especialidadMedico: _especialidadMedico
+        doctors[_doctorNid] = Doctor ({
+            doctorName: _doctorName,
+            doctorLicense: _doctorLicense,
+            doctorSpecialty: _doctorSpecialty
         });
     }
 
-    function emitirReceta(
-        string memory _nombrePaciente,
-        string memory _dniPaciente,
-        string memory _numAfiliado,
-        string memory _obraSocial,
-        string memory _planObraSocial,
-        string memory _medicamento1,
-        uint _cantidad1,
-        string memory _medicamento2,
-        uint _cantidad2,
-        string memory _diagnostico,
-        string memory _dniMedico // Solo el DNI del médico
+    function issuePrescription(
+        string memory _patientName,
+        string memory _patientNid,
+        string memory _affiliateNum,
+        string memory _licenseName,
+        string memory _licensePlan,
+        string memory _med1,
+        uint _quantity1,
+        string memory _med2,
+        uint _quantity2,
+        string memory _diagnosis,
+        string memory _doctorNid 
     ) public {
-        Receta memory newReceta = Receta(
-            _nombrePaciente,
-            _dniPaciente,
-            _numAfiliado,
-            _obraSocial,
-            _planObraSocial,
-            _medicamento1,
-            _cantidad1,
-            _medicamento2,
-            _cantidad2,
-            _diagnostico,
-            _dniMedico
+        Prescription memory newPrescription = Prescription(
+            _patientName,
+            _patientNid,
+            _affiliateNum,
+            _licenseName,
+            _licensePlan,
+            _med1,
+            _quantity1,
+            _med2,
+            _quantity2,
+            _diagnosis,
+            _doctorNid
         );
-        recetas.push(newReceta);
-        recetaCount++;
+        prescriptions.push(newPrescription);
+        prescriptionCount++;
 
-        emit RecetaEmitida(
-            _nombrePaciente,
-            _dniPaciente,
-            _numAfiliado,
-            _obraSocial,
-            _planObraSocial,
-            _medicamento1,
-            _cantidad1,
-            _medicamento2,
-            _cantidad2,
-            _diagnostico,
-            _dniMedico
+        emit IssuedPrescription(
+            _patientName,
+            _patientName,
+            _affiliateNum,
+            _licenseName,
+            _licensePlan,
+            _med1,
+            _quantity1,
+            _med2,
+            _quantity2,
+            _diagnosis,
+            _doctorNid
         );
     }
 
-    function getReceta(uint _recetaId) public view returns (Receta memory, Medico memory) {
-        require(_recetaId > 0 && _recetaId <= recetaCount, "id de receta invalido.");
-        Receta memory receta = recetas[_recetaId - 1];
-        Medico memory medico = medicos[receta.dniMedico];
-        return (receta, medico);
+    function getPrescription(uint _prescriptionId) public view returns (Prescription memory, Doctor memory) {
+        require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "invalid id.");
+        Prescription memory prescription = prescriptions[_prescriptionId - 1];
+        Doctor memory doctor = doctors[prescription.doctorNid];
+        return (prescription, doctor);
     }
 
-    function getRecetas() public view returns (Receta[] memory) {
-        return recetas;
+    function getPrescriptions() public view returns (Prescription[] memory) {
+        return prescriptions;
     }
 
 
-    function getRecetasPorMedico(string memory _dniMedico) public view returns (Receta[] memory) {
-    // Contar cuántas recetas ha emitido el médico
+    function getPresbyDoctorNid(string memory _doctorNid) public view returns (Prescription[] memory) {
+    // count amount of prescriptions issued
     uint count = 0;
-    for (uint i = 0; i < recetaCount; i++) {
-        if (keccak256(abi.encodePacked(recetas[i].dniMedico)) == keccak256(abi.encodePacked(_dniMedico))) {
+    for (uint i = 0; i < prescriptionCount; i++) {
+        if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
             count++;
         }
     }
-    // Crear un array para almacenar las recetas del médico
-    Receta[] memory recetasMedico = new Receta[](count);
+    // array for doctor's prescriptions
+    Prescription[] memory doctorPrescriptions = new Prescription[](count);
     uint index = 0;
-    for (uint i = 0; i < recetaCount; i++) {
-        if (keccak256(abi.encodePacked(recetas[i].dniMedico)) == keccak256(abi.encodePacked(_dniMedico))) {
-            recetasMedico[index] = recetas[i];
+    for (uint i = 0; i < prescriptionCount; i++) {
+        if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
+            doctorPrescriptions[index] = prescriptions[i];
             index++;
         }
     }
 
-    return recetasMedico;
+    return doctorPrescriptions;
 }
 }

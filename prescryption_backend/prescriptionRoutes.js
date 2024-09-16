@@ -1,9 +1,9 @@
 const express = require('express');
-const { emitirReceta, obtenerRecetasPorMedico } = require('./prescriptionController');
+const { issuePrescription, getPresbyDoctorNid } = require('./prescriptionController');
 const router = express.Router();
 
-// Define la ruta para emitir receta
-router.post('/emitir_receta', emitirReceta);
-router.get('/pr_by_doctor', obtenerRecetasPorMedico);
+// Define routes
+router.post('/issue_press', issuePrescription);
+router.get('/pr_by_doctor', getPresbyDoctorNid);
 
 module.exports = router;
