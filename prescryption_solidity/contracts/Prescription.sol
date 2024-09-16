@@ -109,4 +109,26 @@ contract RecetaContract {
     function getRecetas() public view returns (Receta[] memory) {
         return recetas;
     }
+
+
+    function getRecetasPorMedico(string memory _dniMedico) public view returns (Receta[] memory) {
+    // Contar cuántas recetas ha emitido el médico
+    uint count = 0;
+    for (uint i = 0; i < recetaCount; i++) {
+        if (keccak256(abi.encodePacked(recetas[i].dniMedico)) == keccak256(abi.encodePacked(_dniMedico))) {
+            count++;
+        }
+    }
+    // Crear un array para almacenar las recetas del médico
+    Receta[] memory recetasMedico = new Receta[](count);
+    uint index = 0;
+    for (uint i = 0; i < recetaCount; i++) {
+        if (keccak256(abi.encodePacked(recetas[i].dniMedico)) == keccak256(abi.encodePacked(_dniMedico))) {
+            recetasMedico[index] = recetas[i];
+            index++;
+        }
+    }
+
+    return recetasMedico;
+}
 }

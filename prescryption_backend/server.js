@@ -7,6 +7,12 @@ const cors = require('cors');
 const axios = require('axios');
 // Rutas de receta
 const recetaRoutes = require('./prescriptionRoutes');
+// Importar los modelos desde la carpeta models
+const Doctor = require('./models/Doctor');
+const Pharmacist = require('./models/Pharmacist');
+const Patient = require('./models/Patient');
+const Insurance = require('./models/Insurance');
+
 require('dotenv').config();
 
 const app = express();
@@ -44,54 +50,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error(err));
 
-// Schemas for different user types
-const doctorSchema = new mongoose.Schema({
-    nid: { type: String, required: true, unique: true },
-    license: { type: String, required: true },
-    name: { type: String, required: true },
-    surname: { type: String, required: true },
-    specialty: { type: String, required: true },
-    password: { type: String, required: true },
-    mail: { type: String, required: true }
-});
 
-const pharmacistSchema = new mongoose.Schema({
-    nid: { type: String, required: true, unique: true },
-    license: { type: String, required: true },
-    name: { type: String, required: true },
-    surname: { type: String, required: true },
-    farmacia: { type: String, required: true },
-    cuit_farmacia: { type: String, required: true },
-    password: { type: String, required: true },
-    mail: { type: String, required: true }
-});
-
-const patientSchema = new mongoose.Schema({
-    nid: { type: String, required: true, unique: true },
-    name: { type: String, required: true },
-    surname: { type: String, required: true },
-    fecha_nacimiento: { type: Date, required: true },
-    obra_social: { type: String, required: true },
-    plan_os: { type: String, required: true },
-    num_afiliado: { type: String, required: true },
-    password: { type: String, required: true },
-    mail: { type: String, required: true }
-});
-
-const insuranceSchema = new mongoose.Schema({
-    nid: { type: String, required: true, unique: true },
-    name: { type: String, required: true },
-    surname: { type: String, required: true },
-    razon_social: { type: String, required: true },
-    cuit_os: { type: String, required: true },
-    password: { type: String, required: true },
-    mail: { type: String, required: true }
-});
-
-const Doctor = mongoose.model('Doctor', doctorSchema);
-const Pharmacist = mongoose.model('Pharmacist', pharmacistSchema);
-const Patient = mongoose.model('Patient', patientSchema);
-const Insurance = mongoose.model('Insurance', insuranceSchema);
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
