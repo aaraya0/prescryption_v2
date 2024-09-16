@@ -6,6 +6,10 @@ function Login() {
     const [nid, setNid] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const userType = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('userType='))
+    ?.split('=')[1];
 
     const handleLogin = async () => {
         const userType = document.cookie
@@ -47,19 +51,20 @@ function Login() {
     };
 
     const handleRegister = () => {
-        navigate('/register'); // Redirige a la pantalla de registro
+        navigate('/register'); 
     };
 
     return (
         <div className="formLogin">
-            <h2 className="loginTitle">Iniciar Sesión</h2>
-            <p className="buttonTitle">DNI</p>
-            <input className="loginButton" type="text" placeholder="DNI (sin puntos)" value={nid} onChange={e => setNid(e.target.value)} />
-            <p className="buttonTitle">Contraseña</p>
-            <input type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)} />
+            <h2 className="loginTitle">Iniciar Sesión {userType}</h2>
+            <p className="inputTitle">DNI</p>
+            <input className="loginInput" type="text" placeholder="DNI (sin puntos)" value={nid} onChange={e => setNid(e.target.value)} />
+            <p className="inputTitle">Contraseña</p>
+            <input className="loginInput" type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)} />
             <button className="loginButton" onClick={handleLogin}>Ingresar</button>
+            <button className='RecordarButton'>Recordar Contraseña</button>
             <p>
-                ¿No tenés una cuenta? <button onClick={handleRegister}>Registrate</button>
+                ¿No tenés una cuenta? <button className='RegistrateButton' onClick={handleRegister}>Registrate</button>
             </p>
         </div>
     );

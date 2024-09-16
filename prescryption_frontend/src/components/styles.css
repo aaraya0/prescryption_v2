@@ -6,34 +6,21 @@ body, html {
     align-items: center; 
 }
 
+
+/* Menu options styles*/
 .formUserOptions {
     background-color: white; 
-    padding: 40px;
+    padding: 50px;
     border-radius: 5px; 
     display: flex; 
     flex-direction: column; 
-    gap: 10px; 
-    width: 250px; 
-    margin: 0 auto; 
-}
-
-.formLogin {
-    background-color: white; 
-    padding: 40px;
-    border-radius: 5px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-    width: 300px; 
-    margin: 0 auto; 
+    gap: 15px; 
+    width: 320px; 
+    margin: 0 auto;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);    
 }
 
 .formUserOptions .buttons {
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-}
-.formlogin .loginButton{
     display: flex; 
     flex-direction: column; 
     gap: 10px; 
@@ -43,16 +30,6 @@ body, html {
     font-size: 18px;
     font-weight: normal;
     text-align: center;
-}
-
-.formLogin .loginTitle {
-    font-size: 28px;
-    font-weight: bold;
-    text-align: center;
-}
-.formLogin .buttonTitle {
-    font-size: 18px;
-    font-weight: bolder;
 }
 
 .formUserOptions button {
@@ -82,4 +59,150 @@ body, html {
 
 .formUserOptions button:hover {
     font-weight: bolder; 
+}
+
+/*login styles*/
+.formLogin {
+    background-color: white; 
+    padding: 50px;
+    border-radius: 5px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
+    gap: 1px; 
+    width: 300px; 
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.formLogin input.loginInput {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #9f9f9f;
+    width: 258px;
+    margin-bottom: 15px;
+}
+
+.formLogin .loginButton {
+    background-color: #8A88DB;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 280px;
+    margin: 10px;
+}
+
+.formLogin .loginButton:hover {
+    background-color: #706EC1;
+}
+
+.formLogin .loginTitle {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+.formLogin .RegistrateButton {
+    border: none;
+    background-color: white;
+    font-size: 15px;
+    cursor: pointer;
+}
+.formLogin .RegistrateButton:hover {
+    text-decoration: underline;
+}
+
+.formLogin .RecordarButton {
+    border: none;
+    background-color: white;
+    font-size: 15px;
+    cursor: pointer;
+    padding-top: 20px;
+}
+
+.formLogin .RecordarButton:hover {
+    text-decoration: underline;
+}
+
+.formLogin .inputTitle {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #000;
+    text-align: left;
+    width: 92%;
+}
+
+
+/* Register styles*/
+
+.register-container {
+   width: 100%;
+    max-width: 350px;
+    background-color: #FFFFFF;
+    margin-top: 80px;
+    margin-bottom: 10px;
+    padding: 10px 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+.form-header h2 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+.form-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.form-input {
+    width: 94%;
+    padding: 10px;
+    border: 1px solid #9f9f9f;
+    border-radius: 5px;
+    font-size: 14px;
+}
+.form-radio {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+.form-radio label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+.register-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #ED83B1;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.register-button:hover {
+    background-color: #c76d94;
+}
+
+.register-container p {
+    text-align: center;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    border: none;
+    background-color: #FFF;
+    cursor: pointer;
+}
+
+.login-link:hover {
+    text-decoration: underline;
 }
