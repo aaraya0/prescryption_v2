@@ -14,10 +14,10 @@ function MainMenu() {
         <div className="formUserOptions">
             <h2 className="title">Elija su tipo de usuario</h2>
             <div className="buttons">
-                <button className="patientButton" onClick={() => handleSelection('paciente')}>Paciente</button>
-                <button className="doctorsButton" onClick={() => handleSelection('medico')}>Médico</button>
-                <button className="pharmacistButton" onClick={() => handleSelection('farmaceutico')}>Farmacéutico</button>
-                <button className="osButton" onClick={() => handleSelection('obra_social')}>Obra Social</button>
+                <button className="patientButton" onClick={() => handleSelection('patient')}>Paciente</button>
+                <button className="doctorsButton" onClick={() => handleSelection('doctor')}>Médico</button>
+                <button className="pharmacistButton" onClick={() => handleSelection('pharmacist')}>Farmacéutico</button>
+                <button className="osButton" onClick={() => handleSelection('insurance')}>Obra Social</button>
             </div>
         </div>
     );

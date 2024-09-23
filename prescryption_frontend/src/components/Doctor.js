@@ -1,4 +1,3 @@
-// src/components/Doctor.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -11,7 +10,15 @@ const Doctor = () => {
         axios.get('http://localhost:3001/api/pr_by_doctor', {
             headers: { Authorization: `Bearer ${token}` }
         })
-        .then(response => setRecetas(response.data))
+        .then(response => {
+            console.log('Response data:', response.data);  // Verificar la estructura de la respuesta
+            // Verificar si response.data.prescriptions existe y es un array
+            if (Array.isArray(response.data.prescriptions)) {
+                setRecetas(response.data.prescriptions);
+            } else {
+                setRecetas([]);  // Si no es un array, inicializamos como un array vacío
+            }
+        })
         .catch(error => console.error('Error al obtener las recetas:', error));
     }, [token]);
 
@@ -21,10 +28,10 @@ const Doctor = () => {
             <ul>
                 {recetas.map((receta, index) => (
                     <li key={index}>
-                        <strong>Paciente:</strong> {receta.nombrePaciente}<br />
-                        <strong>Medicamento 1:</strong> {receta.medicamento1}, Cantidad: {receta.cantidad1}<br />
-                        <strong>Medicamento 2:</strong> {receta.medicamento2}, Cantidad: {receta.cantidad2}<br />
-                        <strong>Diagnóstico:</strong> {receta.diagnostico}<br />
+                        <strong>Paciente:</strong> {receta.patientName}<br />
+                        <strong>Medicamento 1:</strong> {receta.med1}, Cantidad: {receta.quantity1}<br />
+                        <strong>Medicamento 2:</strong> {receta.med2}, Cantidad: {receta.quantity2}<br />
+                        <strong>Diagnóstico:</strong> {receta.diagnosis}<br />
                     </li>
                 ))}
             </ul>

@@ -110,18 +110,27 @@ contract PrescriptionContract {
         return prescriptions;
     }
 
-
-    function getPresbyDoctorNid(string memory _doctorNid) public view returns (Prescription[] memory) {
-    // count amount of prescriptions issued
+    // -----------------------------
+function getPresbyDoctorNid(string memory _doctorNid) public view returns (Prescription[] memory) {
     uint count = 0;
+    
+    // Primer bucle para contar cuántas recetas pertenecen al doctor
     for (uint i = 0; i < prescriptionCount; i++) {
-        if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
+        // Obtener los hashes de ambos NID (almacenado y proporcionado)
+        bytes32 storedHash = keccak256(abi.encodePacked(prescriptions[i].doctorNid));
+        bytes32 inputHash = keccak256(abi.encodePacked(_doctorNid));
+
+        // Comparar ambos hashes
+        if (storedHash == inputHash) {
             count++;
         }
     }
-    // array for doctor's prescriptions
+
+    // Crear un array para almacenar las recetas del doctor
     Prescription[] memory doctorPrescriptions = new Prescription[](count);
     uint index = 0;
+
+    // Segundo bucle para almacenar las recetas correspondientes
     for (uint i = 0; i < prescriptionCount; i++) {
         if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
             doctorPrescriptions[index] = prescriptions[i];
@@ -131,4 +140,5 @@ contract PrescriptionContract {
 
     return doctorPrescriptions;
 }
+
 }

@@ -30,7 +30,7 @@ function Dashboard({ userType }) {
                     <div>
                         <p>Bienvenido al menú del médico.</p>
                         {/* Botón para emitir receta solo para el médico */}
-                        <button onClick={() => navigate('/emitir-receta')}>Emitir Receta</button>
+                        <button onClick={() => navigate('/issue-prescription')}>Emitir Receta</button>
                         <Doctor />
                     </div>
                 );

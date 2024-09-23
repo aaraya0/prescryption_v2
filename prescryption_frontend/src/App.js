@@ -20,7 +20,7 @@ function App() {
                     <Route path="/dashboard/farmaceutico" element={<Dashboard userType="farmaceutico" />} />
                     <Route path="/dashboard/obra_social" element={<Dashboard userType="obra_social" />} />
                     <Route path="/perfil/:userType" element={<Perfil />} /> {/* Ruta para el perfil */}
-                    <Route path="/emitir-receta" element={<EmitirReceta />} />
+                    <Route path="/issue-prescription" element={<EmitirReceta />} />
                 </Routes>
             </div>
         </Router>

@@ -3,16 +3,16 @@ import axios from 'axios';
 
 function EmitirReceta() {
   const [formData, setFormData] = useState({
-    nombrePaciente: '',
-    dniPaciente: '',
-    numAfiliado: '',
-    obraSocial: '',
-    planObraSocial: '',
-    medicamento1: '',
-    cantidad1: '',
-    medicamento2: '',
-    cantidad2: '',
-    diagnostico: '',
+    patientName: '',
+    patientNid: '',
+    affiliateNum: '',
+    insuranceName: '',
+    insurancePlan: '',
+    med1: '',
+    quantity1: '',
+    med2: '',
+    quantity2: '',
+    diagnosis: '',
   });
 
   // Manejar los cambios en los inputs del formulario
@@ -36,17 +36,17 @@ function EmitirReceta() {
 
     // Validar los campos del formulario antes de enviarlos
     const {
-      nombrePaciente,
-      dniPaciente,
-      numAfiliado,
-      obraSocial,
-      planObraSocial,
-      medicamento1,
-      cantidad1,
-      diagnostico,
+      patientName,
+      patientNid,
+      affiliateNum,
+      insuranceName,
+      insurancePlan,
+      med1,
+      quantity1,
+      diagnosis,
     } = formData;
 
-    if (!nombrePaciente || !dniPaciente || !numAfiliado || !obraSocial || !planObraSocial || !medicamento1 || !cantidad1 || !diagnostico) {
+    if (!patientName || !patientNid || !affiliateNum || !insuranceName || !insurancePlan || !med1 || !quantity1 || !diagnosis) {
       alert('Por favor, completa todos los campos obligatorios.');
       return;
     }
@@ -58,7 +58,7 @@ function EmitirReceta() {
     try {
       // Enviar la solicitud al backend con el token en los headers
       const response = await axios.post(
-        'http://localhost:3001/api/emitir_receta',
+        'http://localhost:3001/api/issue_pres',
         formData,
         {
           headers: {
@@ -95,16 +95,16 @@ function EmitirReceta() {
     <div>
       <h2>Emitir Receta</h2>
       <form onSubmit={handleSubmit}>
-        <input type="text" name="nombrePaciente" placeholder="Nombre y Apellido" onChange={handleChange} required />
-        <input type="text" name="dniPaciente" placeholder="DNI" onChange={handleChange} required />
-        <input type="text" name="numAfiliado" placeholder="Número de Afiliado" onChange={handleChange} required />
-        <input type="text" name="obraSocial" placeholder="Obra Social" onChange={handleChange} required />
-        <input type="text" name="planObraSocial" placeholder="Plan de Obra Social" onChange={handleChange} required />
-        <input type="text" name="medicamento1" placeholder="Ingresar Medicamento 1" onChange={handleChange} required />
-        <input type="text" name="cantidad1" placeholder="Cantidad" onChange={handleChange} required />
-        <input type="text" name="medicamento2" placeholder="Ingresar Medicamento 2" onChange={handleChange} />
-        <input type="text" name="cantidad2" placeholder="Cantidad" onChange={handleChange} />
-        <textarea name="diagnostico" placeholder="Diagnóstico" onChange={handleChange} required></textarea>
+        <input type="text" name="patientName" placeholder="Nombre y Apellido" onChange={handleChange} required />
+        <input type="text" name="patientNid" placeholder="DNI" onChange={handleChange} required />
+        <input type="text" name="affiliateNum" placeholder="Número de Afiliado" onChange={handleChange} required />
+        <input type="text" name="insuranceName" placeholder="Obra Social" onChange={handleChange} required />
+        <input type="text" name="insurancePlan" placeholder="Plan de Obra Social" onChange={handleChange} required />
+        <input type="text" name="med1" placeholder="Ingresar Medicamento 1" onChange={handleChange} required />
+        <input type="text" name="quantity1" placeholder="Cantidad" onChange={handleChange} required />
+        <input type="text" name="med2" placeholder="Ingresar Medicamento 2" onChange={handleChange} />
+        <input type="text" name="quantity2" placeholder="Cantidad" onChange={handleChange} />
+        <textarea name="diagnosis" placeholder="Diagnóstico" onChange={handleChange} required></textarea>
         <button type="submit">Emitir Receta</button>
       </form>
     </div>

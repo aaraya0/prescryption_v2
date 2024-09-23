@@ -29,16 +29,16 @@ function Login() {
             alert('Login exitoso');
 
             switch (userType) {
-                case 'paciente':
+                case 'patient':
                     navigate('/dashboard/paciente');
                     break;
-                case 'medico':
+                case 'doctor':
                     navigate('/dashboard/medico');
                     break;
-                case 'farmaceutico':
+                case 'pharmacist':
                     navigate('/dashboard/farmaceutico');
                     break;
-                case 'obra_social':
+                case 'insurance':
                     navigate('/dashboard/obra_social');
                     break;
                 default:

@@ -31,7 +31,7 @@ function Register() {
 
     const renderFields = () => {
         switch (userType) {
-            case 'paciente':
+            case 'patient':
                 return (
                     <>
                         <input className="form-input" type="text" name="name" placeholder="Nombre" onChange={handleChange} />
@@ -51,7 +51,7 @@ function Register() {
                         <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
                     </>
                 );
-            case 'medico':
+            case 'doctor':
                 return (
                     <>
                         <input className="form-input" type="text" name="name" placeholder="Nombre" onChange={handleChange} />
@@ -63,7 +63,7 @@ function Register() {
                         <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
                     </>
                 );
-            case 'farmaceutico':
+            case 'pharmacist':
                 return (
                     <>
                         <input className="form-input" type="text" name="name" placeholder="Nombre" onChange={handleChange} />
@@ -75,7 +75,7 @@ function Register() {
                         <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
                     </>
                 );
-            case 'obra_social':
+            case 'insurance':
                 return (
                     <>
                         <input className="form-input" type="text" name="name" placeholder="Nombre" onChange={handleChange} />
