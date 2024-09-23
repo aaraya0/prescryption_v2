@@ -134,17 +134,28 @@ body, html {
     text-align: left;
     width: 92%;
 }
+.login-link {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    border: none;
+    background-color: #FFF;
+    cursor: pointer;
+}
+
+.login-link:hover {
+    text-decoration: underline;
+}
 
 
 /* Register styles*/
 
 .register-container {
-   width: 100%;
+    width: 100%;
     max-width: 350px;
     background-color: #FFFFFF;
-    margin-top: 80px;
-    margin-bottom: 10px;
-    padding: 10px 30px;
+    margin: 350px auto 20px auto; 
+    padding: 8px 30px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -168,13 +179,12 @@ body, html {
 .form-radio {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 10px;
+    padding: 10px 2px;
 }
 .form-radio label {
     display: flex;
     align-items: center;
-    font-size: 14px;
+    font-size: 16px;
 }
 .register-button {
     width: 100%;
@@ -194,15 +204,52 @@ body, html {
     text-align: center;
 }
 
-.login-link {
-    text-align: center;
-    margin-top: 10px;
-    font-size: 14px;
-    border: none;
-    background-color: #FFF;
-    cursor: pointer;
+.form-body .inputTitle {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: -10px;
+    margin-top: -5px;
+    color: #000;
+    text-align: left;
+    width: 92%;
+}
+.form-body .optionsTitle {
+    font-weight: 500;
+    color: #000;
+    text-align: left;
 }
 
-.login-link:hover {
+/*Header styles*/
+
+.header {
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    background: transparent; 
+    padding: 20px; 
+    display: flex; 
+    justify-content: space-between;
+    align-items: center; 
+    z-index: 1000; 
+    height: 80px;
+}
+
+.back-button {
+    background: none; 
+    border: none; 
+    color: #6C6C6C; 
+    font-size: 16px; 
+    cursor: pointer; 
+}
+.back-button:hover{
     text-decoration: underline;
 }
+
+/*hasta tener un logo en imagen*/
+.logo {
+    font-size: 24px; 
+    font-weight: bold; 
+    margin-right: 40px;
+}
+
