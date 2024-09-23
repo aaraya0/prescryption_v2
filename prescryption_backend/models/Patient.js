@@ -10,7 +10,8 @@ const patientSchema = new mongoose.Schema({
     insurance_plan: { type: String, required: true },
     affiliate_num: { type: String, required: true },
     password: { type: String, required: true },
-    mail: { type: String, required: true }
+    mail: { type: String, required: true },
+    //sex: {type: String, required: true}
 });
 
 module.exports = mongoose.model('Patient', patientSchema);
