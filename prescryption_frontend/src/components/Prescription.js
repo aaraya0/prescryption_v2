@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import "./styles.css"
 
 function EmitirReceta() {
   const [formData, setFormData] = useState({
@@ -92,23 +93,63 @@ function EmitirReceta() {
   };
 
   return (
-    <div>
-      <h2>Emitir Receta</h2>
-      <form onSubmit={handleSubmit}>
-        <input type="text" name="patientName" placeholder="Nombre y Apellido" onChange={handleChange} required />
-        <input type="text" name="patientNid" placeholder="DNI" onChange={handleChange} required />
-        <input type="text" name="affiliateNum" placeholder="Número de Afiliado" onChange={handleChange} required />
-        <input type="text" name="insuranceName" placeholder="Obra Social" onChange={handleChange} required />
-        <input type="text" name="insurancePlan" placeholder="Plan de Obra Social" onChange={handleChange} required />
-        <input type="text" name="med1" placeholder="Ingresar Medicamento 1" onChange={handleChange} required />
-        <input type="text" name="quantity1" placeholder="Cantidad" onChange={handleChange} required />
-        <input type="text" name="med2" placeholder="Ingresar Medicamento 2" onChange={handleChange} />
-        <input type="text" name="quantity2" placeholder="Cantidad" onChange={handleChange} />
-        <textarea name="diagnosis" placeholder="Diagnóstico" onChange={handleChange} required></textarea>
-        <button type="submit">Emitir Receta</button>
-      </form>
+    <div className="receta-container">
+      <div className="form-container">
+        <form onSubmit={handleSubmit}>
+          <div className="receipt_left">
+            <div className="form-group">
+              <label>Nombre(s) y Apellido(s) del Paciente</label>
+              <input type="text" name="patientName" placeholder="Nombre(s)" onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>DNI</label>
+              <input type="text" name="patientNid" placeholder="DNI (sin puntos)" onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>Número de Afiliado</label>
+              <input type="text" name="affiliateNum" placeholder="Número de Afiliado" onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>Obra Social</label>
+              <input type="text" name="insuranceName" placeholder="Obra Social" onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>Plan de Obra Social</label>
+              <input type="text" name="insurancePlan" placeholder="Plan Obra Social" onChange={handleChange} required />
+            </div>
+          </div>
+          <div className="receipt_right">
+            <div className="form-group">
+              <label>Rp:</label>
+              <input type="text" name="med1" placeholder="Ingresar medicamento 1" onChange={handleChange} required />
+              <input type="text" name="quantity1" placeholder="Ingresar Cantidad" onChange={handleChange} required />
+              <input type="text" name="med2" placeholder="Ingresar medicamento 2" onChange={handleChange} />
+              <input type="text" name="quantity2" placeholder="Ingresar Cantidad" onChange={handleChange} />
+            </div>
+            <div className="form-group">
+              <label>Diagnóstico</label>
+              <textarea name="diagnosis" className="textarea" placeholder="Ingresar diagnóstico" onChange={handleChange} required></textarea>
+            </div>
+          </div>
+        </form>
+        <div className="separator"></div>
+        <div className="medical-info">
+          <div className="doctor-info">
+            <p>Médica: Julia Blunt</p>
+            <p>MP: 1234E</p>
+            <p>Médica - Gastroenteróloga</p>
+          </div>
+          <div className="prescription-info">
+            <p>Fecha de Emisión: 20/08/2024</p>
+            <p>Fecha de Vencimiento: 20/09/2024</p>
+            <p>Córdoba - Argentina</p>
+          </div>
+        </div>
+      </div>
+      <button type="submit" className="button">Generar Receta</button>
     </div>
   );
+
 }
 
 export default EmitirReceta;
