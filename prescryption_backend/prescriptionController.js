@@ -1,7 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const { Web3 } = require('web3');
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const Doctor = require('./models/Doctor');
+const Patient = require('./models/Patient'); // Importa el modelo de Paciente
 
 // Web3 config
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
@@ -12,6 +15,15 @@ const contractJSON = JSON.parse(fs.readFileSync(contractPath, 'utf8'));
 const contractAddress = "0x53591ac659e8CfD73046923C01778f1E71D68678"; // Ganache contract address
 const prescriptionContract = new web3.eth.Contract(contractJSON.abi, contractAddress);
 
+// Función auxiliar para desencriptar la clave privada del médico
+const decryptPrivateKey = (encryptedPrivateKey, password) => {
+    const decipher = crypto.createDecipher('aes-256-cbc', password);
+    let decrypted = decipher.update(encryptedPrivateKey, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+};
+
+// Emitir receta firmada por el médico
 exports.issuePrescription = async (req, res) => {
     const {
         patientName,
@@ -23,10 +35,10 @@ exports.issuePrescription = async (req, res) => {
         quantity1,
         med2,
         quantity2,
-        diagnosis,
+        diagnosis
     } = req.body;
 
-    const { nid } = req.user; // Logged doctor NID
+    const { nid } = req.user; // NID del médico autenticado
 
     try {
         // Validaciones
@@ -34,19 +46,32 @@ exports.issuePrescription = async (req, res) => {
             return res.status(400).send('Missing necessary data.');
         }
 
+        // Buscar al paciente por NID en la base de datos
+        const patient = await Patient.findOne({ nid: patientNid });
+        if (!patient) {
+            return res.status(404).send('Patient not found.');
+        }
+        
+        // Obtener la dirección del paciente de la base de datos
+        const patientAddress = patient.blockchain.address;
+
         // Buscar al doctor en la base de datos
         const doctor = await Doctor.findOne({ nid });
         if (!doctor) {
             return res.status(404).send('Doctor not found.');
         }
 
-        // Obtener cuentas y usar la primera cuenta para firmar la transacción
-        const accounts = await web3.eth.getAccounts();
-        const fromAccount = accounts[0];
+        // Desencriptar la clave privada del médico para firmar la transacción
+        const privateKey = decryptPrivateKey(doctor.blockchain.privateKey, doctor.password);
 
-        console.log('Sending transaction...');
+        // Firmar la transacción con la clave privada del médico
+        const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+        web3.eth.accounts.wallet.add(account);
+        const fromAccount = account.address;
 
-        // Enviar transacción al contrato
+        console.log('Sending signed transaction...');
+
+        // Enviar la transacción firmada al contrato
         const receipt = await prescriptionContract.methods
             .issuePrescription(
                 patientName,
@@ -59,14 +84,15 @@ exports.issuePrescription = async (req, res) => {
                 med2,
                 quantity2,
                 diagnosis,
-                doctor.nid
+                doctor.nid,
+                patientAddress // Aquí va la dirección del paciente obtenida de la base de datos
             )
             .send({ from: fromAccount, gas: '2000000' });
+        
+        const prescriptionId = receipt.events.IssuedPrescription.returnValues.prescriptionId; // Captura el prescriptionId
 
-        // Mostrar el receipt de la transacción
         console.log('Transaction Receipt:', receipt);
 
-        // Verificar si la transacción fue exitosa
         if (receipt.status) {
             res.send({
                 message: 'Prescription issued and saved in blockchain',

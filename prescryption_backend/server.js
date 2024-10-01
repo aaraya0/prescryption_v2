@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const axios = require('axios');
+const Wallet = require('ethereumjs-wallet').default; // Importación para generar direcciones blockchain
 const prescriptionRoutes = require('./prescriptionRoutes');
 const Doctor = require('./models/Doctor');
 const Pharmacist = require('./models/Pharmacist');
@@ -50,6 +51,18 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
+// Helper function to generate blockchain address
+function generarDireccionBlockchain() {
+    const wallet = Wallet.generate();
+    const privateKey = wallet.getPrivateKeyString();
+    const address = wallet.getAddressString();
+    
+    return {
+        privateKey,
+        address
+    };
+}
+
 // User registry
 
 // Patient registry
@@ -63,7 +76,27 @@ app.post('/patient_register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newPatient = new Patient({ name, surname, nid, birth_date, insurance_name, insurance_plan, affiliate_num, mail, password: hashedPassword });
+
+    // Genera dirección blockchain
+    const { privateKey, address } = generarDireccionBlockchain();
+    const encryptedPrivateKey = await bcrypt.hash(privateKey, 10); // Encripta la clave privada
+
+    const newPatient = new Patient({
+        name,
+        surname,
+        nid,
+        birth_date,
+        insurance_name,
+        insurance_plan,
+        affiliate_num,
+        mail,
+        password: hashedPassword,
+        blockchain: {
+            privateKey: encryptedPrivateKey, // Se almacena encriptada
+            address
+        }
+    });
+
     try {
         await newPatient.save();
         res.send('Patient registered.');
@@ -87,7 +120,25 @@ app.post('/doctor_register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newDoctor = new Doctor({ nid, license, name, surname, specialty, password: hashedPassword, mail });
+
+    // Genera dirección blockchain
+    const { privateKey, address } = generarDireccionBlockchain();
+    const encryptedPrivateKey = await bcrypt.hash(privateKey, 10); // Encripta la clave privada
+
+    const newDoctor = new Doctor({
+        nid,
+        license,
+        name,
+        surname,
+        specialty,
+        password: hashedPassword,
+        mail,
+        blockchain: {
+            privateKey: encryptedPrivateKey, // Se almacena encriptada
+            address
+        }
+    });
+
     try {
         await newDoctor.save();
         res.send('Doctor registered');
@@ -111,7 +162,26 @@ app.post('/pharmacist_register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newPharmacist = new Pharmacist({ nid, license, name, surname, pharmacy, pharmacy_nid, mail, password: hashedPassword });
+
+    // Genera dirección blockchain
+    const { privateKey, address } = generarDireccionBlockchain();
+    const encryptedPrivateKey = await bcrypt.hash(privateKey, 10); // Encripta la clave privada
+
+    const newPharmacist = new Pharmacist({
+        nid,
+        license,
+        name,
+        surname,
+        pharmacy,
+        pharmacy_nid,
+        mail,
+        password: hashedPassword,
+        blockchain: {
+            privateKey: encryptedPrivateKey, // Se almacena encriptada
+            address
+        }
+    });
+
     try {
         await newPharmacist.save();
         res.send('Pharmacist registered.');
@@ -131,7 +201,25 @@ app.post('/insurance_register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newInsurance = new Insurance({ name, surname, nid, insurance_name, insurance_nid, mail, password: hashedPassword });
+
+    // Genera dirección blockchain
+    const { privateKey, address } = generarDireccionBlockchain();
+    const encryptedPrivateKey = await bcrypt.hash(privateKey, 10); // Encripta la clave privada
+
+    const newInsurance = new Insurance({
+        name,
+        surname,
+        nid,
+        insurance_name,
+        insurance_nid,
+        mail,
+        password: hashedPassword,
+        blockchain: {
+            privateKey: encryptedPrivateKey, // Se almacena encriptada
+            address
+        }
+    });
+
     try {
         await newInsurance.save();
         res.send('Insurance registered.');
@@ -168,8 +256,5 @@ app.post('/login', async (req, res) => {
         res.status(401).send('Invalid credentials');
     }
 });
-
-
-
 
 app.listen(3001, () => console.log('Server running on port 3001'));

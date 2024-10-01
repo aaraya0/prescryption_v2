@@ -7,7 +7,11 @@ const doctorSchema = new mongoose.Schema({
     surname: { type: String, required: true },
     specialty: { type: String, required: true },
     password: { type: String, required: true },
-    mail: { type: String, required: true }
+    mail: { type: String, required: true },
+    blockchain: {
+        privateKey: { type: String, required: true }, // Clave privada encriptada
+        address: { type: String, required: true } // Dirección pública de la blockchain
+    }
 });
 
 module.exports = mongoose.model('Doctor', doctorSchema);

@@ -14,10 +14,12 @@ contract PrescriptionContract {
         uint quantity2;
         string diagnosis;
         string doctorNid; 
+        address patientAddress; // Dirección del paciente
+        bool transferredToPatient; // Indica si fue transferida al paciente
     }
 
     Prescription[] public prescriptions;
-    mapping(string => Doctor) public doctors; 
+  mapping(string => Doctor) public doctors; 
 
     struct Doctor {
         string doctorName;
@@ -28,6 +30,7 @@ contract PrescriptionContract {
     uint public prescriptionCount;
 
     event IssuedPrescription(
+        uint prescriptionId, 
         string patientName,
         string patientNid,
         string affiliateNum,
@@ -38,70 +41,92 @@ contract PrescriptionContract {
         string med2,
         uint quantity2,
         string diagnosis,
-        string doctorNid
+        string doctorNid,
+        address patientAddress
     );
 
     // Register function
-    function registerDoctor(
+    /*function registerDoctor(
         string memory _doctorNid,
         string memory _doctorName,
         string memory _doctorLicense,
         string memory _doctorSpecialty
     ) public {
-        doctors[_doctorNid] = Doctor ({
+        doctors[_doctorNid] = Doctor({
             doctorName: _doctorName,
             doctorLicense: _doctorLicense,
             doctorSpecialty: _doctorSpecialty
         });
-    }
+    }*/
+
+    // EMITIR RECETA 
+    event TransferredToPatient(uint prescriptionId, address patientAddress);
 
     function issuePrescription(
         string memory _patientName,
         string memory _patientNid,
         string memory _affiliateNum,
-        string memory _licenseName,
-        string memory _licensePlan,
+        string memory _insuranceName,
+        string memory _insurancePlan,
         string memory _med1,
         uint _quantity1,
         string memory _med2,
         uint _quantity2,
         string memory _diagnosis,
-        string memory _doctorNid 
+        string memory _doctorNid,
+        address _patientAddress
     ) public {
-        Prescription memory newPrescription = Prescription(
-            _patientName,
-            _patientNid,
-            _affiliateNum,
-            _licenseName,
-            _licensePlan,
-            _med1,
-            _quantity1,
-            _med2,
-            _quantity2,
-            _diagnosis,
-            _doctorNid
-        );
+        Prescription memory newPrescription = Prescription({
+            patientName: _patientName,
+            patientNid: _patientNid,
+            affiliateNum: _affiliateNum,
+            insuranceName: _insuranceName,
+            insurancePlan: _insurancePlan,
+            med1: _med1,
+            quantity1: _quantity1,
+            med2: _med2,
+            quantity2: _quantity2,
+            diagnosis: _diagnosis,
+            doctorNid: _doctorNid,
+            patientAddress: _patientAddress,
+            transferredToPatient: false
+        });
+
         prescriptions.push(newPrescription);
+        uint prescriptionId = prescriptionCount;
         prescriptionCount++;
 
         emit IssuedPrescription(
+            prescriptionId,
             _patientName,
-            _patientName,
+            _patientNid,
             _affiliateNum,
-            _licenseName,
-            _licensePlan,
+            _insuranceName,
+            _insurancePlan,
             _med1,
             _quantity1,
             _med2,
             _quantity2,
             _diagnosis,
-            _doctorNid
+            _doctorNid,
+            _patientAddress
         );
     }
 
+    function transferToPatient(uint _prescriptionId) public {
+        require(_prescriptionId < prescriptionCount, "Invalid prescription ID.");
+        Prescription storage prescription = prescriptions[_prescriptionId];
+
+        require(!prescription.transferredToPatient, "Prescription already transferred.");
+        require(msg.sender == prescription.patientAddress, "Only the patient can accept the transfer.");
+
+        prescription.transferredToPatient = true;
+        emit TransferredToPatient(_prescriptionId, msg.sender);
+    }
+
     function getPrescription(uint _prescriptionId) public view returns (Prescription memory, Doctor memory) {
-        require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "invalid id.");
-        Prescription memory prescription = prescriptions[_prescriptionId - 1];
+        require(_prescriptionId < prescriptionCount, "Invalid ID.");
+        Prescription memory prescription = prescriptions[_prescriptionId];
         Doctor memory doctor = doctors[prescription.doctorNid];
         return (prescription, doctor);
     }
@@ -110,35 +135,23 @@ contract PrescriptionContract {
         return prescriptions;
     }
 
-    // -----------------------------
-function getPresbyDoctorNid(string memory _doctorNid) public view returns (Prescription[] memory) {
-    uint count = 0;
-    
-    // Primer bucle para contar cuántas recetas pertenecen al doctor
-    for (uint i = 0; i < prescriptionCount; i++) {
-        // Obtener los hashes de ambos NID (almacenado y proporcionado)
-        bytes32 storedHash = keccak256(abi.encodePacked(prescriptions[i].doctorNid));
-        bytes32 inputHash = keccak256(abi.encodePacked(_doctorNid));
-
-        // Comparar ambos hashes
-        if (storedHash == inputHash) {
-            count++;
+    function getPresbyDoctorNid(string memory _doctorNid) public view returns (Prescription[] memory) {
+        uint count = 0;
+        for (uint i = 0; i < prescriptionCount; i++) {
+            if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
+                count++;
+            }
         }
-    }
 
-    // Crear un array para almacenar las recetas del doctor
-    Prescription[] memory doctorPrescriptions = new Prescription[](count);
-    uint index = 0;
-
-    // Segundo bucle para almacenar las recetas correspondientes
-    for (uint i = 0; i < prescriptionCount; i++) {
-        if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
-            doctorPrescriptions[index] = prescriptions[i];
-            index++;
+        Prescription[] memory doctorPrescriptions = new Prescription[](count);
+        uint index = 0;
+        for (uint i = 0; i < prescriptionCount; i++) {
+            if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
+                doctorPrescriptions[index] = prescriptions[i];
+                index++;
+            }
         }
+
+        return doctorPrescriptions;
     }
-
-    return doctorPrescriptions;
-}
-
 }
