@@ -6,6 +6,5 @@ const router = express.Router();
 router.post('/issue_pres', issuePrescription);
 router.get('/pr_by_doctor', getPresbyDoctorNid);
 router.get('/all_pres', getAllPrescriptions);
-router.post('/transfer_pres', transferPrescriptionToPatient); 
 
 module.exports = router;

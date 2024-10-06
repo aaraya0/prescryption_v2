@@ -131,6 +131,7 @@ function EmitirReceta() {
               <textarea name="diagnosis" className="textarea" placeholder="Ingresar diagnóstico" onChange={handleChange} required></textarea>
             </div>
           </div>
+          <button type="submit" className="button">Generar Receta</button>
         </form>
         <div className="separator"></div>
         <div className="medical-info">
@@ -146,7 +147,7 @@ function EmitirReceta() {
           </div>
         </div>
       </div>
-      <button type="submit" className="button">Generar Receta</button>
+      
     </div>
   );
 

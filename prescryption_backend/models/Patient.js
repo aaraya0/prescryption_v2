@@ -1,6 +1,4 @@
-// models/Patient.js
 const mongoose = require('mongoose');
-
 const patientSchema = new mongoose.Schema({
     nid: { type: String, required: true, unique: true },
     name: { type: String, required: true },
@@ -11,11 +9,7 @@ const patientSchema = new mongoose.Schema({
     affiliate_num: { type: String, required: true },
     password: { type: String, required: true },
     mail: { type: String, required: true },
-    //sex: {type: String, required: true},
-    blockchain: {
-        privateKey: { type: String, required: true }, // Clave privada encriptada
-        address: { type: String, required: true } // Dirección pública de la blockchain
-    }
+    address: { type: String, required: true }  // Añadir address de Ethereum del paciente
 });
 
 module.exports = mongoose.model('Patient', patientSchema);

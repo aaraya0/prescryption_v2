@@ -40,20 +40,14 @@ function Register() {
                         <input className="form-input" type="text" name="surname" placeholder="Apellido" onChange={handleChange} />
                         <p className="inputTitle">DNI</p>
                         <input className="form-input" type="text" name="nid" placeholder="DNI" onChange={handleChange} />
-                        <div className="form-radio">
-                            <label className='optionsTitle'>Sexo</label>
-                            <label><input type="radio" name="sexo" value="F" onChange={handleChange} />F</label>
-                            <label><input type="radio" name="sexo" value="M" onChange={handleChange} />M</label>
-                            <label><input type="radio" name="sexo" value="X" onChange={handleChange} />X</label>
-                        </div>
                         <p className="inputTitle">Fecha de Nacimiento</p>
-                        <input className="form-input" type="date" name="fecha_nacimiento" placeholder="Fecha de Nacimiento" onChange={handleChange} />
+                        <input className="form-input" type="date" name="birth_date" placeholder="Fecha de Nacimiento" onChange={handleChange} />
                         <p className="inputTitle">Obra Social</p>
-                        <input className="form-input" type="text" name="obra_social" placeholder="Obra Social" onChange={handleChange} />
+                        <input className="form-input" type="text" name="insurance_name" placeholder="Obra Social" onChange={handleChange} />
                         <p className="inputTitle">Plan de Obra Social</p>
-                        <input className="form-input" type="text" name="plan_os" placeholder="Plan de Obra Social" onChange={handleChange} />
+                        <input className="form-input" type="text" name="insurance_plan" placeholder="Plan de Obra Social" onChange={handleChange} />
                         <p className="inputTitle">Número de Afiliado</p>
-                        <input className="form-input" type="text" name="num_afiliado" placeholder="Número de Afiliado" onChange={handleChange} />
+                        <input className="form-input" type="text" name="affiliate_num" placeholder="Número de Afiliado" onChange={handleChange} />
                         <p className="inputTitle">Correo Electrónico</p>
                         <input className="form-input" type="email" name="mail" placeholder="Email" onChange={handleChange} />
                         <p className="inputTitle">Contraseña</p>
