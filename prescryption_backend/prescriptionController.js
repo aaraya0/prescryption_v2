@@ -33,7 +33,7 @@ exports.issuePrescription = async (req, res) => {
         quantity1,
         med2,
         quantity2,
-        diagnosis,
+        diagnosis
     } = req.body;
 
     const { nid } = req.user; // NID del médico autenticado
@@ -55,35 +55,42 @@ exports.issuePrescription = async (req, res) => {
         if (!patient) {
             return res.status(404).send('Patient not found.');
         }
-        console.log('Patient Ethereum address:', patient.address);
 
-        // Obtener cuentas de Ethereum y usar la primera cuenta para firmar la transacción
         const accounts = await web3.eth.getAccounts();
         const fromAccount = accounts[0];
 
-        console.log('Sending transaction...');
+        // Obtener la fecha actual (emisión) y calcular la fecha de vencimiento (30 días después)
+        const issueDate = new Date();
+        const expirationDate = new Date(issueDate);
+        expirationDate.setDate(issueDate.getDate() + 30);
 
-        // Enviar transacción al contrato, incluyendo la dirección del paciente
+        // Preparar las structs para los datos de la receta y obra social
+        const meds = {
+            med1,
+            quantity1,
+            med2,
+            quantity2,
+            diagnosis
+        };
+
+        const insurance = {
+            affiliateNum,
+            insuranceName,
+            insurancePlan
+        };
+
+        // Llamar al contrato para emitir la receta
         const receipt = await prescriptionContract.methods
             .issuePrescription(
                 patientName,
                 patientNid,
-                affiliateNum,
-                insuranceName,
-                insurancePlan,
-                med1,
-                quantity1,
-                med2,
-                quantity2,
-                diagnosis,
+                meds,
+                insurance,
                 doctor.nid,
-                patient.address  // Pasar la address del paciente al contrato
+                patient.address
             )
             .send({ from: fromAccount, gas: '2000000' });
 
-        console.log('Transaction Receipt:', receipt);
-
-        // Verificar si la transacción fue exitosa
         if (receipt.status) {
             res.send({
                 message: 'Prescription issued and saved in blockchain',
@@ -100,6 +107,8 @@ exports.issuePrescription = async (req, res) => {
     }
 };
 
+
+
 exports.getPresbyDoctorNid = async (req, res) => {
     try {
         const { nid } = req.user; // NID del doctor desde el token JWT
@@ -115,9 +124,6 @@ exports.getPresbyDoctorNid = async (req, res) => {
         const accounts = await web3.eth.getAccounts();
         const fromAccount = accounts[0]; // Primera cuenta de Ganache
 
-        // Registrar para depuración
-        console.log(`Doctor found: ${doctor.nid}, calling contract from account: ${fromAccount}`);
-
         // Llamar a la función del contrato inteligente para obtener recetas por NID del doctor
         const prescriptions = await prescriptionContract.methods.getPresbyDoctorNid(doctor.nid).call({ from: fromAccount });
 
@@ -131,19 +137,24 @@ exports.getPresbyDoctorNid = async (req, res) => {
         const formattedPrescriptions = prescriptions.map(prescription => ({
             patientName: prescription.patientName,
             patientNid: prescription.patientNid,
-            affiliateNum: prescription.affiliateNum,
-            insuranceName: prescription.insuranceName,
-            insurancePlan: prescription.insurancePlan,
-            med1: prescription.med1,
-            quantity1: Number(prescription.quantity1), // Convertir BigInt a Number
-            med2: prescription.med2,
-            quantity2: Number(prescription.quantity2), // Convertir BigInt a Number
-            diagnosis: prescription.diagnosis,
-            doctorNid: prescription.doctorNid
+            meds: {
+                med1: prescription.meds.med1,
+                quantity1: Number(prescription.meds.quantity1),
+                med2: prescription.meds.med2,
+                quantity2: Number(prescription.meds.quantity2),
+                diagnosis: prescription.meds.diagnosis
+            },
+            insurance: {
+                affiliateNum: prescription.insurance.affiliateNum,
+                insuranceName: prescription.insurance.insuranceName,
+                insurancePlan: prescription.insurance.insurancePlan
+            },
+            doctorNid: prescription.doctorNid,
+            issueDate: Number(prescription.issueDate),
+            expirationDate: Number(prescription.expirationDate),
+            patientAddress: prescription.patientAddress
         }));
 
-        // Registrar las recetas formateadas para depuración
-        console.log('Formatted prescriptions:', formattedPrescriptions);
 
         // Enviar las recetas formateadas al frontend
         res.json({
@@ -155,7 +166,6 @@ exports.getPresbyDoctorNid = async (req, res) => {
         res.status(500).send('Error obtaining prescriptions. Details: ' + error.message);
     }
 };
-
 
 // Función para convertir todos los BigInt a string en un objeto
 const convertBigIntToString = (obj) => {
@@ -199,6 +209,71 @@ exports.getAllPrescriptions = async (req, res) => {
         // Enviar las recetas al frontend
         res.json({
             message: 'All prescriptions obtained successfully',
+            prescriptions: formattedPrescriptions
+        });
+    } catch (error) {
+        console.error('Error obtaining prescriptions:', error);
+        res.status(500).send('Error obtaining prescriptions. Details: ' + error.message);
+    }
+};
+
+exports.getPresbyPatientNid = async (req, res) => {
+    try {
+        const { nid } = req.user; // NID del paciente desde el token JWT
+
+        // Buscar al paciente en la base de datos
+        const patient = await Patient.findOne({ nid });
+        if (!patient) {
+            console.error(`Patient with NID: ${nid} not found in the database.`);
+            return res.status(404).send('Patient not found.');
+        }
+
+        const patientAddress = patient.address;
+
+        // Obtener cuentas de Ganache
+        const accounts = await web3.eth.getAccounts();
+        const fromAccount = accounts[0]; // Primera cuenta de Ganache
+
+        // Llamar a la función del contrato inteligente para obtener recetas por dirección del paciente
+        const prescriptions = await prescriptionContract.methods.getPresbyPatientAddress(patientAddress).call({ from: fromAccount });
+
+        // Verificar si se encontraron recetas
+        if (prescriptions.length === 0) {
+            console.warn(`No prescriptions found for patient address: ${patientAddress}`);
+            return res.status(404).send('Prescriptions not found for this patient.');
+        }
+
+        // Procesar las recetas, asegurándonos de manejar los BigInt
+        const formattedPrescriptions = prescriptions.map(prescription => {
+            const isExpired = new Date() > new Date(prescription.expirationDate);
+            
+            return {
+                patientName: prescription.patientName,
+                patientNid: prescription.patientNid,
+                meds: {
+                    med1: prescription.meds.med1,
+                    quantity1: Number(prescription.meds.quantity1),
+                    med2: prescription.meds.med2,
+                    quantity2: Number(prescription.meds.quantity2),
+                    diagnosis: prescription.meds.diagnosis
+                },
+                insurance: {
+                    affiliateNum: prescription.insurance.affiliateNum,
+                    insuranceName: prescription.insurance.insuranceName,
+                    insurancePlan: prescription.insurance.insurancePlan
+                },
+                doctorNid: prescription.doctorNid,
+                issueDate: Number(prescription.issueDate),
+                expirationDate: Number(prescription.expirationDate),
+                patientAddress: prescription.patientAddress,
+                status: isExpired ? 'Expirada' : 'Vigente'
+            };
+        });
+        
+
+        // Enviar las recetas formateadas al frontend
+        res.json({
+            message: 'Prescriptions obtained successfully',
             prescriptions: formattedPrescriptions
         });
     } catch (error) {

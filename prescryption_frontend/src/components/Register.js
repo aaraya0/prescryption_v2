@@ -41,6 +41,12 @@ function Register() {
                         <p className="inputTitle">DNI</p>
                         <input className="form-input" type="text" name="nid" placeholder="DNI" onChange={handleChange} />
                         <p className="inputTitle">Fecha de Nacimiento</p>
+                        <div className="form-radio">
+                            <label className='optionsTitle'>Sexo</label>
+                            <label><input type="radio" name="sex" value="F" onChange={handleChange} />F</label>
+                            <label><input type="radio" name="sex" value="M" onChange={handleChange} />M</label>
+                            <label><input type="radio" name="sex" value="X" onChange={handleChange} />X</label>
+                        </div>
                         <input className="form-input" type="date" name="birth_date" placeholder="Fecha de Nacimiento" onChange={handleChange} />
                         <p className="inputTitle">Obra Social</p>
                         <input className="form-input" type="text" name="insurance_name" placeholder="Obra Social" onChange={handleChange} />

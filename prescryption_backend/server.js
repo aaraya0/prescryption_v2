@@ -55,7 +55,7 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 // Patient registry
 app.post('/register_patient', async (req, res) => {
-    const { name, surname, nid, birth_date, insurance_name, insurance_plan, affiliate_num, mail, password } = req.body;
+    const { name, surname, nid, birth_date, sex, insurance_name, insurance_plan, affiliate_num, mail, password } = req.body;
 
     // Verifica si el paciente ya está registrado
     const existingPatient = await Patient.findOne({ nid });
@@ -72,6 +72,7 @@ app.post('/register_patient', async (req, res) => {
         surname,
         nid,
         birth_date,
+        sex,
         insurance_name,
         insurance_plan,
         affiliate_num,

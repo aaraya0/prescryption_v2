@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Doctor from './Doctor'; 
+import Doctor from './Doctor';
+import Patient from './Patient'; // Importamos el componente de Patient
 
 function Dashboard({ userType }) {
     const navigate = useNavigate();
@@ -24,7 +25,13 @@ function Dashboard({ userType }) {
     const renderMenu = () => {
         switch (userType) {
             case 'paciente':
-                return <p>Bienvenido al menú del paciente.</p>;
+                return (
+                    <div>
+                        <p>Bienvenido al menú del paciente.</p>
+                        {/* Mostrar las recetas del paciente */}
+                        <Patient />
+                    </div>
+                );
             case 'medico':
                 return (
                     <div>

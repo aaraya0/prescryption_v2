@@ -2,23 +2,33 @@
 pragma solidity ^0.8.0;
 
 contract PrescriptionContract {
-    struct Prescription {
-        string patientName;
-        string patientNid;
-        string affiliateNum;
-        string insuranceName;
-        string insurancePlan;
+    struct MedicationInfo {
         string med1;
         uint quantity1;
         string med2;
         uint quantity2;
         string diagnosis;
-        string doctorNid; 
+    }
+
+    struct InsuranceInfo {
+        string affiliateNum;
+        string insuranceName;
+        string insurancePlan;
+    }
+
+    struct Prescription {
+        string patientName;
+        string patientNid;
+        MedicationInfo meds;
+        InsuranceInfo insurance;
+        string doctorNid;
         address patientAddress;
+        uint issueDate;
+        uint expirationDate;
     }
 
     Prescription[] public prescriptions;
-    mapping(string => Doctor) public doctors; 
+    mapping(string => Doctor) public doctors;
 
     struct Doctor {
         string doctorName;
@@ -31,79 +41,53 @@ contract PrescriptionContract {
     event IssuedPrescription(
         string patientName,
         string patientNid,
-        string affiliateNum,
-        string insuranceName,
-        string insurancePlan,
-        string med1,
-        uint quantity1,
-        string med2,
-        uint quantity2,
-        string diagnosis,
+        MedicationInfo meds,
+        InsuranceInfo insurance,
         string doctorNid,
-        address patientAddress 
+        address patientAddress,
+        uint issueDate,
+        uint expirationDate
     );
 
-    // Register function
-    function registerDoctor(
-        string memory _doctorNid,
-        string memory _doctorName,
-        string memory _doctorLicense,
-        string memory _doctorSpecialty
-    ) public {
-        doctors[_doctorNid] = Doctor ({
-            doctorName: _doctorName,
-            doctorLicense: _doctorLicense,
-            doctorSpecialty: _doctorSpecialty
-        });
-    }
-
+    // Emitir receta
     function issuePrescription(
         string memory _patientName,
         string memory _patientNid,
-        string memory _affiliateNum,
-        string memory _licenseName,
-        string memory _licensePlan,
-        string memory _med1,
-        uint _quantity1,
-        string memory _med2,
-        uint _quantity2,
-        string memory _diagnosis,
+        MedicationInfo memory _meds,
+        InsuranceInfo memory _insurance,
         string memory _doctorNid,
-        address _patientAddress 
+        address _patientAddress
     ) public {
-        Prescription memory newPrescription = Prescription(
-            _patientName,
-            _patientNid,
-            _affiliateNum,
-            _licenseName,
-            _licensePlan,
-            _med1,
-            _quantity1,
-            _med2,
-            _quantity2,
-            _diagnosis,
-            _doctorNid,
-             _patientAddress
-        );
+        uint issueDate = block.timestamp;
+        uint expirationDate = issueDate + 30 days;
+
+        Prescription memory newPrescription = Prescription({
+            patientName: _patientName,
+            patientNid: _patientNid,
+            meds: _meds,
+            insurance: _insurance,
+            doctorNid: _doctorNid,
+            patientAddress: _patientAddress,
+            issueDate: issueDate,
+            expirationDate: expirationDate
+        });
+
         prescriptions.push(newPrescription);
         prescriptionCount++;
 
         emit IssuedPrescription(
             _patientName,
-            _patientName,
-            _affiliateNum,
-            _licenseName,
-            _licensePlan,
-            _med1,
-            _quantity1,
-            _med2,
-            _quantity2,
-            _diagnosis,
+            _patientNid,
+            _meds,
+            _insurance,
             _doctorNid,
-            _patientAddress
+            _patientAddress,
+            issueDate,
+            expirationDate
         );
     }
 
+    // Get a specific prescription by ID
     function getPrescription(uint _prescriptionId) public view returns (Prescription memory, Doctor memory) {
         require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "invalid id.");
         Prescription memory prescription = prescriptions[_prescriptionId - 1];
@@ -111,39 +95,61 @@ contract PrescriptionContract {
         return (prescription, doctor);
     }
 
+    // Get all prescriptions
     function getPrescriptions() public view returns (Prescription[] memory) {
         return prescriptions;
     }
 
+    // Get prescriptions by doctor NID
+    function getPresbyDoctorNid(string memory _doctorNid) public view returns (Prescription[] memory) {
+        uint count = 0;
+
+        // First loop to count how many prescriptions belong to the doctor
+        for (uint i = 0; i < prescriptionCount; i++) {
+            if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
+                count++;
+            }
+        }
+
+        // Create an array to store the doctor's prescriptions
+        Prescription[] memory doctorPrescriptions = new Prescription[](count);
+        uint index = 0;
+
+        // Second loop to store the corresponding prescriptions
+        for (uint i = 0; i < prescriptionCount; i++) {
+            if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
+                doctorPrescriptions[index] = prescriptions[i];
+                index++;
+            }
+        }
+
+        return doctorPrescriptions;
+    }
+
     // -----------------------------
-function getPresbyDoctorNid(string memory _doctorNid) public view returns (Prescription[] memory) {
-    uint count = 0;
-    
-    // Primer bucle para contar cuántas recetas pertenecen al doctor
-    for (uint i = 0; i < prescriptionCount; i++) {
-        // Obtener los hashes de ambos NID (almacenado y proporcionado)
-        bytes32 storedHash = keccak256(abi.encodePacked(prescriptions[i].doctorNid));
-        bytes32 inputHash = keccak256(abi.encodePacked(_doctorNid));
+    // New function to get prescriptions by patient address
+    function getPresbyPatientAddress(address _patientAddress) public view returns (Prescription[] memory) {
+        uint count = 0;
 
-        // Comparar ambos hashes
-        if (storedHash == inputHash) {
-            count++;
+        // First loop to count how many prescriptions belong to the patient
+        for (uint i = 0; i < prescriptionCount; i++) {
+            if (prescriptions[i].patientAddress == _patientAddress) {
+                count++;
+            }
         }
-    }
 
-    // Crear un array para almacenar las recetas del doctor
-    Prescription[] memory doctorPrescriptions = new Prescription[](count);
-    uint index = 0;
+        // Create an array to store the patient's prescriptions
+        Prescription[] memory patientPrescriptions = new Prescription[](count);
+        uint index = 0;
 
-    // Segundo bucle para almacenar las recetas correspondientes
-    for (uint i = 0; i < prescriptionCount; i++) {
-        if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
-            doctorPrescriptions[index] = prescriptions[i];
-            index++;
+        // Second loop to store the corresponding prescriptions
+        for (uint i = 0; i < prescriptionCount; i++) {
+            if (prescriptions[i].patientAddress == _patientAddress) {
+                patientPrescriptions[index] = prescriptions[i];
+                index++;
+            }
         }
+
+        return patientPrescriptions;
     }
-
-    return doctorPrescriptions;
-}
-
 }
