@@ -134,26 +134,33 @@ exports.getPresbyDoctorNid = async (req, res) => {
         }
 
         // Procesar las recetas, asegurándonos de manejar los BigInt
-        const formattedPrescriptions = prescriptions.map(prescription => ({
-            patientName: prescription.patientName,
-            patientNid: prescription.patientNid,
-            meds: {
-                med1: prescription.meds.med1,
-                quantity1: Number(prescription.meds.quantity1),
-                med2: prescription.meds.med2,
-                quantity2: Number(prescription.meds.quantity2),
-                diagnosis: prescription.meds.diagnosis
-            },
-            insurance: {
-                affiliateNum: prescription.insurance.affiliateNum,
-                insuranceName: prescription.insurance.insuranceName,
-                insurancePlan: prescription.insurance.insurancePlan
-            },
-            doctorNid: prescription.doctorNid,
-            issueDate: Number(prescription.issueDate),
-            expirationDate: Number(prescription.expirationDate),
-            patientAddress: prescription.patientAddress
-        }));
+        const formattedPrescriptions = prescriptions.map(prescription => {
+            const issueDate = new Date(Number(prescription.issueDate) * 1000);
+            const expirationDate = new Date(Number(prescription.expirationDate) * 1000);
+            const isExpired = new Date() > expirationDate;
+
+            return {
+                patientName: prescription.patientName,
+                patientNid: prescription.patientNid,
+                meds: {
+                    med1: prescription.meds.med1,
+                    quantity1: Number(prescription.meds.quantity1),
+                    med2: prescription.meds.med2,
+                    quantity2: Number(prescription.meds.quantity2),
+                    diagnosis: prescription.meds.diagnosis
+                },
+                insurance: {
+                    affiliateNum: prescription.insurance.affiliateNum,
+                    insuranceName: prescription.insurance.insuranceName,
+                    insurancePlan: prescription.insurance.insurancePlan
+                },
+                doctorNid: prescription.doctorNid,
+                issueDate: issueDate.toLocaleDateString(),  // Formatear fecha de emisión
+                expirationDate: expirationDate.toLocaleDateString(),  // Formatear fecha de vencimiento
+                patientAddress: prescription.patientAddress,
+                status: isExpired ? 'Expirada' : 'Vigente'  // Marcar si está expirada o vigente
+            };
+        });
 
 
         // Enviar las recetas formateadas al frontend
@@ -217,7 +224,7 @@ exports.getAllPrescriptions = async (req, res) => {
     }
 };
 
-exports.getPresbyPatientNid = async (req, res) => {
+exports.getPresbyPatientAddress = async (req, res) => {
     try {
         const { nid } = req.user; // NID del paciente desde el token JWT
 
@@ -243,13 +250,45 @@ exports.getPresbyPatientNid = async (req, res) => {
             return res.status(404).send('Prescriptions not found for this patient.');
         }
 
-        // Procesar las recetas, asegurándonos de manejar los BigInt
-        const formattedPrescriptions = prescriptions.map(prescription => {
-            const isExpired = new Date() > new Date(prescription.expirationDate);
-            
+        // Iterar sobre las recetas y buscar la información del médico en la base de datos
+        const formattedPrescriptions = await Promise.all(prescriptions.map(async (prescription) => {
+            const issueDate = new Date(Number(prescription.issueDate) * 1000);
+            const expirationDate = new Date(Number(prescription.expirationDate) * 1000);
+            const isExpired = new Date() > expirationDate;
+
+            // Buscar al doctor en la base de datos usando el doctorNid de la receta
+            const doctor = await Doctor.findOne({ nid: prescription.doctorNid });
+
+            // Si no se encuentra al médico, manejar el error
+            if (!doctor) {
+                console.warn(`Doctor with NID: ${prescription.doctorNid} not found.`);
+                return {
+                    doctorName: 'Doctor not found',
+                    doctorNid: prescription.doctorNid,
+                    meds: {
+                        med1: prescription.meds.med1,
+                        quantity1: Number(prescription.meds.quantity1),
+                        med2: prescription.meds.med2,
+                        quantity2: Number(prescription.meds.quantity2),
+                        diagnosis: prescription.meds.diagnosis
+                    },
+                    insurance: {
+                        affiliateNum: prescription.insurance.affiliateNum,
+                        insuranceName: prescription.insurance.insuranceName,
+                        insurancePlan: prescription.insurance.insurancePlan
+                    },
+                    patientNid: prescription.patientNid,
+                    issueDate: issueDate.toLocaleDateString(),
+                    expirationDate: expirationDate.toLocaleDateString(),
+                    doctorAddress: prescription.doctorAddress,
+                    status: isExpired ? 'Expirada' : 'Vigente'
+                };
+            }
+
+            // Formatear la receta con los datos del doctor obtenidos de la base de datos
             return {
-                patientName: prescription.patientName,
-                patientNid: prescription.patientNid,
+                doctorName: `${doctor.name} ${doctor.surname}`,
+                doctorSpecialty: doctor.specialty,
                 meds: {
                     med1: prescription.meds.med1,
                     quantity1: Number(prescription.meds.quantity1),
@@ -262,16 +301,14 @@ exports.getPresbyPatientNid = async (req, res) => {
                     insuranceName: prescription.insurance.insuranceName,
                     insurancePlan: prescription.insurance.insurancePlan
                 },
-                doctorNid: prescription.doctorNid,
-                issueDate: Number(prescription.issueDate),
-                expirationDate: Number(prescription.expirationDate),
-                patientAddress: prescription.patientAddress,
+                patientNid: prescription.patientNid,
+                issueDate: issueDate.toLocaleDateString(),
+                expirationDate: expirationDate.toLocaleDateString(),
+                doctorAddress: prescription.doctorAddress,
                 status: isExpired ? 'Expirada' : 'Vigente'
             };
-        });
-        
+        }));
 
-        // Enviar las recetas formateadas al frontend
         res.json({
             message: 'Prescriptions obtained successfully',
             prescriptions: formattedPrescriptions
@@ -281,3 +318,4 @@ exports.getPresbyPatientNid = async (req, res) => {
         res.status(500).send('Error obtaining prescriptions. Details: ' + error.message);
     }
 };
+

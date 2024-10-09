@@ -11,12 +11,11 @@ const Patient = () => {
             headers: { Authorization: `Bearer ${token}` }
         })
         .then(response => {
-            console.log('Response data:', response.data);  // Verificar la estructura de la respuesta
-            // Verificar si response.data.prescriptions existe y es un array
+            console.log('Response data:', response.data);
             if (Array.isArray(response.data.prescriptions)) {
                 setRecetas(response.data.prescriptions);
             } else {
-                setRecetas([]);  // Si no es un array, inicializamos como un array vacío
+                setRecetas([]);
             }
         })
         .catch(error => console.error('Error al obtener las recetas:', error));
@@ -28,11 +27,13 @@ const Patient = () => {
             <ul>
                 {recetas.map((receta, index) => (
                     <li key={index}>
-                        <strong>Médico:</strong> {receta.doctorNid}<br />
-                        <strong>Medicamento 1:</strong> {receta.med1}, Cantidad: {receta.quantity1}<br />
-                        <strong>Medicamento 2:</strong> {receta.med2}, Cantidad: {receta.quantity2}<br />
-                        <strong>Diagnóstico:</strong> {receta.diagnosis}<br />
-                        <strong>Estado:</strong>
+                        <strong>Médico:</strong> {receta.doctorName} ({receta.doctorSpecialty})<br />
+                        <strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}<br />
+                        <strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}<br />
+                        <strong>Diagnóstico:</strong> {receta.meds.diagnosis}<br />
+                        <strong>Estado:</strong> {receta.status}<br />
+                        <strong>Fecha de Emisión:</strong> {receta.issueDate}<br />
+                        <strong>Fecha de Expiración:</strong> {receta.expirationDate}<br />
                     </li>
                 ))}
             </ul>
