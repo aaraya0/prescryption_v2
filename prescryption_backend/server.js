@@ -7,7 +7,7 @@ const cors = require('cors');
 const axios = require('axios');
 const prescriptionRoutes = require('./prescriptionRoutes');
 const Doctor = require('./models/Doctor');
-const Pharmacist = require('./models/Pharmacist');
+const Pharmacy = require('./models/Pharmacy');
 const Patient = require('./models/Patient');
 const Insurance = require('./models/Insurance');
 const { Web3 } = require('web3');  // Cambiado aquí
@@ -91,7 +91,7 @@ app.post('/register_patient', async (req, res) => {
 
 
 // Doctor registry
-app.post('/doctor_register', async (req, res) => {
+app.post('/register_doctor', async (req, res) => {
     const { nid, license, name, surname, specialty, password, mail } = req.body;
 
     // Licence verification
@@ -114,13 +114,13 @@ app.post('/doctor_register', async (req, res) => {
     }
 });
 
-// Pharmacist registry
-app.post('/pharmacist_register', async (req, res) => {
-    const { nid, license, name, surname, pharmacy, pharmacy_nid, mail, password } = req.body;
+// Pharmacy registry
+app.post('/register_pharmacy', async (req, res) => {
+    const { nid, license, name, surname, pharmacy_name, pharmacy_nid, mail, password, alias} = req.body;
 
     // License verification
     try {
-        const verifyResponse = await axios.post('http://localhost:5000/verify', { license });
+        const verifyResponse = await axios.post('http://localhost:5000/verify', { license, nid });
         if (!verifyResponse.data.valid) {
             return res.status(400).send('Invalid license or NID.');
         }
@@ -129,17 +129,17 @@ app.post('/pharmacist_register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newPharmacist = new Pharmacist({ nid, license, name, surname, pharmacy, pharmacy_nid, mail, password: hashedPassword });
+    const newPharmacy = new Pharmacy({ nid, license, name, surname, pharmacy_name, pharmacy_nid, mail, password: hashedPassword, alias });
     try {
-        await newPharmacist.save();
-        res.send('Pharmacist registered.');
+        await newPharmacy.save();
+        res.send('Pharmacy registered.');
     } catch (err) {
         res.status(400).send(err);
     }
 });
 
 // Insurance registry
-app.post('/insurance_register', async (req, res) => {
+app.post('/register_insurance', async (req, res) => {
     const { name, surname, nid, insurance_name, insurance_nid, mail, password } = req.body;
 
     // Verifies existing user with that NID
@@ -167,7 +167,7 @@ app.post('/login', async (req, res) => {
             user = await Doctor.findOne({ nid });
             break;
         case 'pharmacy':
-            user = await Pharmacist.findOne({ nid });
+            user = await Pharmacy.findOne({ nid });
             break;
         case 'patient':
             user = await Patient.findOne({ nid });

@@ -79,19 +79,23 @@ function Register() {
                         <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
                     </>
                 );
-            case 'pharmacist':
+            case 'pharmacy':
                 return (
                     <>
                         <p className="inputTitle">Nombre</p>
                         <input className="form-input" type="text" name="name" placeholder="Nombre" onChange={handleChange} />
                         <p className="inputTitle">Apellido</p>
                         <input className="form-input" type="text" name="surname" placeholder="Apellido" onChange={handleChange} />
+                        <p className="inputTitle">DNI</p>
+                        <input className="form-input" type="text" name="nid" placeholder="DNI" onChange={handleChange} />
                         <p className="inputTitle">Matrícula</p>
                         <input className="form-input" type="text" name="license" placeholder="Matrícula" onChange={handleChange} />
-                        <p className="inputTitle">Farmacia</p>
-                        <input className="form-input" type="text" name="farmacia" placeholder="Farmacia" onChange={handleChange} />
+                        <p className="inputTitle">Nombre de la Farmacia</p>
+                        <input className="form-input" type="text" name="pharmacy_name" placeholder="Nombre de Farmacia" onChange={handleChange} />
+                        <p className="inputTitle">Alias de Farmacia</p>
+                        <input className="form-input" type="text" name="alias" placeholder="Alias de Farmacia" onChange={handleChange} />
                         <p className="inputTitle">CUIT Farmacia</p>
-                        <input className="form-input" type="text" name="cuit_farmacia" placeholder="CUIT Farmacia" onChange={handleChange} />
+                        <input className="form-input" type="text" name="pharmacy_nid" placeholder="CUIT Farmacia" onChange={handleChange} />
                         <p className="inputTitle">Correo Electrónico</p>
                         <input className="form-input" type="email" name="mail" placeholder="Email" onChange={handleChange} />
                         <p className="inputTitle">Contraseña</p>
