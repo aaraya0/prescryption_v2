@@ -8,5 +8,6 @@ router.get('/pr_by_doctor', getPresbyDoctorNid);
 router.get('/pr_by_patient', getPresbyPatientAddress);
 router.get('/all_pres', getAllPrescriptions);
 router.get('/pr_to_pharmacy', sendPrescriptionToPharmacy);
+router.get('/doctor_info',getDoctorInfo);
 
 module.exports = router;

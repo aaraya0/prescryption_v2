@@ -388,3 +388,32 @@ exports.sendPrescriptionToPharmacy = async (req, res) => {
         res.status(500).json({ message: 'Error sending prescription', error: error.message });
     }
 };
+
+
+// quiero ver de traer la info del medico para el footer de la receta...
+exports.getDoctorInfo = async (req, res) => {
+    try {
+        const { nid } = req.user; // NID del doctor desde el token JWT
+        console.log(req.user)
+        
+        const doctor = await Doctor.findOne({ nid });
+        if (!doctor) {
+            console.error(`Doctor with NID: ${nid} not found in the database.`);
+            return res.status(404).send('Doctor not found.');
+        }
+
+        const doctorInfo = {
+            name: doctor.name,
+            license: doctor.license, 
+            specialty: doctor.specialty
+        };
+
+        res.json({
+            message: 'Doctor information obtained successfully',
+            doctor: doctorInfo
+        });
+    } catch (error) {
+        console.error('Error obtaining doctor information:', error);
+        res.status(500).send('Error obtaining doctor information. Details: ' + error.message);
+    }
+};

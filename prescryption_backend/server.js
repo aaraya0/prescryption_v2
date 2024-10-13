@@ -91,28 +91,58 @@ app.post('/register_patient', async (req, res) => {
 
 
 // Doctor registry
+// Doctor registry
 app.post('/register_doctor', async (req, res) => {
-    const { nid, license, name, surname, specialty, password, mail } = req.body;
-
-    // Licence verification
     try {
-        const verifyResponse = await axios.post('http://localhost:5000/verify', { nid, license });
-        if (!verifyResponse.data.valid) {
-            return res.status(400).send('Invalid license or NID');
+        console.log('Request body:', req.body);
+        const { nid, license, name, surname, specialty, password, mail } = req.body;
+
+        // Verificación de campos obligatorios
+        if (!nid || !license || !name || !surname || !specialty || !password || !mail) {
+            console.log('Missing required fields');
+            return res.status(400).send('Missing required fields');
+        }
+
+        // Licence verification
+        try {
+            console.log('Starting license verification...');
+            const verifyResponse = await axios.post('http://localhost:5000/verify', { nid, license });
+            console.log('License verification response:', verifyResponse.data);
+            if (!verifyResponse.data.valid) {
+                return res.status(400).send('Invalid license or NID');
+            }
+        } catch (err) {
+            console.error('Error in license verification:', err.message);
+            return res.status(500).send('Error verifying license');
+        }
+
+        // Hashing the password
+        let hashedPassword;
+        try {
+            console.log('Hashing password...');
+            hashedPassword = await bcrypt.hash(password, 10);
+        } catch (err) {
+            console.error('Error hashing password:', err.message);
+            return res.status(500).send('Error hashing password');
+        }
+
+        // Saving doctor to the database
+        const newDoctor = new Doctor({ nid, license, name, surname, specialty, password: hashedPassword, mail });
+        try {
+            console.log('Saving new doctor to the database...');
+            await newDoctor.save();
+            console.log('Doctor registered successfully');
+            res.send('Doctor registered');
+        } catch (err) {
+            console.error('Error saving doctor to the database:', err.message);
+            return res.status(400).send('Error en el registro');
         }
     } catch (err) {
-        return res.status(500).send('Error verifying license');
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newDoctor = new Doctor({ nid, license, name, surname, specialty, password: hashedPassword, mail });
-    try {
-        await newDoctor.save();
-        res.send('Doctor registered');
-    } catch (err) {
-        res.status(400).send(err);
+        console.error('Unexpected error:', err.message);
+        return res.status(500).send('Internal server error');
     }
 });
+
 
 // Pharmacy registry
 app.post('/register_pharmacy', async (req, res) => {
@@ -186,8 +216,6 @@ app.post('/login', async (req, res) => {
         res.status(401).send('Invalid credentials');
     }
 });
-
-
 
 
 app.listen(3001, () => console.log('Server running on port 3001'));
