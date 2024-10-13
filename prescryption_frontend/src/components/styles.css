@@ -310,8 +310,11 @@ body, html {
     height: 80px;
     resize: none;
   }
+  .buttonGenerarReceta{
+    align-self: flex-end; 
+
+  }
   .button {
-    align-self: flex-end; /* Mover el botón a la derecha */
     background-color: #A6C4CA;
     color: black;
     padding: 10px 20px;
@@ -319,7 +322,7 @@ body, html {
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
-    margin-top: 20px; /* Espaciado superior para separarlo del formulario */
+    margin-top: 20px;
 }
  .button:hover {
     text-decoration: underline;
@@ -335,10 +338,3 @@ body, html {
     font-size: 12px;
     color: #333;
   }
-
-  .separator {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #040404; /* Línea separadora */
-    width: 100%;
-}
