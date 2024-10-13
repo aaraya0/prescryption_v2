@@ -16,48 +16,6 @@ function EmitirReceta() {
     diagnosis: '',
   });
 
-  const [doctorInfo, setDoctorInfo] = useState({ 
-    name: '',
-    license: '',
-    specialty: '',
-  });
-
-  useEffect(() => {
-    const fetchDoctorInfo = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('No estás autenticado. Por favor, inicia sesión nuevamente.');
-        return;
-      }
-  
-      try {
-        const response = await axios.get('http://localhost:3001/api/doctor_info', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        console.log(response.data.doctor)
-  
-        setDoctorInfo({
-          name: response.data.doctor.name,
-          license: response.data.doctor.license,
-          specialty: response.data.doctor.specialty,
-        });
-      } catch (error) {
-        console.error('Error al obtener la información del médico:', error);
-        alert('Error al obtener la información del médico: ' + (error.response?.data || error.message));
-      }
-    };
-  
-    fetchDoctorInfo();
-  }, []);
-  
-
-
-
-
-
   // Manejar los cambios en los inputs del formulario
   const handleChange = (e) => {
     setFormData({
@@ -175,19 +133,6 @@ function EmitirReceta() {
           </div>
           <button type="submit" className="button">Generar Receta</button>
         </form>
-        <div className="separator"></div>
-        <div className="medical-info">
-          <div className="doctor-info">
-            <p>Médico: {doctorInfo.name || 'Cargando...'}</p>
-            <p>MP: {doctorInfo.license || 'Cargando...'}</p>
-            <p>Médico - {doctorInfo.specialty || 'Cargando...'}</p>
-          </div>
-          <div className="prescription-info">
-          <p>Fecha de Emisión: {new Date().toLocaleDateString()}</p>
-          <p>Fecha de Vencimiento: {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p> {/* Fecha de vencimiento un mes después */}
-            <p>Córdoba - Argentina</p>
-          </div>
-        </div>
       </div>
       
     </div>
