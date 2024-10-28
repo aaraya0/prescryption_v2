@@ -3,33 +3,41 @@ import axios from 'axios';
 
 const Patient = () => {
     const [recetas, setRecetas] = useState([]);
-    const [alias, setAlias] = useState(''); // Estado para almacenar el alias de la farmacia
-    const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null); // Estado para almacenar el ID de la receta seleccionada
+    const [alias, setAlias] = useState(''); 
+    const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null);
     const token = localStorage.getItem('token');
+    const [deletedPrescriptions, setDeletedPrescriptions] = useState(
+        JSON.parse(localStorage.getItem('deletedPrescriptions')) || []
+    );
+    const [showDeleted, setShowDeleted] = useState(false); // Estado para alternar entre mostrar o no las recetas eliminadas
 
     useEffect(() => {
-        // Obtener recetas del paciente cuando el componente se monta
         axios.get('http://localhost:3001/api/pr_by_patient', {
             headers: { Authorization: `Bearer ${token}` }
         })
         .then(response => {
-            console.log('Response data:', response.data);
             if (Array.isArray(response.data.prescriptions)) {
-                setRecetas(response.data.prescriptions);
+                let filteredPrescriptions = response.data.prescriptions;
+                if (!showDeleted) {
+                    filteredPrescriptions = filteredPrescriptions.filter(
+                        receta => !deletedPrescriptions.includes(receta.prescriptionId)
+                    );
+                }
+                setRecetas(filteredPrescriptions);
             } else {
                 setRecetas([]);
             }
         })
         .catch(error => console.error('Error al obtener las recetas:', error));
-    }, [token]);
+    }, [token, deletedPrescriptions, showDeleted]);
 
     const handleTransfer = async (prescriptionId) => {
-        setSelectedPrescriptionId(prescriptionId); // Almacena el ID de la receta seleccionada
+        setSelectedPrescriptionId(prescriptionId);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedPrescriptionId || !alias) return; // Verifica que se haya seleccionado una receta y se haya ingresado un alias
+        if (!selectedPrescriptionId || !alias) return;
 
         try {
             const response = await axios.post('http://localhost:3001/api/pr_to_pharmacy', {
@@ -40,12 +48,25 @@ const Patient = () => {
             });
 
             alert('Receta transferida a la farmacia. Transacción hash: ' + response.data.transactionHash);
-            setAlias(''); // Reiniciar el alias después de la transferencia
-            setSelectedPrescriptionId(null); // Reiniciar la receta seleccionada
+            setAlias('');
+            setSelectedPrescriptionId(null);
         } catch (error) {
             console.error('Error al transferir la receta:', error);
             alert('Error al transferir la receta.');
         }
+    };
+
+    const handleDelete = (prescriptionId) => {
+        const updatedDeletedPrescriptions = [...deletedPrescriptions, prescriptionId];
+        setDeletedPrescriptions(updatedDeletedPrescriptions);
+        localStorage.setItem('deletedPrescriptions', JSON.stringify(updatedDeletedPrescriptions));
+
+        setRecetas(recetas.filter(receta => receta.prescriptionId !== prescriptionId));
+    };
+
+    // Función para restaurar las recetas eliminadas
+    const restoreDeletedPrescriptions = () => {
+        setShowDeleted(!showDeleted);
     };
 
     return (
@@ -61,7 +82,12 @@ const Patient = () => {
                         <strong>Estado:</strong> {receta.status}<br />
                         <strong>Fecha de Emisión:</strong> {receta.issueDate}<br />
                         <strong>Fecha de Expiración:</strong> {receta.expirationDate}<br />
-                        <button onClick={() => handleTransfer(receta.prescriptionId)}>Transferir Receta</button>
+                        
+                        {receta.status === "Expirada" ? (
+                            <button onClick={() => handleDelete(receta.prescriptionId)}>Eliminar</button>
+                        ) : (
+                            <button onClick={() => handleTransfer(receta.prescriptionId)}>Transferir Receta</button>
+                        )}
                     </li>
                 ))}
             </ul>
@@ -80,6 +106,9 @@ const Patient = () => {
                     <button type="submit">Enviar</button>
                 </form>
             )}
+            <button onClick={restoreDeletedPrescriptions}>
+                {showDeleted ? 'Ocultar Recetas Eliminadas' : 'Mostrar Recetas Eliminadas'}
+            </button>
         </div>
     );
 };

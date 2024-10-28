@@ -10,7 +10,7 @@ const Doctor = require('./models/Doctor');
 const Pharmacy = require('./models/Pharmacy');
 const Patient = require('./models/Patient');
 const Insurance = require('./models/Insurance');
-const { Web3 } = require('web3');  // Cambiado aquí
+const { Web3 } = require('web3');
 
 require('dotenv').config();
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
@@ -25,6 +25,8 @@ app.use(cors({
 
 app.use(bodyParser.json());
 
+const SECRET_KEY = process.env.SECRET_KEY;
+
 // Middleware to verify token
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -34,7 +36,7 @@ const verifyToken = (req, res, next) => {
     if (!token) return res.status(403).send('Token required');
 
     try {
-        const decoded = jwt.verify(token, process.env.SECRET_KEY);
+        const decoded = jwt.verify(token, SECRET_KEY);
         req.user = decoded;
         next();
     } catch (err) {
@@ -42,17 +44,52 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-// use routes 
+// Cache para rastrear intentos de inicio de sesión fallidos por NID
+const loginAttemptCache = {};
+
+// Limitador de intentos basado en NID
+const loginLimiter = (req, res, next) => {
+    const { nid } = req.body;
+    const maxAttempts = 5;
+    const windowMs = 15 * 60 * 1000; // 15 minutos
+    const now = Date.now();
+
+    // Si el NID no tiene registros en la caché, inicializa sus datos
+    if (!loginAttemptCache[nid]) {
+        loginAttemptCache[nid] = { attempts: 0, lastAttemptTime: now };
+    }
+
+    const userAttempts = loginAttemptCache[nid];
+
+    // Resetea los intentos si ha pasado el tiempo de ventana (15 minutos)
+    if (now - userAttempts.lastAttemptTime > windowMs) {
+        userAttempts.attempts = 0;
+        userAttempts.lastAttemptTime = now;
+    }
+
+    // Incrementa los intentos
+    userAttempts.attempts++;
+
+    // Si el usuario excede el número máximo de intentos, bloquea el login
+    if (userAttempts.attempts > maxAttempts) {
+        return res.status(429).json({ message: 'Demasiados intentos fallidos de inicio de sesión. Intenta nuevamente en 15 minutos.' });
+    }
+
+    // Actualiza el tiempo del último intento
+    userAttempts.lastAttemptTime = now;
+
+    // Continúa con el siguiente middleware si no ha excedido los intentos
+    next();
+};
+
+// Use routes
 app.use('/api', verifyToken, prescriptionRoutes);
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error(err));
 
-const SECRET_KEY = process.env.SECRET_KEY;
-
 // User registry
-
 // Patient registry
 app.post('/register_patient', async (req, res) => {
     const { name, surname, nid, birth_date, sex, insurance_name, insurance_plan, affiliate_num, mail, password } = req.body;
@@ -89,66 +126,35 @@ app.post('/register_patient', async (req, res) => {
     }
 });
 
-
-// Doctor registry
 // Doctor registry
 app.post('/register_doctor', async (req, res) => {
     try {
         console.log('Request body:', req.body);
         const { nid, license, name, surname, specialty, password, mail } = req.body;
 
-        // Verificación de campos obligatorios
         if (!nid || !license || !name || !surname || !specialty || !password || !mail) {
-            console.log('Missing required fields');
             return res.status(400).send('Missing required fields');
         }
 
-        // Licence verification
-        try {
-            console.log('Starting license verification...');
-            const verifyResponse = await axios.post('http://localhost:5000/verify', { nid, license });
-            console.log('License verification response:', verifyResponse.data);
-            if (!verifyResponse.data.valid) {
-                return res.status(400).send('Invalid license or NID');
-            }
-        } catch (err) {
-            console.error('Error in license verification:', err.message);
-            return res.status(500).send('Error verifying license');
+        const verifyResponse = await axios.post('http://localhost:5000/verify', { nid, license });
+        if (!verifyResponse.data.valid) {
+            return res.status(400).send('Invalid license or NID');
         }
 
-        // Hashing the password
-        let hashedPassword;
-        try {
-            console.log('Hashing password...');
-            hashedPassword = await bcrypt.hash(password, 10);
-        } catch (err) {
-            console.error('Error hashing password:', err.message);
-            return res.status(500).send('Error hashing password');
-        }
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Saving doctor to the database
         const newDoctor = new Doctor({ nid, license, name, surname, specialty, password: hashedPassword, mail });
-        try {
-            console.log('Saving new doctor to the database...');
-            await newDoctor.save();
-            console.log('Doctor registered successfully');
-            res.send('Doctor registered');
-        } catch (err) {
-            console.error('Error saving doctor to the database:', err.message);
-            return res.status(400).send('Error en el registro');
-        }
+        await newDoctor.save();
+        res.send('Doctor registered');
     } catch (err) {
-        console.error('Unexpected error:', err.message);
         return res.status(500).send('Internal server error');
     }
 });
 
-
 // Pharmacy registry
 app.post('/register_pharmacy', async (req, res) => {
-    const { nid, license, name, surname, pharmacy_name, pharmacy_nid, mail, password, alias} = req.body;
+    const { nid, license, name, surname, pharmacy_name, pharmacy_nid, mail, password, alias } = req.body;
 
-    // License verification
     try {
         const verifyResponse = await axios.post('http://localhost:5000/verify', { license, nid });
         if (!verifyResponse.data.valid) {
@@ -172,7 +178,6 @@ app.post('/register_pharmacy', async (req, res) => {
 app.post('/register_insurance', async (req, res) => {
     const { name, surname, nid, insurance_name, insurance_nid, mail, password } = req.body;
 
-    // Verifies existing user with that NID
     const existingInsurance = await Insurance.findOne({ nid });
     if (existingInsurance) {
         return res.status(400).send('Insurance with same NID already registered.');
@@ -188,10 +193,11 @@ app.post('/register_insurance', async (req, res) => {
     }
 });
 
-// Login
-app.post('/login', async (req, res) => {
+// Login con protección contra ataques de fuerza bruta basado en NID
+app.post('/login', loginLimiter, async (req, res) => {
     const { nid, password, userType } = req.body;
     let user;
+
     switch (userType) {
         case 'doctor':
             user = await Doctor.findOne({ nid });
@@ -210,12 +216,16 @@ app.post('/login', async (req, res) => {
     }
 
     if (user && await bcrypt.compare(password, user.password)) {
-        const token = jwt.sign({ nid, userType }, SECRET_KEY);
+        const token = jwt.sign({ nid, userType }, SECRET_KEY, { expiresIn: '1h' });
+
+        // Reinicia los intentos de inicio de sesión exitoso
+        loginAttemptCache[nid].attempts = 0;
+
         res.json({ token });
     } else {
         res.status(401).send('Invalid credentials');
     }
 });
 
-
+// Start server
 app.listen(3001, () => console.log('Server running on port 3001'));
