@@ -37,24 +37,8 @@ function Login() {
             const token = response.data.token;
             localStorage.setItem('token', token); // Guarda el token en localStorage
             alert('Login exitoso');
+            navigate(`/dashboard/${userType}`);
 
-            // Redirigir según el tipo de usuario
-            switch (userType) {
-                case 'patient':
-                    navigate('/dashboard/paciente');
-                    break;
-                case 'doctor':
-                    navigate('/dashboard/medico');
-                    break;
-                case 'pharmacist':
-                    navigate('/dashboard/farmaceutico');
-                    break;
-                case 'insurance':
-                    navigate('/dashboard/obra_social');
-                    break;
-                default:
-                    break;
-            }
         } catch (error) {
             if (error.response && error.response.status === 429) {
                 setErrorMessage('Has excedido el número de intentos de inicio de sesión. Intenta nuevamente en 15 minutos.');

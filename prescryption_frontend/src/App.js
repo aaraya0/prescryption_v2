@@ -20,10 +20,10 @@ function App() {
                     <Route path="/" element={<MainMenu />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/login" element={<Login />} />
-                    <Route path="/dashboard/paciente" element={<Dashboard userType="paciente" />} />
-                    <Route path="/dashboard/medico" element={<Dashboard userType="medico" />} />
-                    <Route path="/dashboard/farmaceutico" element={<Dashboard userType="farmaceutico" />} />
-                    <Route path="/dashboard/obra_social" element={<Dashboard userType="obra_social" />} />
+                    <Route path="/dashboard/patient" element={<Dashboard userType="patient" />} />
+                    <Route path="/dashboard/doctor" element={<Dashboard userType="doctor" />} />
+                    <Route path="/dashboard/pharmacy" element={<Dashboard userType="pharmacy" />} />
+                    <Route path="/dashboard/insurance" element={<Dashboard userType="insurance" />} />
                     <Route path="/perfil/:userType" element={<Perfil />} /> {/* Ruta para el perfil */}
                     <Route path="/issue-prescription" element={<EmitirReceta />} />
                 </Routes>

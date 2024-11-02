@@ -1,28 +1,24 @@
 const fs = require('fs');
 const path = require('path');
-const { Web3 } = require('web3');  // Cambiado aquí
+const { Web3 } = require('web3');  // Changed here
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const Doctor = require('./models/Doctor');
 const Patient = require('./models/Patient');
 const Pharmacy = require('./models/Pharmacy');
 
-
-
-// Web3 config
+// Web3 configuration
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 
-
-
-// Leer las direcciones de los contratos desde el archivo JSON
+// Read contract addresses from JSON file
 const contractsDataPath = path.resolve(__dirname, '../prescryption_solidity/contracts_data.json');
 const contractsData = JSON.parse(fs.readFileSync(contractsDataPath, 'utf8'));
 
-// Cargar el ABI del contrato
+// Load contract ABI
 const prescriptionContractPath = path.resolve(__dirname, '../prescryption_solidity/build/contracts', 'PrescriptionContract.json');
 const prescriptionContractJSON = JSON.parse(fs.readFileSync(prescriptionContractPath, 'utf8'));
 
-// Instanciar el contrato de recetas
+// Instantiate the prescription contract
 const prescriptionContract = new web3.eth.Contract(prescriptionContractJSON.abi, contractsData.PrescriptionContract);
 
 exports.issuePrescription = async (req, res) => {
@@ -39,21 +35,21 @@ exports.issuePrescription = async (req, res) => {
         diagnosis
     } = req.body;
 
-    const { nid } = req.user; // NID del médico autenticado
+    const { nid } = req.user; // Authenticated doctor's NID
 
     try {
-        // Validaciones
+        // Validations
         if (!patientName || !patientNid || !affiliateNum || !insuranceName || !insurancePlan || !med1 || !quantity1 || !diagnosis) {
             return res.status(400).send('Missing necessary data.');
         }
 
-        // Buscar al doctor en la base de datos
+        // Search for the doctor in the database
         const doctor = await Doctor.findOne({ nid });
         if (!doctor) {
             return res.status(404).send('Doctor not found.');
         }
 
-        // Buscar al paciente por NID en la base de datos
+        // Search for the patient by NID in the database
         const patient = await Patient.findOne({ nid: patientNid });
         if (!patient) {
             return res.status(404).send('Patient not found.');
@@ -62,17 +58,22 @@ exports.issuePrescription = async (req, res) => {
         const accounts = await web3.eth.getAccounts();
         const fromAccount = accounts[0];
 
-        // Obtener la fecha actual (emisión) y calcular la fecha de vencimiento (30 días después)
+        // Use the current date for issuance
         const issueDate = new Date();
+
+        // Convert the date to timestamp (in seconds)
+        const issueDateTimestamp = Math.floor(issueDate.getTime() / 1000);
+
+        // Calculate expiration date (30 days after the current date)
         const expirationDate = new Date(issueDate);
         expirationDate.setDate(issueDate.getDate() + 30);
 
-        // Preparar las structs para los datos de la receta y obra social
+        // Prepare meds structure
         const meds = {
             med1,
             quantity1,
-            med2,
-            quantity2,
+            med2: med2 || "N/A", // Send "N/A" if med2 is empty
+            quantity2: quantity2 || 0, // Send 0 if quantity2 is empty
             diagnosis
         };
 
@@ -82,7 +83,7 @@ exports.issuePrescription = async (req, res) => {
             insurancePlan
         };
 
-        // Llamar al contrato para emitir la receta
+        // Call the contract to issue the prescription
         const receipt = await prescriptionContract.methods
             .issuePrescription(
                 patientName,
@@ -90,104 +91,103 @@ exports.issuePrescription = async (req, res) => {
                 meds,
                 insurance,
                 doctor.nid,
-                patient.address
+                patient.address,
+                issueDateTimestamp
             )
             .send({ from: fromAccount, gas: '2000000' });
     
-
-            if (receipt.status) {
-                const prescriptionId = receipt.events.IssuedPrescription.returnValues.id;
+        if (receipt.status) {
+            const prescriptionId = receipt.events.IssuedPrescription.returnValues.id;
     
-                // Convertir el recibo y sus campos a string
-                const formattedReceipt = convertBigIntToString({
-                    message: 'Prescription issued and saved in blockchain',
-                    prescriptionId,
-                    transactionHash: receipt.transactionHash,
-                    blockNumber: receipt.blockNumber,
-                    gasUsed: receipt.gasUsed
-                });
-    
-                res.send(formattedReceipt);
-            } else {
-                res.status(500).send('Error issuing prescription in blockchain');
-            }
-        } catch (error) {
-            console.error('Error issuing prescription:', error);
-            res.status(500).send('Error issuing prescription. Details: ' + error.message);
-        }
-    };
-
-
-    exports.getPresbyDoctorNid = async (req, res) => {
-        try {
-            const { nid } = req.user; // NID del doctor desde el token JWT
-    
-            // Buscar el doctor en la base de datos (asumiendo que existe un modelo Doctor)
-            const doctor = await Doctor.findOne({ nid });
-            if (!doctor) {
-                console.error(`Doctor with NID: ${nid} not found in the database.`);
-                return res.status(404).send('Doctor not found.');
-            }
-    
-            // Obtener cuentas de Ganache
-            const accounts = await web3.eth.getAccounts();
-            const fromAccount = accounts[0]; // Primera cuenta de Ganache
-    
-            // Llamar a la función del contrato inteligente para obtener recetas por NID del doctor
-            const prescriptions = await prescriptionContract.methods.getPresbyDoctorNid(doctor.nid).call({ from: fromAccount });
-    
-            // Verificar si se encontraron recetas
-            if (prescriptions.length === 0) {
-                console.warn(`No prescriptions found for doctor NID: ${doctor.nid}`);
-                return res.status(404).send('Prescriptions not found for this doctor.');
-            }
-    
-            // Procesar las recetas, asegurándonos de manejar los BigInt
-            const formattedPrescriptions = prescriptions.map(prescription => {
-                const issueDate = new Date(Number(prescription.issueDate) * 1000);
-                const expirationDate = new Date(Number(prescription.expirationDate) * 1000);
-                const isExpired = new Date() > expirationDate;
-    
-                return {
-                    prescriptionId: convertBigIntToString(prescription.id), // Convertir a string
-                    patientName: prescription.patientName,
-                    patientNid: prescription.patientNid,
-                    meds: {
-                        med1: prescription.meds.med1,
-                        quantity1: Number(prescription.meds.quantity1), // Asegurarte de que sea un número
-                        med2: prescription.meds.med2,
-                        quantity2: Number(prescription.meds.quantity2), // Asegurarte de que sea un número
-                        diagnosis: prescription.meds.diagnosis
-                    },
-                    insurance: {
-                        affiliateNum: prescription.insurance.affiliateNum,
-                        insuranceName: prescription.insurance.insuranceName,
-                        insurancePlan: prescription.insurance.insurancePlan
-                    },
-                    doctorNid: prescription.doctorNid,
-                    issueDate: issueDate.toLocaleDateString(),  // Formatear fecha de emisión
-                    expirationDate: expirationDate.toLocaleDateString(),  // Formatear fecha de vencimiento
-                    patientAddress: prescription.patientAddress,
-                    status: isExpired ? 'Expirada' : 'Vigente'  // Marcar si está expirada o vigente
-                };
+            // Convert receipt and its fields to string
+            const formattedReceipt = convertBigIntToString({
+                message: 'Prescription issued and saved in blockchain',
+                prescriptionId,
+                transactionHash: receipt.transactionHash,
+                blockNumber: receipt.blockNumber,
+                gasUsed: receipt.gasUsed
             });
     
-            // Convertir todo el objeto de recetas a string
-            const responseToSend = convertBigIntToString({
-                message: 'Prescriptions obtained successfully',
-                prescriptions: formattedPrescriptions
-            });
-    
-            // Enviar las recetas formateadas al frontend
-            res.json(responseToSend);
-        } catch (error) {
-            console.error('Error obtaining prescriptions:', error);
-            res.status(500).send('Error obtaining prescriptions. Details: ' + error.message);
+            res.send(formattedReceipt);
+        } else {
+            res.status(500).send('Error issuing prescription in blockchain');
         }
-    };
+    } catch (error) {
+        console.error('Error issuing prescription:', error);
+        res.status(500).send('Error issuing prescription. Details: ' + error.message);
+    }
+};
+
+
+exports.getPresbyDoctorNid = async (req, res) => {
+    try {
+        const { nid } = req.user; // Doctor's NID from JWT token
+    
+        // Find the doctor in the database
+        const doctor = await Doctor.findOne({ nid });
+        if (!doctor) {
+            console.error(`Doctor with NID: ${nid} not found in the database.`);
+            return res.status(404).send('Doctor not found.');
+        }
+    
+        // Get Ganache accounts
+        const accounts = await web3.eth.getAccounts();
+        const fromAccount = accounts[0]; // First Ganache account
+    
+        // Call the smart contract function to get prescriptions by doctor's NID
+        const prescriptions = await prescriptionContract.methods.getPresbyDoctorNid(doctor.nid).call({ from: fromAccount });
+    
+        // Check if prescriptions were found
+        if (prescriptions.length === 0) {
+            console.warn(`No prescriptions found for doctor NID: ${doctor.nid}`);
+            return res.status(404).send('Prescriptions not found for this doctor.');
+        }
+    
+        // Process prescriptions, ensuring to handle BigInt
+        const formattedPrescriptions = prescriptions.map(prescription => {
+            const issueDate = new Date(Number(prescription.issueDate) * 1000);
+            const expirationDate = new Date(Number(prescription.expirationDate) * 1000);
+            const isExpired = new Date() > expirationDate;
+    
+            return {
+                prescriptionId: convertBigIntToString(prescription.id),
+                patientName: prescription.patientName,
+                patientNid: prescription.patientNid,
+                meds: {
+                    med1: prescription.meds.med1,
+                    quantity1: Number(prescription.meds.quantity1),
+                    med2: prescription.meds.med2,
+                    quantity2: Number(prescription.meds.quantity2),
+                    diagnosis: prescription.meds.diagnosis
+                },
+                insurance: {
+                    affiliateNum: prescription.insurance.affiliateNum,
+                    insuranceName: prescription.insurance.insuranceName,
+                    insurancePlan: prescription.insurance.insurancePlan
+                },
+                doctorNid: prescription.doctorNid,
+                issueDate: issueDate.toLocaleDateString(),
+                expirationDate: expirationDate.toLocaleDateString(),
+                patientAddress: prescription.patientAddress,
+                status: isExpired ? 'Expired' : 'Valid'
+            };
+        });
+    
+        // Convert all prescription objects to strings
+        const responseToSend = convertBigIntToString({
+            message: 'Prescriptions obtained successfully',
+            prescriptions: formattedPrescriptions
+        });
+    
+        res.json(responseToSend);
+    } catch (error) {
+        console.error('Error obtaining prescriptions:', error);
+        res.status(500).send('Error obtaining prescriptions. Details: ' + error.message);
+    }
+};
     
 
-// Función para convertir todos los BigInt a string en un objeto
+// Function to convert all BigInts to strings in an object
 const convertBigIntToString = (obj) => {
     if (typeof obj === 'bigint') {
         return obj.toString();
@@ -205,28 +205,26 @@ const convertBigIntToString = (obj) => {
 
 exports.getAllPrescriptions = async (req, res) => {
     try {
-        // Obtener cuentas de Ganache (puedes usar la primera cuenta)
+        // Get Ganache accounts
         const accounts = await web3.eth.getAccounts();
-        const fromAccount = accounts[0]; // Usamos la primera cuenta de Ganache
+        const fromAccount = accounts[0];
 
         console.log(`Calling contract to get all prescriptions from account: ${fromAccount}`);
 
-        // Llamar a la función del contrato inteligente para obtener todas las recetas
+        // Call the smart contract function to get all prescriptions
         const prescriptions = await prescriptionContract.methods.getPrescriptions().call({ from: fromAccount });
 
-        // Verificar si se encontraron recetas
+        // Check if prescriptions were found
         if (prescriptions.length === 0) {
             console.warn('No prescriptions found in the blockchain.');
             return res.status(404).send('No prescriptions found.');
         }
 
-        // Convertir todos los BigInt a strings en las recetas
+        // Convert all BigInts to strings in prescriptions
         const formattedPrescriptions = convertBigIntToString(prescriptions);
 
-        // Registrar las recetas obtenidas para depuración
         console.log('All prescriptions obtained:', formattedPrescriptions);
 
-        // Enviar las recetas al frontend
         res.json({
             message: 'All prescriptions obtained successfully',
             prescriptions: formattedPrescriptions
@@ -239,9 +237,12 @@ exports.getAllPrescriptions = async (req, res) => {
 
 exports.getPresbyPatientAddress = async (req, res) => {
     try {
-        const { nid } = req.user; // NID del paciente desde el token JWT
+        const { nid } = req.user; // Patient's NID from JWT token
+        
 
-        // Buscar al paciente en la base de datos
+        console.log(`Starting search for patient with NID: ${nid}`);
+
+        // Find patient in the database
         const patient = await Patient.findOne({ nid });
         if (!patient) {
             console.error(`Patient with NID: ${nid} not found in the database.`);
@@ -249,37 +250,40 @@ exports.getPresbyPatientAddress = async (req, res) => {
         }
 
         const patientAddress = patient.address;
+        console.log(`Patient address found: ${patientAddress}`);
 
-        // Obtener cuentas de Ganache
+        // Get Ganache accounts
         const accounts = await web3.eth.getAccounts();
-        const fromAccount = accounts[0]; // Primera cuenta de Ganache
+        const fromAccount = accounts[0];
+        console.log(`Ganache account used for transaction: ${fromAccount}`);
 
-        // Llamar a la función del contrato inteligente para obtener recetas por dirección del paciente
+        // Call the smart contract function to get prescriptions by patient address
+        console.log(`Searching blockchain for prescriptions for patient address: ${patientAddress}`);
         const prescriptions = await prescriptionContract.methods.getPresbyPatientAddress(patientAddress).call({ from: fromAccount });
 
-        // Verificar si se encontraron recetas
         if (prescriptions.length === 0) {
             console.warn(`No prescriptions found for patient address: ${patientAddress}`);
             return res.status(404).send('Prescriptions not found for this patient.');
         }
 
-        // Configura las opciones para el formato de fecha dd/mm/yyyy
+        console.log(`Prescriptions obtained for patient: ${prescriptions.length} prescription(s) found`);
+
         const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
 
-        // Iterar sobre las recetas y buscar la información del médico en la base de datos
         const formattedPrescriptions = await Promise.all(prescriptions.map(async (prescription) => {
             const issueDate = new Date(Number(prescription.issueDate) * 1000);
             const expirationDate = new Date(Number(prescription.expirationDate) * 1000);
             const isExpired = new Date() > expirationDate;
 
-            // Buscar al doctor en la base de datos usando el doctorNid de la receta
+            console.log(`Processing prescription ID: ${prescription.id}. Issue Date: ${issueDate}, Expiration Date: ${expirationDate}`);
+
+            console.log(`Searching for Doctor with NID: ${prescription.doctorNid}`);
             const doctor = await Doctor.findOne({ nid: prescription.doctorNid });
 
-            // Si no se encuentra al médico, manejar el error
             if (!doctor) {
                 console.warn(`Doctor with NID: ${prescription.doctorNid} not found.`);
                 return {
-                    prescriptionId: convertBigIntToString(prescription.id), // Convertir a string
+                    prescriptionId: convertBigIntToString(prescription.id),
                     doctorName: 'Doctor not found',
                     doctorNid: prescription.doctorNid,
                     meds: {
@@ -298,13 +302,14 @@ exports.getPresbyPatientAddress = async (req, res) => {
                     issueDate: issueDate.toLocaleDateString('en-GB', options),
                     expirationDate: expirationDate.toLocaleDateString('en-GB', options),
                     doctorAddress: prescription.doctorAddress,
-                    status: isExpired ? 'Expirada' : 'Vigente'
+                    status: isExpired ? 'Expired' : 'Valid'
                 };
             }
 
-            // Formatear la receta con los datos del doctor obtenidos de la base de datos
+            console.log(`Doctor found: ${doctor.name} ${doctor.surname}, Specialty: ${doctor.specialty}`);
+
             return {
-                prescriptionId: convertBigIntToString(prescription.id), // Convertir a string
+                prescriptionId: convertBigIntToString(prescription.id),
                 doctorName: `${doctor.name} ${doctor.surname}`,
                 doctorSpecialty: doctor.specialty,
                 meds: {
@@ -323,16 +328,18 @@ exports.getPresbyPatientAddress = async (req, res) => {
                 issueDate: issueDate.toLocaleDateString('en-GB', options),
                 expirationDate: expirationDate.toLocaleDateString('en-GB', options),
                 doctorAddress: prescription.doctorAddress,
-                status: isExpired ? 'Expirada' : 'Vigente'
+                status: isExpired ? 'Expired' : 'Valid'
             };
         }));
 
-        // Convertir todo el objeto de recetas a string
+        console.log(`Formatted prescriptions for patient: ${formattedPrescriptions.length} prescription(s) formatted`);
+
         const responseToSend = convertBigIntToString({
             message: 'Prescriptions obtained successfully',
             prescriptions: formattedPrescriptions
         });
 
+        console.log('Sending response to frontend');
         res.json(responseToSend);
     } catch (error) {
         console.error('Error obtaining prescriptions:', error);
@@ -342,50 +349,152 @@ exports.getPresbyPatientAddress = async (req, res) => {
 
 exports.sendPrescriptionToPharmacy = async (req, res) => {
     const { alias, prescriptionId } = req.body;
-    const patientNid = req.user; // NID del paciente
+    const patientNid = req.user.nid;
 
     try {
-        // Buscar la farmacia por alias
+        const accounts = await web3.eth.getAccounts();
+        const fromAccount = accounts[0];
+        console.log("Using fromAccount:", fromAccount);
+
+        // Find pharmacy by alias
         const pharmacy = await Pharmacy.findOne({ alias });
         if (!pharmacy) {
             return res.status(404).json({ message: 'Pharmacy not found' });
         }
+        console.log("Pharmacy address:", pharmacy.address);
 
-        // Buscar la dirección del paciente usando su NID
+        // Find patient address using NID
         const patient = await Patient.findOne({ nid: patientNid });
         if (!patient) {
             return res.status(404).json({ message: 'Patient not found' });
         }
+        const patientAddress = patient.address;
+        console.log("Patient address:", patientAddress);
 
-        const patientAddress = patient.address; // Obtener la dirección del paciente
-
-        // 1. Buscar la receta en la blockchain usando su ID
-        const prescriptionData = await prescriptionContract.methods
-            .getPrescription(prescriptionId) // Asegúrate de que esta función exista en tu contrato
+        // Get prescription data from blockchain
+        let prescriptionData = await prescriptionContract.methods
+            .getPrescription(prescriptionId)
             .call();
-        
+
         if (!prescriptionData) {
             return res.status(404).json({ message: 'Prescription not found in blockchain' });
         }
+        console.log("Original prescription data from blockchain:", prescriptionData);
 
-        // 2. Modificar la receta agregando la dirección de la farmacia
+        // Convert BigInt values in prescriptionData to avoid serialization issues
+        prescriptionData = convertBigIntToString(prescriptionData);
+        console.log("Converted prescription data (BigInt to String):", prescriptionData);
+
+        // Prepare the updated prescription object
         const updatedPrescription = {
-            ...prescriptionData,
-            pharmacyAddress: pharmacy.address // Agregar el nuevo campo
+            id: prescriptionData.id,
+            patientName: prescriptionData.patientName,
+            patientNid: prescriptionData.patientNid,
+            meds: prescriptionData.meds,
+            insurance: prescriptionData.insurance,
+            doctorNid: prescriptionData.doctorNid,
+            patientAddress: patientAddress,
+            pharmacyAddress: pharmacy.address,
+            issueDate: prescriptionData.issueDate,
+            expirationDate: prescriptionData.expirationDate
         };
 
-        // 3. Enviar la receta modificada de nuevo a la blockchain
+        console.log("Updated prescription (before sending to blockchain):", updatedPrescription);
+
+        // Send the updated prescription to the blockchain
         const receipt = await prescriptionContract.methods
-            .updatePrescription(prescriptionId, updatedPrescription) // Asegúrate de que esta función exista en tu contrato
-            .send({ from: patientAddress });
+            .updatePrescription(prescriptionId, updatedPrescription.pharmacyAddress) // Pass only pharmacyAddress as per contract function
+            .send({ from: fromAccount, gas: '2000000' });
 
         if (receipt.status) {
-            res.json({ message: 'Prescription sent to pharmacy', transactionHash: receipt.transactionHash });
+            const formattedReceipt = convertBigIntToString({
+                message: 'Prescription sent to pharmacy',
+                transactionHash: receipt.transactionHash,
+                blockNumber: receipt.blockNumber,
+                gasUsed: receipt.gasUsed
+            });
+            console.log("Formatted receipt:", formattedReceipt);
+            res.json(formattedReceipt);
         } else {
             res.status(500).json({ message: 'Error sending prescription' });
         }
     } catch (error) {
+        console.error("Error sending prescription:", error);
         res.status(500).json({ message: 'Error sending prescription', error: error.message });
     }
 };
 
+
+exports.getPresbyPharmacyAddress = async (req, res) => {
+    try {
+        const { nid } = req.user; // Farmacia identificada por NID en JWT
+
+        // Buscar la farmacia en la base de datos usando el NID
+        const pharmacy = await Pharmacy.findOne({ nid });
+        if (!pharmacy) {
+            return res.status(404).send('Pharmacy not found.');
+        }
+        const pharmacyAddress = pharmacy.address;
+
+        // Obtener cuentas de Ethereum
+        const accounts = await web3.eth.getAccounts();
+        const fromAccount = accounts[0];
+
+        // Llamar al contrato para obtener las recetas por dirección de la farmacia
+        const prescriptions = await prescriptionContract.methods
+            .getPresbyPharmacyAddress(pharmacyAddress)
+            .call({ from: fromAccount });
+
+        // Validar si se encontraron recetas
+        if (prescriptions.length === 0) {
+            return res.status(404).send('No prescriptions found for this pharmacy.');
+        }
+
+        // Formatear las recetas obtenidas
+        const formattedPrescriptions = await Promise.all(prescriptions.map(async (prescription) => {
+            // Obtener datos del paciente de la receta
+            const patient = await Patient.findOne({ address: prescription.patientAddress });
+            const doctor = await Doctor.findOne({ nid: prescription.doctorNid });
+
+            return {
+                prescriptionId: convertBigIntToString(prescription.id),
+                patient: {
+                    name: patient.name,
+                    surname: patient.surname,
+                    nid: patient.nid,
+                    address: prescription.patientAddress
+                },
+                meds: {
+                    med1: prescription.meds.med1,
+                    quantity1: Number(prescription.meds.quantity1),
+                    med2: prescription.meds.med2,
+                    quantity2: Number(prescription.meds.quantity2),
+                    diagnosis: prescription.meds.diagnosis
+                },
+                insurance: {
+                    affiliateNum: prescription.insurance.affiliateNum,
+                    insuranceName: prescription.insurance.insuranceName,
+                    insurancePlan: prescription.insurance.insurancePlan
+                },
+                doctor: {
+                    name: doctor ? doctor.name : 'Unknown',
+                    surname: doctor ? doctor.surname : 'Unknown',
+                    specialty: doctor ? doctor.specialty : 'Unknown',
+                    nid: prescription.doctorNid,
+                    address: prescription.doctorAddress
+                },
+                issueDate: new Date(Number(prescription.issueDate) * 1000).toLocaleDateString('en-GB'),
+                expirationDate: new Date(Number(prescription.expirationDate) * 1000).toLocaleDateString('en-GB')
+            };
+        }));
+
+        // Enviar las recetas formateadas al cliente
+        res.json({
+            message: 'Prescriptions obtained successfully',
+            prescriptions: formattedPrescriptions
+        });
+    } catch (error) {
+        console.error('Error obtaining prescriptions for pharmacy:', error);
+        res.status(500).send('Error obtaining prescriptions. Details: ' + error.message);
+    }
+};

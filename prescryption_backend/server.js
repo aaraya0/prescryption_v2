@@ -32,7 +32,7 @@ const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     if (!authHeader) return res.status(403).send('Token required');
 
-    const token = authHeader.split(' ')[1]; // deletes "Bearer" prefix
+    const token = authHeader.split(' ')[1];
     if (!token) return res.status(403).send('Token required');
 
     try {
@@ -54,31 +54,24 @@ const loginLimiter = (req, res, next) => {
     const windowMs = 15 * 60 * 1000; // 15 minutos
     const now = Date.now();
 
-    // Si el NID no tiene registros en la caché, inicializa sus datos
     if (!loginAttemptCache[nid]) {
         loginAttemptCache[nid] = { attempts: 0, lastAttemptTime: now };
     }
 
     const userAttempts = loginAttemptCache[nid];
 
-    // Resetea los intentos si ha pasado el tiempo de ventana (15 minutos)
     if (now - userAttempts.lastAttemptTime > windowMs) {
         userAttempts.attempts = 0;
         userAttempts.lastAttemptTime = now;
     }
 
-    // Incrementa los intentos
     userAttempts.attempts++;
 
-    // Si el usuario excede el número máximo de intentos, bloquea el login
     if (userAttempts.attempts > maxAttempts) {
         return res.status(429).json({ message: 'Demasiados intentos fallidos de inicio de sesión. Intenta nuevamente en 15 minutos.' });
     }
 
-    // Actualiza el tiempo del último intento
     userAttempts.lastAttemptTime = now;
-
-    // Continúa con el siguiente middleware si no ha excedido los intentos
     next();
 };
 
@@ -89,21 +82,18 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error(err));
 
-// User registry
 // Patient registry
 app.post('/register_patient', async (req, res) => {
     const { name, surname, nid, birth_date, sex, insurance_name, insurance_plan, affiliate_num, mail, password } = req.body;
 
-    // Verifica si el paciente ya está registrado
     const existingPatient = await Patient.findOne({ nid });
     if (existingPatient) {
         return res.status(400).send('Patient already registered with this NID.');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Generar address de Ethereum para el paciente
     const account = web3.eth.accounts.create();
+
     const newPatient = new Patient({
         name,
         surname,
@@ -129,7 +119,6 @@ app.post('/register_patient', async (req, res) => {
 // Doctor registry
 app.post('/register_doctor', async (req, res) => {
     try {
-        console.log('Request body:', req.body);
         const { nid, license, name, surname, specialty, password, mail } = req.body;
 
         if (!nid || !license || !name || !surname || !specialty || !password || !mail) {
@@ -142,14 +131,30 @@ app.post('/register_doctor', async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Generar una nueva cuenta Ethereum para el doctor
+        const account = web3.eth.accounts.create();
 
-        const newDoctor = new Doctor({ nid, license, name, surname, specialty, password: hashedPassword, mail });
+        // Crear el nuevo registro de doctor con address y privateKey
+        const newDoctor = new Doctor({
+            nid,
+            license,
+            name,
+            surname,
+            specialty,
+            password: hashedPassword,
+            mail,
+            address: account.address,          // Guardar la dirección generada
+            privateKey: account.privateKey      // Guardar la clave privada generada
+        });
+
         await newDoctor.save();
         res.send('Doctor registered');
     } catch (err) {
         return res.status(500).send('Internal server error');
     }
 });
+
 
 // Pharmacy registry
 app.post('/register_pharmacy', async (req, res) => {
@@ -165,7 +170,21 @@ app.post('/register_pharmacy', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newPharmacy = new Pharmacy({ nid, license, name, surname, pharmacy_name, pharmacy_nid, mail, password: hashedPassword, alias });
+    const account = web3.eth.accounts.create();
+
+    const newPharmacy = new Pharmacy({
+        nid,
+        license,
+        name,
+        surname,
+        pharmacy_name,
+        pharmacy_nid,
+        mail,
+        password: hashedPassword,
+        alias,
+        address: account.address  // Guardar la address generada
+    });
+
     try {
         await newPharmacy.save();
         res.send('Pharmacy registered.');
@@ -184,7 +203,19 @@ app.post('/register_insurance', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newInsurance = new Insurance({ name, surname, nid, insurance_name, insurance_nid, mail, password: hashedPassword });
+    const account = web3.eth.accounts.create();
+
+    const newInsurance = new Insurance({
+        name,
+        surname,
+        nid,
+        insurance_name,
+        insurance_nid,
+        mail,
+        password: hashedPassword,
+        address: account.address  // Guardar la address generada
+    });
+
     try {
         await newInsurance.save();
         res.send('Insurance registered.');

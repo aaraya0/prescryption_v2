@@ -53,19 +53,19 @@ contract PrescriptionContract {
         uint expirationDate
     );
 
-    // Emitir receta
+    // Emitir receta con fecha personalizada
     function issuePrescription(
         string memory _patientName,
         string memory _patientNid,
         MedicationInfo memory _meds,
         InsuranceInfo memory _insurance,
         string memory _doctorNid,
-        address _patientAddress
+        address _patientAddress,
+        uint _issueDate  // Nueva variable para aceptar la fecha de emisión personalizada
     ) public {
         prescriptionCount++;  // Incrementar el contador para el nuevo ID
 
-        uint issueDate = block.timestamp;
-        uint expirationDate = issueDate + 30 days;
+        uint expirationDate = _issueDate + 30 days;  // Calcular la fecha de vencimiento a partir de la fecha de emisión personalizada
 
         Prescription memory newPrescription = Prescription({
             id: prescriptionCount,  // Asignar el ID
@@ -76,7 +76,7 @@ contract PrescriptionContract {
             doctorNid: _doctorNid,
             patientAddress: _patientAddress,
             pharmacyAddress: address(0), // Inicialmente vacío
-            issueDate: issueDate,
+            issueDate: _issueDate,
             expirationDate: expirationDate
         });
 
@@ -91,7 +91,7 @@ contract PrescriptionContract {
             _doctorNid,
             _patientAddress,
             address(0), // Inicialmente vacío
-            issueDate,
+            _issueDate,
             expirationDate
         );
     }
@@ -163,5 +163,31 @@ contract PrescriptionContract {
     function updatePrescription(uint _prescriptionId, address _pharmacyAddress) public {
         require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
         prescriptions[_prescriptionId - 1].pharmacyAddress = _pharmacyAddress; // Actualizar la dirección de la farmacia
+    }
+
+    // Obtener recetas por dirección de la farmacia
+    function getPresbyPharmacyAddress(address _pharmacyAddress) public view returns (Prescription[] memory) {
+        uint count = 0;
+
+        // Primer bucle para contar cuántas recetas pertenecen a la farmacia
+        for (uint i = 0; i < prescriptionCount; i++) {
+            if (prescriptions[i].pharmacyAddress == _pharmacyAddress) {
+                count++;
+            }
+        }
+
+        // Crear un array para almacenar las recetas de la farmacia
+        Prescription[] memory pharmacyPrescriptions = new Prescription[](count);
+        uint index = 0;
+
+        // Segundo bucle para almacenar las recetas correspondientes
+        for (uint i = 0; i < prescriptionCount; i++) {
+            if (prescriptions[i].pharmacyAddress == _pharmacyAddress) {
+                pharmacyPrescriptions[index] = prescriptions[i];
+                index++;
+            }
+        }
+
+        return pharmacyPrescriptions;
     }
 }

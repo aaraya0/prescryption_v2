@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import "./styles.css"
 
@@ -35,7 +35,6 @@ function EmitirReceta() {
       return;
     }
 
-    // Validar los campos del formulario antes de enviarlos
     const {
       patientName,
       patientNid,
@@ -47,14 +46,11 @@ function EmitirReceta() {
       diagnosis,
     } = formData;
 
+    // Validar los campos del formulario antes de enviarlos
     if (!patientName || !patientNid || !affiliateNum || !insuranceName || !insurancePlan || !med1 || !quantity1 || !diagnosis) {
       alert('Por favor, completa todos los campos obligatorios.');
       return;
     }
-
-    // Imprimir el token y los datos del formulario para depuración
-    console.log('Token:', token);
-    console.log('Datos del formulario:', formData);
 
     try {
       // Enviar la solicitud al backend con el token en los headers
@@ -68,17 +64,11 @@ function EmitirReceta() {
         }
       );
       alert('Receta emitida con éxito');
-      console.log('Respuesta del servidor:', response.data);
     } catch (error) {
       console.error('Error al emitir la receta:', error);
 
       // Manejo de errores detallado
       if (error.response) {
-        console.error('Error response data:', error.response.data);
-        console.error('Error response status:', error.response.status);
-        console.error('Error response headers:', error.response.headers);
-        
-        // Manejar diferentes tipos de errores de autenticación o validación
         if (error.response.status === 401) {
           alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
         } else if (error.response.status === 400) {
@@ -131,14 +121,14 @@ function EmitirReceta() {
               <textarea name="diagnosis" className="textarea" placeholder="Ingresar diagnóstico" onChange={handleChange} required></textarea>
             </div>
           </div>
+          {/* Botón de Generar Receta dentro del formulario */}
+          <div className='buttonGenerarReceta'>
+            <button type="submit" className="button">Generar Receta</button>
+          </div>
         </form>
-      </div>
-      <div className='buttonGenerarReceta'>
-      <button type="submit" className="button">Generar Receta</button>
       </div>
     </div>
   );
-
 }
 
 export default EmitirReceta;

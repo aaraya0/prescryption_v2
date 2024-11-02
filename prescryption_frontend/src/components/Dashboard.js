@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Doctor from './Doctor';
-import Patient from './Patient'; // Importamos el componente de Patient
+import Patient from './Patient'; 
+import Pharmacy from './Pharmacy';
 
 function Dashboard({ userType }) {
     const navigate = useNavigate();
@@ -24,7 +25,7 @@ function Dashboard({ userType }) {
 
     const renderMenu = () => {
         switch (userType) {
-            case 'paciente':
+            case 'patient':
                 return (
                     <div>
                         <p>Bienvenido al menú del paciente.</p>
@@ -32,7 +33,7 @@ function Dashboard({ userType }) {
                         <Patient />
                     </div>
                 );
-            case 'medico':
+            case 'doctor':
                 return (
                     <div>
                         <p>Bienvenido al menú del médico.</p>
@@ -41,9 +42,15 @@ function Dashboard({ userType }) {
                         <Doctor />
                     </div>
                 );
-            case 'farmaceutico':
-                return <p>Bienvenido al menú del farmacéutico.</p>;
-            case 'obra_social':
+            case 'pharmacy':
+                return (
+                    <div>
+                    <p>Bienvenido al menú de la farmacia.</p>
+            
+                    <Pharmacy />
+                </div>
+                );
+            case 'insurance':
                 return <p>Bienvenido al menú de la obra social.</p>;
             default:
                 return <p>No se encontró el rol del usuario.</p>;

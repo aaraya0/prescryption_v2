@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import './styles.css';
 
 const Doctor = () => {
     const [recetas, setRecetas] = useState([]);
+    const [expandedReceta, setExpandedReceta] = useState(null); // Estado para controlar qué receta está expandida
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -21,18 +23,29 @@ const Doctor = () => {
         .catch(error => console.error('Error al obtener las recetas:', error));
     }, [token]);
 
+    // Función para alternar la expansión de una receta
+    const toggleReceta = (index) => {
+        setExpandedReceta(expandedReceta === index ? null : index);
+    };
+
     return (
-        <div>
+        <div className="receta-list-container">
             <h3>Recetas Emitidas</h3>
-            <ul>
+            <ul className="receta-list">
                 {recetas.map((receta, index) => (
-                    <li key={index}>
-                        <strong>Paciente:</strong> {receta.patientName}<br />
-                        <strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}<br />
-                        <strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}<br />
-                        <strong>Diagnóstico:</strong> {receta.meds.diagnosis}<br />
-                        <strong>Fecha de Emisión:</strong> {new Date(receta.issueDate).toLocaleDateString()}<br />
-                        <strong>Fecha de Expiración:</strong> {new Date(receta.expirationDate).toLocaleDateString()}<br />
+                    <li key={index} className="receta-item">
+                        <div className="receta-header" onClick={() => toggleReceta(index)}>
+                            <strong>Paciente:</strong> {receta.patientName}
+                        </div>
+                        {expandedReceta === index && ( // Mostrar solo si está expandida
+                            <div className="receta-details">
+                                <p><strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}</p>
+                                <p><strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}</p>
+                                <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis}</p>
+                                <p><strong>Fecha de Emisión:</strong> {new Date(receta.issueDate).toLocaleDateString()}</p>
+                                <p><strong>Fecha de Expiración:</strong> {new Date(receta.expirationDate).toLocaleDateString()}</p>
+                            </div>
+                        )}
                     </li>
                 ))}
             </ul>
