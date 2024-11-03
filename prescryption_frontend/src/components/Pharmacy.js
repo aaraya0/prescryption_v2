@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import PrescriptionValidation from './PrescriptionValidation'; // Importar componente de validación de receta
 
 const Pharmacy = () => {
     const [prescriptions, setPrescriptions] = useState([]);
-    const [patientNidSearch, setPatientNidSearch] = useState(''); // Campo para búsqueda por NID de paciente
+    const [patientNidSearch, setPatientNidSearch] = useState('');
+    const [selectedPrescription, setSelectedPrescription] = useState(null); // Para la receta seleccionada
     const [token] = useState(localStorage.getItem('token'));
 
     useEffect(() => {
@@ -20,12 +22,14 @@ const Pharmacy = () => {
         .catch(error => console.error('Error al obtener las recetas:', error));
     }, [token]);
 
-    // Función para manejar la búsqueda por NID de paciente
     const handleSearch = (e) => {
         setPatientNidSearch(e.target.value);
     };
 
-    // Filtrar recetas por NID del paciente
+    const handleValidate = (prescription) => {
+        setSelectedPrescription(prescription); // Establece la receta seleccionada para validación
+    };
+
     const filteredPrescriptions = prescriptions.filter(prescription => 
         prescription.patient.nid.includes(patientNidSearch)
     );
@@ -34,7 +38,6 @@ const Pharmacy = () => {
         <div>
             <h3>Recetas de Farmacia</h3>
             
-            {/* Búsqueda por NID del paciente */}
             <label>
                 Buscar por NID del Paciente:
                 <input 
@@ -52,15 +55,14 @@ const Pharmacy = () => {
                         <strong>Paciente:</strong> {prescription.patient.name} {prescription.patient.surname} (NID: {prescription.patient.nid})<br />
                         <strong>Medicamento 1:</strong> {prescription.meds.med1}, Cantidad: {prescription.meds.quantity1}<br />
                         <strong>Medicamento 2:</strong> {prescription.meds.med2}, Cantidad: {prescription.meds.quantity2}<br />
-                        <strong>Diagnóstico:</strong> {prescription.meds.diagnosis}<br />
-                        <strong>Afiliado:</strong> {prescription.insurance.affiliateNum}<br />
-                        <strong>Obra Social:</strong> {prescription.insurance.insuranceName}, Plan: {prescription.insurance.insurancePlan}<br />
-                        <strong>Médico:</strong> {prescription.doctor.name} {prescription.doctor.surname}, Especialidad: {prescription.doctor.specialty} (NID: {prescription.doctor.nid})<br />
-                        <strong>Fecha de Emisión:</strong> {prescription.issueDate}<br />
-                        <strong>Fecha de Expiración:</strong> {prescription.expirationDate}<br />
+                        <button onClick={() => handleValidate(prescription)}>Validar Receta</button>
                     </li>
                 ))}
             </ul>
+
+            {selectedPrescription && (
+                <PrescriptionValidation prescription={selectedPrescription} />
+            )}
         </div>
     );
 };

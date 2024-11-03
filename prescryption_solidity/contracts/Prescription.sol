@@ -8,6 +8,7 @@ contract PrescriptionContract {
         string med2;
         uint quantity2;
         string diagnosis;
+        string observations;
     }
 
     struct InsuranceInfo {
@@ -16,18 +17,22 @@ contract PrescriptionContract {
         string insurancePlan;
     }
 
+
     struct Prescription {
-        uint id;  // ID único para cada receta
-        string patientName;
-        string patientNid;
-        MedicationInfo meds;
-        InsuranceInfo insurance;
-        string doctorNid;
-        address patientAddress;
-        address pharmacyAddress; // Agregado para almacenar la dirección de la farmacia
-        uint issueDate;
-        uint expirationDate;
-    }
+    uint id;  // ID único para cada receta
+    string patientName;
+    string patientNid;
+    MedicationInfo meds;
+    InsuranceInfo insurance;
+    string doctorNid;
+    address patientAddress;
+    address pharmacyAddress; // Agregado para almacenar la dirección de la farmacia
+    uint issueDate;
+    uint expirationDate;
+    bool used; // Indica si la receta ha sido utilizada
+
+}
+
 
     Prescription[] public prescriptions;
     mapping(string => Doctor) public doctors;
@@ -41,14 +46,14 @@ contract PrescriptionContract {
     uint public prescriptionCount;
 
     event IssuedPrescription(
-        uint id,  // ID agregado al evento
+        uint id,  
         string patientName,
         string patientNid,
         MedicationInfo meds,
         InsuranceInfo insurance,
         string doctorNid,
         address patientAddress,
-        address pharmacyAddress, // Agregado al evento
+        address pharmacyAddress, 
         uint issueDate,
         uint expirationDate
     );
@@ -67,7 +72,7 @@ contract PrescriptionContract {
 
         uint expirationDate = _issueDate + 30 days;  // Calcular la fecha de vencimiento a partir de la fecha de emisión personalizada
 
-        Prescription memory newPrescription = Prescription({
+            Prescription memory newPrescription = Prescription({
             id: prescriptionCount,  // Asignar el ID
             patientName: _patientName,
             patientNid: _patientNid,
@@ -77,8 +82,10 @@ contract PrescriptionContract {
             patientAddress: _patientAddress,
             pharmacyAddress: address(0), // Inicialmente vacío
             issueDate: _issueDate,
-            expirationDate: expirationDate
+            expirationDate: expirationDate,
+            used: false // Inicialmente, la receta no está utilizada
         });
+
 
         prescriptions.push(newPrescription);
 
@@ -190,4 +197,13 @@ contract PrescriptionContract {
 
         return pharmacyPrescriptions;
     }
+
+        function markPrescriptionAsUsed(uint _prescriptionId) public {
+        require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
+        require(!prescriptions[_prescriptionId - 1].used, "Prescription already used.");
+
+        prescriptions[_prescriptionId - 1].used = true;
+    }
+
+
 }
