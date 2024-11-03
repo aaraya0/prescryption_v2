@@ -494,7 +494,8 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
                     address: prescription.doctorAddress
                 },
                 issueDate: new Date(Number(prescription.issueDate) * 1000).toLocaleDateString('en-GB'),
-                expirationDate: new Date(Number(prescription.expirationDate) * 1000).toLocaleDateString('en-GB')
+                expirationDate: new Date(Number(prescription.expirationDate) * 1000).toLocaleDateString('en-GB'),
+                used: prescription.used
             };
         }));
 
@@ -509,50 +510,83 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
     }
 };
 
-// Endpoint para validar la receta en la farmacia
+
+// Endpoint to validate a prescription with two medications
 exports.validatePrescription = async (req, res) => {
-    const { prescriptionId, brand } = req.body;
+    const { prescriptionId, brand1, brand2 } = req.body;
     const { nid } = req.user;
 
     try {
+        // Validate pharmacy
         const pharmacy = await Pharmacy.findOne({ nid });
         if (!pharmacy) {
             return res.status(404).json({ message: 'Pharmacy not found' });
         }
 
+        // Fetch prescription data from blockchain
         const prescription = await prescriptionContract.methods.getPrescription(prescriptionId).call();
-
         if (!prescription) {
             return res.status(404).json({ message: 'Prescription not found in blockchain' });
         }
 
-        const selectedBrand = brand || "Genérico";
+        // Validate each medication individually, taking quantity into account
+        const meds = [
+            { name: prescription.meds.med1, quantity: Number(prescription.meds.quantity1), brand: brand1 || 'Genérico' },
+            { name: prescription.meds.med2, quantity: Number(prescription.meds.quantity2), brand: brand2 || 'Genérico' }
+        ];
 
-        // Obtener el precio y cobertura desde la API Mock
-        const vademecumResponse = await axios.get('http://localhost:4001/api/vademecum/price', {
-            params: { drug_name: prescription.meds.med1, brand: selectedBrand }
-        });
-        const coverageResponse = await axios.get('http://localhost:4001/api/insurance/coverage', {
-            params: {
-                insurance_name: prescription.insurance.insuranceName,
-                plan: prescription.insurance.insurancePlan,
-                drug_name: prescription.meds.med1
+        const validations = await Promise.all(meds.map(async (med) => {
+            if (!med.name) return null; // Skip validation if medication is not specified
+        
+            try {
+                // Fetch price from vademecum API
+                const priceResponse = await axios.get('http://localhost:4001/api/vademecum/price', {
+                    params: { drug_name: med.name, brand: med.brand }
+                });
+                const pricePerUnit = priceResponse.data.price;
+                const totalOriginalPrice = pricePerUnit * med.quantity; // Multiplica por la cantidad aquí
+        
+                // Fetch coverage from insurance API
+                const coverageResponse = await axios.get('http://localhost:4001/api/insurance/coverage', {
+                    params: {
+                        insurance_name: prescription.insurance.insuranceName,
+                        plan: prescription.insurance.insurancePlan,
+                        drug_name: med.name
+                    }
+                });
+                const coveragePercentage = coverageResponse.data.coverage;
+                const coveredAmount = (totalOriginalPrice * coveragePercentage) / 100;
+                const finalPrice = totalOriginalPrice - coveredAmount;
+        
+                return {
+                    drugName: med.name,
+                    brand: med.brand,
+                    quantity: med.quantity,
+                    originalPrice: totalOriginalPrice,
+                    coveragePercentage,
+                    coveredAmount,
+                    finalPrice
+                };
+            } catch (error) {
+                console.warn(`Validation failed for ${med.name}: ${error.message}`);
+                return {
+                    drugName: med.name,
+                    brand: med.brand,
+                    quantity: med.quantity,
+                    originalPrice: 0,
+                    coveragePercentage: 0,
+                    coveredAmount: 0,
+                    finalPrice: 0
+                };
             }
-        });
+        }));
+        
 
-        const price = vademecumResponse.data.price;
-        const coveragePercentage = coverageResponse.data.coverage;
-        const coveredAmount = (price * coveragePercentage) / 100;
-        const finalPrice = price - coveredAmount;
+        const validatedMeds = validations.filter(result => result !== null);
 
         return res.json({
             message: 'Prescription validated successfully',
-            drugName: prescription.meds.med1,
-            brand: selectedBrand,
-            originalPrice: price,
-            coveragePercentage: coveragePercentage,
-            coveredAmount: coveredAmount,
-            finalPrice: finalPrice
+            validatedMeds
         });
     } catch (error) {
         console.error('Error validating prescription:', error);
@@ -560,34 +594,40 @@ exports.validatePrescription = async (req, res) => {
     }
 };
 
+
 exports.generateInvoiceAndMarkUsed = async (req, res) => {
-    const { prescriptionId, patientName, totalPrice, coveragePercentage, finalPrice } = req.body;
+    const { prescriptionId, patientName, validatedMeds } = req.body;
 
     try {
-        // Step 1: Call the mock invoice API
+        const totalPrice = validatedMeds.reduce((sum, med) => sum + med.originalPrice, 0);
+        const totalCoverage = validatedMeds.reduce((sum, med) => sum + med.coveredAmount, 0);
+        const finalPrice = totalPrice - totalCoverage;
+
+        // Llamada a la API de facturación
         const invoiceResponse = await axios.post('http://localhost:4002/api/generate_invoice', {
             prescription_id: prescriptionId,
             patient_name: patientName,
             total_price: totalPrice,
-            coverage_percentage: coveragePercentage,
+            coverage_percentage: (totalCoverage / totalPrice) * 100,
             final_price: finalPrice
         });
 
         const invoiceData = invoiceResponse.data;
+        console.log('Datos de la factura generada:', invoiceData); // <--- Verifica aquí
 
-        // Step 2: Interact with the blockchain to mark the prescription as used
+        // Interactuar con la blockchain
         const accounts = await web3.eth.getAccounts();
         const fromAccount = accounts[0];
 
-        const receipt = await prescriptionContract.methods
+        /*const receipt = await prescriptionContract.methods
             .markPrescriptionAsUsed(prescriptionId)
             .send({ from: fromAccount, gas: '200000' });
 
         if (!receipt.status) {
             return res.status(500).json({ message: 'Failed to mark prescription as used on blockchain.' });
-        }
+        }*/
 
-        // Step 3: Return invoice data to frontend
+         //Retornar datos de la factura al frontend
         res.json({
             message: 'Invoice generated and prescription marked as used',
             invoice: invoiceData
@@ -595,5 +635,48 @@ exports.generateInvoiceAndMarkUsed = async (req, res) => {
     } catch (error) {
         console.error('Error generating invoice and marking prescription as used:', error);
         res.status(500).json({ message: 'Error generating invoice or updating prescription', error: error.message });
+    }
+};
+
+
+
+// Endpoint to get user profile information
+exports.getUserProfile = async (req, res) => {
+    const { userType } = req.user; // Extract user type from token
+    const { nid } = req.user; // User's unique identifier (NID)
+
+    try {
+        let userProfile;
+
+        switch (userType) {
+            case 'patient':
+                userProfile = await Patient.findOne({ nid });
+                if (!userProfile) return res.status(404).json({ message: 'Patient not found.' });
+                break;
+
+            case 'doctor':
+                userProfile = await Doctor.findOne({ nid });
+                if (!userProfile) return res.status(404).json({ message: 'Doctor not found.' });
+                break;
+
+            case 'pharmacy':
+                userProfile = await Pharmacy.findOne({ nid });
+                if (!userProfile) return res.status(404).json({ message: 'Pharmacy not found.' });
+                break;
+
+            case 'insurance':
+                userProfile = await Insurance.findOne({ nid });
+                if (!userProfile) return res.status(404).json({ message: 'Insurance provider not found.' });
+                break;
+
+            default:
+                return res.status(400).json({ message: 'Invalid user type.' });
+        }
+
+        // Send back the user's profile data
+        res.json({ userType, profile: userProfile });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ message: 'Error fetching profile data', error: error.message });
     }
 };

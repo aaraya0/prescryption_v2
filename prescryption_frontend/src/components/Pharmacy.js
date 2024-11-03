@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import PrescriptionValidation from './PrescriptionValidation'; // Importar componente de validación de receta
+import PrescriptionValidation from './PrescriptionValidation'; // Componente para validar recetas
+import '../styles/Pharmacy.css';
 
 const Pharmacy = () => {
     const [prescriptions, setPrescriptions] = useState([]);
     const [patientNidSearch, setPatientNidSearch] = useState('');
-    const [selectedPrescription, setSelectedPrescription] = useState(null); // Para la receta seleccionada
-    const [token] = useState(localStorage.getItem('token'));
+    const [selectedPrescription, setSelectedPrescription] = useState(null);
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         axios.get('http://localhost:3001/api/pr_by_pharmacy', {
@@ -27,7 +28,7 @@ const Pharmacy = () => {
     };
 
     const handleValidate = (prescription) => {
-        setSelectedPrescription(prescription); // Establece la receta seleccionada para validación
+        setSelectedPrescription(prescription); // Abrir modal con la receta seleccionada
     };
 
     const filteredPrescriptions = prescriptions.filter(prescription => 
@@ -35,7 +36,7 @@ const Pharmacy = () => {
     );
 
     return (
-        <div>
+        <div className="pharmacy-dashboard">
             <h3>Recetas de Farmacia</h3>
             
             <label>
@@ -45,23 +46,31 @@ const Pharmacy = () => {
                     value={patientNidSearch} 
                     onChange={handleSearch} 
                     placeholder="Ingrese NID del paciente" 
+                    className="search-input"
                 />
             </label>
 
-            <ul>
+            <ul className="prescription-list">
                 {filteredPrescriptions.map((prescription, index) => (
-                    <li key={index}>
+                    <li key={index} className="prescription-item">
                         <strong>ID de Receta:</strong> {prescription.prescriptionId}<br />
                         <strong>Paciente:</strong> {prescription.patient.name} {prescription.patient.surname} (NID: {prescription.patient.nid})<br />
                         <strong>Medicamento 1:</strong> {prescription.meds.med1}, Cantidad: {prescription.meds.quantity1}<br />
                         <strong>Medicamento 2:</strong> {prescription.meds.med2}, Cantidad: {prescription.meds.quantity2}<br />
-                        <button onClick={() => handleValidate(prescription)}>Validar Receta</button>
+                        {prescription.used ? (
+                            <span className="status-dispensada">Dispensada</span>
+                        ) : (
+                            <button className="validate-button" onClick={() => handleValidate(prescription)}>Validar Receta</button>
+                        )}
                     </li>
                 ))}
             </ul>
 
             {selectedPrescription && (
-                <PrescriptionValidation prescription={selectedPrescription} />
+                <PrescriptionValidation 
+                    prescription={selectedPrescription} 
+                    onClose={() => setSelectedPrescription(null)} 
+                />
             )}
         </div>
     );

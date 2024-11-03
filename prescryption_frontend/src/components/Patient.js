@@ -1,20 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Importar useNavigate
+import { useNavigate } from 'react-router-dom';
 
 const Patient = () => {
     const [recetas, setRecetas] = useState([]);
-    const [alias, setAlias] = useState(''); 
+    const [alias, setAlias] = useState('');
     const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null);
     const token = localStorage.getItem('token');
-    const [deletedPrescriptions, setDeletedPrescriptions] = useState(
-        JSON.parse(localStorage.getItem('deletedPrescriptions')) || []
-    );
-    const [showDeleted, setShowDeleted] = useState(false); // Estado para alternar entre mostrar o no las recetas eliminadas
+    const [statusFilter, setStatusFilter] = useState(''); // Filtro por estado
     const [specialtyFilter, setSpecialtyFilter] = useState(''); // Filtro por especialidad
     const [sortOrder, setSortOrder] = useState('asc'); // Orden por fecha
     const [availableSpecialties, setAvailableSpecialties] = useState([]); // Almacenar las especialidades disponibles
-    const navigate = useNavigate(); // Inicializar useNavigate
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get('http://localhost:3001/api/pr_by_patient', {
@@ -28,13 +25,6 @@ const Patient = () => {
                 const specialties = [...new Set(filteredPrescriptions.map(receta => receta.doctorSpecialty))];
                 setAvailableSpecialties(specialties);
 
-                // Filtrar recetas eliminadas
-                if (!showDeleted) {
-                    filteredPrescriptions = filteredPrescriptions.filter(
-                        receta => !deletedPrescriptions.includes(receta.prescriptionId)
-                    );
-                }
-
                 // Filtrar por especialidad si está seleccionado
                 if (specialtyFilter) {
                     filteredPrescriptions = filteredPrescriptions.filter(
@@ -42,10 +32,16 @@ const Patient = () => {
                     );
                 }
 
+                // Filtrar por estado si está seleccionado
+                if (statusFilter) {
+                    filteredPrescriptions = filteredPrescriptions.filter(
+                        receta => receta.status === statusFilter
+                    );
+                }
+
                 // Ordenar por fecha de emisión
                 filteredPrescriptions = filteredPrescriptions.sort((a, b) => {
-                    // Convertir las fechas de emisión a objetos Date
-                    const dateA = new Date(a.issueDate.split('/').reverse().join('-')); // Invertir el formato de DD/MM/YYYY a YYYY-MM-DD
+                    const dateA = new Date(a.issueDate.split('/').reverse().join('-'));
                     const dateB = new Date(b.issueDate.split('/').reverse().join('-'));
                     return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
                 });
@@ -56,7 +52,7 @@ const Patient = () => {
             }
         })
         .catch(error => console.error('Error al obtener las recetas:', error));
-    }, [token, deletedPrescriptions, showDeleted, specialtyFilter, sortOrder]);
+    }, [token, specialtyFilter, statusFilter, sortOrder]);
 
     const handleTransfer = async (prescriptionId) => {
         setSelectedPrescriptionId(prescriptionId);
@@ -77,24 +73,11 @@ const Patient = () => {
             alert('Receta transferida a la farmacia. Transacción hash: ' + response.data.transactionHash);
             setAlias('');
             setSelectedPrescriptionId(null);
-            navigate('/dashboard/patient'); // Redirigir a /dashboard/patient
+            navigate('/dashboard/patient');
         } catch (error) {
             console.error('Error al transferir la receta:', error);
             alert('Error al transferir la receta.');
         }
-    };
-
-    const handleDelete = (prescriptionId) => {
-        const updatedDeletedPrescriptions = [...deletedPrescriptions, prescriptionId];
-        setDeletedPrescriptions(updatedDeletedPrescriptions);
-        localStorage.setItem('deletedPrescriptions', JSON.stringify(updatedDeletedPrescriptions));
-
-        setRecetas(recetas.filter(receta => receta.prescriptionId !== prescriptionId));
-    };
-
-    // Función para restaurar las recetas eliminadas
-    const restoreDeletedPrescriptions = () => {
-        setShowDeleted(!showDeleted);
     };
 
     return (
@@ -109,6 +92,17 @@ const Patient = () => {
                     {availableSpecialties.map((specialty, index) => (
                         <option key={index} value={specialty}>{specialty}</option>
                     ))}
+                </select>
+            </label>
+
+            {/* Filtro por estado */}
+            <label>
+                Filtrar por Estado:
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                    <option value="">Todos</option>
+                    <option value="Valid">Válido</option>
+                    <option value="Expired">Expirada</option>
+                    <option value="Dispensed">Dispensada</option>
                 </select>
             </label>
 
@@ -132,9 +126,7 @@ const Patient = () => {
                         <strong>Fecha de Emisión:</strong> {receta.issueDate}<br />
                         <strong>Fecha de Expiración:</strong> {receta.expirationDate}<br />
                         
-                        {receta.status === "Expirada" ? (
-                            <button onClick={() => handleDelete(receta.prescriptionId)}>Eliminar</button>
-                        ) : (
+                        {receta.status !== "Dispensed" && (
                             <button onClick={() => handleTransfer(receta.prescriptionId)}>Transferir Receta</button>
                         )}
                     </li>
@@ -156,9 +148,6 @@ const Patient = () => {
                     <button type="submit">Enviar</button>
                 </form>
             )}
-            <button onClick={restoreDeletedPrescriptions}>
-                {showDeleted ? 'Ocultar Recetas Eliminadas' : 'Mostrar Recetas Eliminadas'}
-            </button>
         </div>
     );
 };

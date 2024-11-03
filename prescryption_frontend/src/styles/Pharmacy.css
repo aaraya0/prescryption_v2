@@ -1,0 +1,48 @@
+.pharmacy-dashboard {
+    max-width: 600px;
+    margin: auto;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.prescription-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.prescription-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    position: relative;
+}
+
+.validate-button, .status-dispensada {
+    display: inline-block;
+    padding: 8px 12px;
+    margin-top: 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.validate-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.status-dispensada {
+    background-color: #28a745;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
