@@ -38,17 +38,16 @@ function Dashboard({ userType }) {
                     <div>
                         <p>Bienvenido al menú del médico.</p>
                         {/* Botón para emitir receta solo para el médico */}
-                        <button onClick={() => navigate('/issue-prescription')}>Emitir Receta</button>
+                        <button className="dashboard-button" onClick={() => navigate('/issue-prescription')}>Emitir Receta</button>
                         <Doctor />
                     </div>
                 );
             case 'pharmacy':
                 return (
                     <div>
-                    <p>Bienvenido al menú de la farmacia.</p>
-            
-                    <Pharmacy />
-                </div>
+                        <p>Bienvenido al menú de la farmacia.</p>
+                        <Pharmacy />
+                    </div>
                 );
             case 'insurance':
                 return <p>Bienvenido al menú de la obra social.</p>;
@@ -59,10 +58,14 @@ function Dashboard({ userType }) {
 
     return (
         <div>
+            {/* Container for top-right buttons */}
+            <div className="top-right-buttons">
+                <button className="dashboard-button" onClick={() => navigate(`/perfil/${userType}`)}>Ver Perfil</button>
+                <button className="dashboard-button" onClick={handleLogout}>Cerrar Sesión</button>
+            </div>
+            
             <h2>Dashboard {userType}</h2>
             {renderMenu()}
-            <button onClick={() => navigate(`/perfil/${userType}`)}>Ver Perfil</button>
-            <button onClick={handleLogout}>Cerrar Sesión</button>
         </div>
     );
 }
