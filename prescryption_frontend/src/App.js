@@ -6,6 +6,7 @@ import MainMenu from './components/MainMenu';
 import Dashboard from './components/Dashboard';
 import Perfil from './components/Perfil';
 import EmitirReceta from './components/Prescription';
+import PrescriptionValidation from './components/PrescriptionValidation';
 import Header from './components/Header';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
                     <Route path="/dashboard/insurance" element={<Dashboard userType="insurance" />} />
                     <Route path="/perfil/:userType" element={<Perfil />} /> {/* Ruta para el perfil */}
                     <Route path="/issue-prescription" element={<EmitirReceta />} />
+                    <Route path="/validate-prescription" element={<PrescriptionValidation />} />
                 </Routes>
             </div>
         </Router>

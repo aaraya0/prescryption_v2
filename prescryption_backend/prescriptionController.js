@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const Doctor = require('./models/Doctor');
 const Patient = require('./models/Patient');
 const Pharmacy = require('./models/Pharmacy');
+const axios = require('axios');
 
 // Web3 configuration
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
@@ -32,7 +33,8 @@ exports.issuePrescription = async (req, res) => {
         quantity1,
         med2,
         quantity2,
-        diagnosis
+        diagnosis,
+        observations
     } = req.body;
 
     const { nid } = req.user; // Authenticated doctor's NID
@@ -74,7 +76,8 @@ exports.issuePrescription = async (req, res) => {
             quantity1,
             med2: med2 || "N/A", // Send "N/A" if med2 is empty
             quantity2: quantity2 || 0, // Send 0 if quantity2 is empty
-            diagnosis
+            diagnosis,
+            observations: observations || " "
         };
 
         const insurance = {
@@ -158,8 +161,11 @@ exports.getPresbyDoctorNid = async (req, res) => {
                     quantity1: Number(prescription.meds.quantity1),
                     med2: prescription.meds.med2,
                     quantity2: Number(prescription.meds.quantity2),
-                    diagnosis: prescription.meds.diagnosis
+                    diagnosis: prescription.meds.diagnosis,
+                    observations: prescription.meds.observations
+
                 },
+                
                 insurance: {
                     affiliateNum: prescription.insurance.affiliateNum,
                     insuranceName: prescription.insurance.insuranceName,
@@ -238,7 +244,6 @@ exports.getAllPrescriptions = async (req, res) => {
 exports.getPresbyPatientAddress = async (req, res) => {
     try {
         const { nid } = req.user; // Patient's NID from JWT token
-        
 
         console.log(`Starting search for patient with NID: ${nid}`);
 
@@ -291,7 +296,8 @@ exports.getPresbyPatientAddress = async (req, res) => {
                         quantity1: Number(prescription.meds.quantity1),
                         med2: prescription.meds.med2,
                         quantity2: Number(prescription.meds.quantity2),
-                        diagnosis: prescription.meds.diagnosis
+                        diagnosis: prescription.meds.diagnosis,
+                        observations: prescription.meds.observations,
                     },
                     insurance: {
                         affiliateNum: prescription.insurance.affiliateNum,
@@ -302,7 +308,7 @@ exports.getPresbyPatientAddress = async (req, res) => {
                     issueDate: issueDate.toLocaleDateString('en-GB', options),
                     expirationDate: expirationDate.toLocaleDateString('en-GB', options),
                     doctorAddress: prescription.doctorAddress,
-                    status: isExpired ? 'Expired' : 'Valid'
+                    status: prescription.used ? 'Dispensed' : isExpired ? 'Expired' : 'Valid'
                 };
             }
 
@@ -317,7 +323,8 @@ exports.getPresbyPatientAddress = async (req, res) => {
                     quantity1: Number(prescription.meds.quantity1),
                     med2: prescription.meds.med2,
                     quantity2: Number(prescription.meds.quantity2),
-                    diagnosis: prescription.meds.diagnosis
+                    diagnosis: prescription.meds.diagnosis,
+                    observations: prescription.meds.observations,
                 },
                 insurance: {
                     affiliateNum: prescription.insurance.affiliateNum,
@@ -328,7 +335,7 @@ exports.getPresbyPatientAddress = async (req, res) => {
                 issueDate: issueDate.toLocaleDateString('en-GB', options),
                 expirationDate: expirationDate.toLocaleDateString('en-GB', options),
                 doctorAddress: prescription.doctorAddress,
-                status: isExpired ? 'Expired' : 'Valid'
+                status: prescription.used ? 'Dispensed' : isExpired ? 'Expired' : 'Valid'
             };
         }));
 
@@ -346,6 +353,7 @@ exports.getPresbyPatientAddress = async (req, res) => {
         res.status(500).send('Error obtaining prescriptions. Details: ' + error.message);
     }
 };
+
 
 exports.sendPrescriptionToPharmacy = async (req, res) => {
     const { alias, prescriptionId } = req.body;
@@ -469,8 +477,10 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
                     quantity1: Number(prescription.meds.quantity1),
                     med2: prescription.meds.med2,
                     quantity2: Number(prescription.meds.quantity2),
-                    diagnosis: prescription.meds.diagnosis
+                    diagnosis: prescription.meds.diagnosis,
+                    observations: prescription.meds.observations,
                 },
+                
                 insurance: {
                     affiliateNum: prescription.insurance.affiliateNum,
                     insuranceName: prescription.insurance.insuranceName,
@@ -499,3 +509,91 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
     }
 };
 
+// Endpoint para validar la receta en la farmacia
+exports.validatePrescription = async (req, res) => {
+    const { prescriptionId, brand } = req.body;
+    const { nid } = req.user;
+
+    try {
+        const pharmacy = await Pharmacy.findOne({ nid });
+        if (!pharmacy) {
+            return res.status(404).json({ message: 'Pharmacy not found' });
+        }
+
+        const prescription = await prescriptionContract.methods.getPrescription(prescriptionId).call();
+
+        if (!prescription) {
+            return res.status(404).json({ message: 'Prescription not found in blockchain' });
+        }
+
+        const selectedBrand = brand || "Genérico";
+
+        // Obtener el precio y cobertura desde la API Mock
+        const vademecumResponse = await axios.get('http://localhost:4001/api/vademecum/price', {
+            params: { drug_name: prescription.meds.med1, brand: selectedBrand }
+        });
+        const coverageResponse = await axios.get('http://localhost:4001/api/insurance/coverage', {
+            params: {
+                insurance_name: prescription.insurance.insuranceName,
+                plan: prescription.insurance.insurancePlan,
+                drug_name: prescription.meds.med1
+            }
+        });
+
+        const price = vademecumResponse.data.price;
+        const coveragePercentage = coverageResponse.data.coverage;
+        const coveredAmount = (price * coveragePercentage) / 100;
+        const finalPrice = price - coveredAmount;
+
+        return res.json({
+            message: 'Prescription validated successfully',
+            drugName: prescription.meds.med1,
+            brand: selectedBrand,
+            originalPrice: price,
+            coveragePercentage: coveragePercentage,
+            coveredAmount: coveredAmount,
+            finalPrice: finalPrice
+        });
+    } catch (error) {
+        console.error('Error validating prescription:', error);
+        res.status(500).json({ message: 'Error validating prescription', error: error.message });
+    }
+};
+
+exports.generateInvoiceAndMarkUsed = async (req, res) => {
+    const { prescriptionId, patientName, totalPrice, coveragePercentage, finalPrice } = req.body;
+
+    try {
+        // Step 1: Call the mock invoice API
+        const invoiceResponse = await axios.post('http://localhost:4002/api/generate_invoice', {
+            prescription_id: prescriptionId,
+            patient_name: patientName,
+            total_price: totalPrice,
+            coverage_percentage: coveragePercentage,
+            final_price: finalPrice
+        });
+
+        const invoiceData = invoiceResponse.data;
+
+        // Step 2: Interact with the blockchain to mark the prescription as used
+        const accounts = await web3.eth.getAccounts();
+        const fromAccount = accounts[0];
+
+        const receipt = await prescriptionContract.methods
+            .markPrescriptionAsUsed(prescriptionId)
+            .send({ from: fromAccount, gas: '200000' });
+
+        if (!receipt.status) {
+            return res.status(500).json({ message: 'Failed to mark prescription as used on blockchain.' });
+        }
+
+        // Step 3: Return invoice data to frontend
+        res.json({
+            message: 'Invoice generated and prescription marked as used',
+            invoice: invoiceData
+        });
+    } catch (error) {
+        console.error('Error generating invoice and marking prescription as used:', error);
+        res.status(500).json({ message: 'Error generating invoice or updating prescription', error: error.message });
+    }
+};

@@ -15,9 +15,10 @@ function EmitirReceta() {
     med2: '',
     quantity2: '',
     diagnosis: '',
+    observations: ''  // Nuevo campo para observaciones
   });
 
-  const navigate = useNavigate(); // Inicializa useNavigate
+  const navigate = useNavigate();
 
   // Manejar los cambios en los inputs del formulario
   const handleChange = (e) => {
@@ -62,7 +63,7 @@ function EmitirReceta() {
         formData,
         {
           headers: {
-            'Authorization': `Bearer ${token}`, // Incluye el token en el header
+            'Authorization': `Bearer ${token}`, 
           },
         }
       );
@@ -71,7 +72,6 @@ function EmitirReceta() {
     } catch (error) {
       console.error('Error al emitir la receta:', error);
 
-      // Manejo de errores detallado
       if (error.response) {
         if (error.response.status === 401) {
           alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
@@ -124,8 +124,11 @@ function EmitirReceta() {
               <label>Diagnóstico</label>
               <textarea name="diagnosis" className="textarea" placeholder="Ingresar diagnóstico" onChange={handleChange} required></textarea>
             </div>
+            <div className="form-group"> {/* Campo para observaciones */}
+              <label>Observaciones</label>
+              <textarea name="observations" className="textarea" placeholder="Ingresar observaciones (opcional)" onChange={handleChange}></textarea>
+            </div>
           </div>
-          {/* Botón de Generar Receta dentro del formulario */}
           <div className='buttonGenerarReceta'>
             <button type="submit" className="button">Generar Receta</button>
           </div>
