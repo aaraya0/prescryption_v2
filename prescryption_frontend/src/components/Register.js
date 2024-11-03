@@ -76,11 +76,23 @@ function Register() {
                         <p className="inputTitle">Obra Social</p>
                         <input className="form-input" type="text" name="insurance_name" placeholder="Obra Social" onChange={handleChange} />
                         <p className="inputTitle">Número de Afiliado</p>
-                        <input className="form-input" type="text" name="affiliate_num" placeholder="Número de Afiliado" onChange={handleChange} />
-                        
-                        <button type="button" onClick={fetchInsurancePlan} className="fetch-plan-button">
-                            ➔ {/* Icono de flecha */}
-                        </button>
+                        <div className="affiliate-input-container">
+    <input 
+        className="form-input" 
+        type="text" 
+        name="affiliate_num" 
+        placeholder="Número de Afiliado" 
+        onChange={handleChange} 
+    />
+    <button 
+        type="button" 
+        onClick={fetchInsurancePlan} 
+        className="fetch-plan-button"
+        title="Fetch Insurance Plan"
+    >
+        ➔ {/* Icono de flecha */}
+    </button>
+</div>
                         
                         <p className="inputTitle">Plan de Obra Social</p>
                         <input
@@ -99,6 +111,67 @@ function Register() {
                         <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
                     </>
                 );
+                case 'doctor':
+                    return (
+                        <>
+                            <p className="inputTitle">Nombre</p>
+                            <input className="form-input" type="text" name="name" placeholder="Nombre" onChange={handleChange} />
+                            <p className="inputTitle">Apellido</p>
+                            <input className="form-input" type="text" name="surname" placeholder="Apellido" onChange={handleChange} />
+                            <p className="inputTitle">DNI</p>
+                            <input className="form-input" type="text" name="nid" placeholder="DNI" onChange={handleChange} />
+                            <p className="inputTitle">Matrícula</p>
+                            <input className="form-input" type="text" name="license" placeholder="Matrícula" onChange={handleChange} />
+                            <p className="inputTitle">Especialidad</p>
+                            <input className="form-input" type="text" name="specialty" placeholder="Especialidad" onChange={handleChange} />
+                            <p className="inputTitle">Correo Electrónico</p>
+                            <input className="form-input" type="email" name="mail" placeholder="Email" onChange={handleChange} />
+                            <p className="inputTitle">Contraseña</p>
+                            <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
+                        </>
+                    );
+                case 'pharmacy':
+                    return (
+                        <>
+                            <p className="inputTitle">Nombre</p>
+                            <input className="form-input" type="text" name="name" placeholder="Nombre" onChange={handleChange} />
+                            <p className="inputTitle">Apellido</p>
+                            <input className="form-input" type="text" name="surname" placeholder="Apellido" onChange={handleChange} />
+                            <p className="inputTitle">DNI</p>
+                            <input className="form-input" type="text" name="nid" placeholder="DNI" onChange={handleChange} />
+                            <p className="inputTitle">Matrícula</p>
+                            <input className="form-input" type="text" name="license" placeholder="Matrícula" onChange={handleChange} />
+                            <p className="inputTitle">Nombre de la Farmacia</p>
+                            <input className="form-input" type="text" name="pharmacy_name" placeholder="Nombre de Farmacia" onChange={handleChange} />
+                            <p className="inputTitle">Alias de Farmacia</p>
+                            <input className="form-input" type="text" name="alias" placeholder="Alias de Farmacia" onChange={handleChange} />
+                            <p className="inputTitle">CUIT Farmacia</p>
+                            <input className="form-input" type="text" name="pharmacy_nid" placeholder="CUIT Farmacia" onChange={handleChange} />
+                            <p className="inputTitle">Correo Electrónico</p>
+                            <input className="form-input" type="email" name="mail" placeholder="Email" onChange={handleChange} />
+                            <p className="inputTitle">Contraseña</p>
+                            <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
+                        </>
+                    );
+                case 'insurance':
+                    return (
+                        <>
+                            <p className="inputTitle">Nombre</p>
+                            <input className="form-input" type="text" name="name" placeholder="Nombre" onChange={handleChange} />
+                            <p className="inputTitle">Apellido</p>
+                            <input className="form-input" type="text" name="surname" placeholder="Apellido" onChange={handleChange} />
+                            <p className="inputTitle">DNI</p>
+                            <input className="form-input" type="text" name="nid" placeholder="DNI" onChange={handleChange} />
+                            <p className="inputTitle">Razón Social</p>
+                            <input className="form-input" type="text" name="razon_social" placeholder="Razón Social" onChange={handleChange} />
+                            <p className="inputTitle">CUIT Obra Social</p>
+                            <input className="form-input" type="text" name="cuit_os" placeholder="CUIT Obra Social" onChange={handleChange} />
+                            <p className="inputTitle">Correo Electrónico</p>
+                            <input className="form-input" type="email" name="mail" placeholder="Email" onChange={handleChange} />
+                            <p className="inputTitle">Contraseña</p>
+                            <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
+                            </>
+                            );
             default:
                 return <p>Por favor, selecciona un tipo de usuario.</p>;
         }
