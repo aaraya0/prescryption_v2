@@ -619,13 +619,13 @@ exports.generateInvoiceAndMarkUsed = async (req, res) => {
         const accounts = await web3.eth.getAccounts();
         const fromAccount = accounts[0];
 
-        /*const receipt = await prescriptionContract.methods
+        const receipt = await prescriptionContract.methods
             .markPrescriptionAsUsed(prescriptionId)
             .send({ from: fromAccount, gas: '200000' });
 
         if (!receipt.status) {
             return res.status(500).json({ message: 'Failed to mark prescription as used on blockchain.' });
-        }*/
+        }
 
          //Retornar datos de la factura al frontend
         res.json({
@@ -677,6 +677,24 @@ exports.getUserProfile = async (req, res) => {
         res.json({ userType, profile: userProfile });
     } catch (error) {
         console.error('Error fetching user profile:', error);
+        res.status(500).json({ message: 'Error fetching profile data', error: error.message });
+    }
+};
+
+// Endpoint para obtener el perfil de un paciente por DNI
+exports.getPatientByNID = async (req, res) => {
+    const { nid } = req.params; // DNI del paciente pasado como parámetro
+
+    try {
+        const userProfile = await Patient.findOne({ nid });
+        if (!userProfile) {
+            return res.status(404).json({ message: 'Patient not found.' });
+        }
+
+        // Enviamos los datos del perfil del paciente
+        res.json({ profile: userProfile });
+    } catch (error) {
+        console.error('Error fetching patient profile:', error);
         res.status(500).json({ message: 'Error fetching profile data', error: error.message });
     }
 };

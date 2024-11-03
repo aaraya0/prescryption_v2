@@ -1,11 +1,14 @@
+// EmitirReceta.js
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; 
-import "./styles.css"
+import { useNavigate } from 'react-router-dom';
+import { FaSearch } from 'react-icons/fa';
+import "./styles.css";
 
 function EmitirReceta() {
   const [formData, setFormData] = useState({
     patientName: '',
+    patientSurname: '',
     patientNid: '',
     affiliateNum: '',
     insuranceName: '',
@@ -15,12 +18,12 @@ function EmitirReceta() {
     med2: '',
     quantity2: '',
     diagnosis: '',
-    observations: ''  // Nuevo campo para observaciones
+    observations: ''
   });
 
   const navigate = useNavigate();
 
-  // Manejar los cambios en los inputs del formulario
+  // Manejar cambios en el formulario
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -28,11 +31,42 @@ function EmitirReceta() {
     });
   };
 
-  // Función para manejar el envío del formulario
+  // Buscar datos del paciente
+  const handleSearchPatient = async () => {
+    console.log("Buscando paciente con NID:", formData.patientNid);
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('No estás autenticado. Por favor, inicia sesión nuevamente.');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`http://localhost:3001/api/patient/${formData.patientNid}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const patientData = response.data.profile;
+      console.log("Datos del paciente encontrados:", patientData);
+
+      // Actualizar los campos del formulario con los datos recibidos
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        patientName: patientData.name || '',
+        patientSurname: patientData.surname || '',
+        affiliateNum: patientData.affiliate_num || '',
+        insuranceName: patientData.insurance_name || '',
+        insurancePlan: patientData.insurance_plan || ''
+      }));
+    } catch (error) {
+      console.error('Error al buscar datos del paciente:', error);
+      alert('Paciente no encontrado.');
+    }
+  };
+
+  // Enviar el formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Obtener el token almacenado en localStorage
     const token = localStorage.getItem('token');
     if (!token) {
       alert('No estás autenticado. Por favor, inicia sesión nuevamente.');
@@ -41,6 +75,7 @@ function EmitirReceta() {
 
     const {
       patientName,
+      patientSurname,
       patientNid,
       affiliateNum,
       insuranceName,
@@ -50,39 +85,20 @@ function EmitirReceta() {
       diagnosis,
     } = formData;
 
-    // Validar los campos del formulario antes de enviarlos
-    if (!patientName || !patientNid || !affiliateNum || !insuranceName || !insurancePlan || !med1 || !quantity1 || !diagnosis) {
+    if (!patientName || !patientSurname || !patientNid || !affiliateNum || !insuranceName || !insurancePlan || !med1 || !quantity1 || !diagnosis) {
       alert('Por favor, completa todos los campos obligatorios.');
       return;
     }
 
     try {
-      // Enviar la solicitud al backend con el token en los headers
-      const response = await axios.post(
-        'http://localhost:3001/api/issue_pres',
-        formData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`, 
-          },
-        }
-      );
+      await axios.post('http://localhost:3001/api/issue_pres', formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       alert('Receta emitida con éxito');
-      navigate('/dashboard/doctor'); 
+      navigate('/dashboard/doctor');
     } catch (error) {
       console.error('Error al emitir la receta:', error);
-
-      if (error.response) {
-        if (error.response.status === 401) {
-          alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
-        } else if (error.response.status === 400) {
-          alert('Faltan datos necesarios para emitir la receta.');
-        } else {
-          alert('Error desconocido al emitir la receta.');
-        }
-      } else {
-        alert('Error al emitir la receta.');
-      }
+      alert('Error al emitir la receta.');
     }
   };
 
@@ -92,24 +108,40 @@ function EmitirReceta() {
         <form onSubmit={handleSubmit}>
           <div className="receipt_left">
             <div className="form-group">
-              <label>Nombre(s) y Apellido(s) del Paciente</label>
-              <input type="text" name="patientName" placeholder="Nombre(s)" onChange={handleChange} required />
+              <label>DNI</label>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  name="patientNid"
+                  placeholder="DNI (sin puntos)"
+                  onChange={handleChange}
+                  value={formData.patientNid}
+                  required
+                />
+                <button type="button" onClick={handleSearchPatient} style={{ marginLeft: '8px' }}>
+                  <FaSearch />
+                </button>
+              </div>
             </div>
             <div className="form-group">
-              <label>DNI</label>
-              <input type="text" name="patientNid" placeholder="DNI (sin puntos)" onChange={handleChange} required />
+              <label>Nombre del Paciente</label>
+              <input type="text" name="patientName" value={formData.patientName} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>Apellido del Paciente</label>
+              <input type="text" name="patientSurname" value={formData.patientSurname} onChange={handleChange} required />
             </div>
             <div className="form-group">
               <label>Número de Afiliado</label>
-              <input type="text" name="affiliateNum" placeholder="Número de Afiliado" onChange={handleChange} required />
+              <input type="text" name="affiliateNum" value={formData.affiliateNum} onChange={handleChange} required />
             </div>
             <div className="form-group">
               <label>Obra Social</label>
-              <input type="text" name="insuranceName" placeholder="Obra Social" onChange={handleChange} required />
+              <input type="text" name="insuranceName" value={formData.insuranceName} onChange={handleChange} required />
             </div>
             <div className="form-group">
               <label>Plan de Obra Social</label>
-              <input type="text" name="insurancePlan" placeholder="Plan Obra Social" onChange={handleChange} required />
+              <input type="text" name="insurancePlan" value={formData.insurancePlan} onChange={handleChange} required />
             </div>
           </div>
           <div className="receipt_right">
@@ -124,7 +156,7 @@ function EmitirReceta() {
               <label>Diagnóstico</label>
               <textarea name="diagnosis" className="textarea" placeholder="Ingresar diagnóstico" onChange={handleChange} required></textarea>
             </div>
-            <div className="form-group"> {/* Campo para observaciones */}
+            <div className="form-group">
               <label>Observaciones</label>
               <textarea name="observations" className="textarea" placeholder="Ingresar observaciones (opcional)" onChange={handleChange}></textarea>
             </div>

@@ -1,7 +1,7 @@
 const express = require('express');
 const { issuePrescription, getPresbyDoctorNid, getAllPrescriptions, 
     getPresbyPatientAddress, sendPrescriptionToPharmacy, getPresbyPharmacyAddress, 
-    validatePrescription, generateInvoiceAndMarkUsed, getUserProfile  } = require('./prescriptionController');
+    validatePrescription, generateInvoiceAndMarkUsed, getUserProfile, getPatientByNID  } = require('./prescriptionController');
 const router = express.Router();
 
 // Define routes
@@ -14,5 +14,6 @@ router.post('/pr_to_pharmacy', sendPrescriptionToPharmacy);
 router.post('/pr_validate', validatePrescription);
 router.post('/pr_invoice', generateInvoiceAndMarkUsed);
 router.get('/user/profile', getUserProfile);
+router.get('/patient/:nid', getPatientByNID);
 
 module.exports = router;
