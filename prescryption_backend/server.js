@@ -258,5 +258,32 @@ app.post('/login', loginLimiter, async (req, res) => {
     }
 });
 
+// Endpoint para obtener el plan de obra social del paciente
+app.get('/insurance/plan', async (req, res) => {
+    const { name, surname, nid, insurance_name, affiliate_num } = req.query;
+
+    // Verificar que todos los parámetros requeridos estén presentes
+    if (!name || !surname || !nid || !insurance_name || !affiliate_num) {
+        return res.status(400).json({ message: 'Faltan datos obligatorios' });
+    }
+
+    try {
+        // Hacer una solicitud a la API de obra social en el servidor mock de Flask
+        const response = await axios.get('http://localhost:5001/verify_patient', {
+            params: { name, surname, nid, insurance_name, affiliate_num }
+        });
+
+        if (response.data.insurance_plan) {
+            res.json({ plan: response.data.insurance_plan });
+        } else {
+            res.status(404).json({ message: 'No se encontró un plan para este afiliado.' });
+        }
+    } catch (error) {
+        console.error('Error al obtener el plan de obra social:', error);
+        res.status(500).json({ message: 'Error al obtener el plan de obra social.' });
+    }
+});
+
+
 // Start server
 app.listen(3001, () => console.log('Server running on port 3001'));
