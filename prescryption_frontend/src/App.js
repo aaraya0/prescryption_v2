@@ -9,11 +9,13 @@ import EmitirReceta from './components/Prescription';
 import Header from './components/Header';
 
 function App() {
-    const noHeaderRoutes = ["/"];
+    // Agrega las rutas de dashboard en las que no quieres que aparezca el Header
+    const noHeaderRoutes = ["/", "/dashboard/patient", "/dashboard/doctor", "/dashboard/pharmacy", "/dashboard/insurance"];
+
     return (
         <Router>
             <div>
-            <ConditionalHeader noHeaderRoutes={noHeaderRoutes} />
+                <ConditionalHeader noHeaderRoutes={noHeaderRoutes} />
             </div>
             <div className="App">
                 <Routes>
@@ -35,6 +37,7 @@ function App() {
 function ConditionalHeader({ noHeaderRoutes }) {
     const location = useLocation();
 
+    // Verifica si la ruta actual está en el arreglo noHeaderRoutes
     const shouldShowHeader = !noHeaderRoutes.includes(location.pathname);
 
     return shouldShowHeader ? <Header /> : null;
