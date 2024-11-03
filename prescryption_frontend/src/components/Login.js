@@ -43,7 +43,7 @@ function Login() {
             if (error.response && error.response.status === 429) {
                 setErrorMessage('Has excedido el número de intentos de inicio de sesión. Intenta nuevamente en 15 minutos.');
             } else if (error.response && error.response.status === 401) {
-                setErrorMessage('Credenciales inválidas. Por favor, verifica tu NID y contraseña.');
+                setErrorMessage('Credenciales inválidas. Por favor, verifica tu DNI y contraseña.');
             } else {
                 console.error(error);
                 setErrorMessage('Hubo un error en el servidor. Intenta de nuevo más tarde.');

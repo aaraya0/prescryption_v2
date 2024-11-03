@@ -6,6 +6,10 @@ body, html {
     align-items: center; 
 }
 
+.error{
+    color: red;
+    text-align: center;
+}
 
 /* Menu options styles*/
 .formUserOptions {

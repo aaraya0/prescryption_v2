@@ -1,11 +1,22 @@
 import React from 'react';
-import './styles.css'; 
-
+import { useNavigate, useLocation } from 'react-router-dom';
+import './styles.css';
 
 const Header = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const handleBackClick = () => {
+        if (location.pathname === '/login' || location.pathname === '/register') {
+            navigate('/'); // Redirige al menú principal
+        } else {
+            window.history.back(); // Vuelve a la página anterior en otros casos
+        }
+    };
+
     return (
         <header className="header">
-            <button className="back-button" onClick={() => window.history.back()}>
+            <button className="back-button" onClick={handleBackClick}>
                 Volver
             </button>
             <h1 className="logo">PresCryption</h1>
