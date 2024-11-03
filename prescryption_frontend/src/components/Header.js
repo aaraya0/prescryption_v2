@@ -8,9 +8,9 @@ const Header = () => {
 
     const handleBackClick = () => {
         if (location.pathname === '/login' || location.pathname === '/register') {
-            navigate('/'); // Redirige al menú principal
-        } else {
-            window.history.back(); // Vuelve a la página anterior en otros casos
+            navigate('/'); 
+        }else {
+            window.history.back(); 
         }
     };
 

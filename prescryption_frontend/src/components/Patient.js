@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 
 const Patient = () => {
     const [recetas, setRecetas] = useState([]);
@@ -13,6 +14,7 @@ const Patient = () => {
     const [specialtyFilter, setSpecialtyFilter] = useState(''); // Filtro por especialidad
     const [sortOrder, setSortOrder] = useState('asc'); // Orden por fecha
     const [availableSpecialties, setAvailableSpecialties] = useState([]); // Almacenar las especialidades disponibles
+    const navigate = useNavigate(); // Inicializar useNavigate
 
     useEffect(() => {
         axios.get('http://localhost:3001/api/pr_by_patient', {
@@ -75,6 +77,7 @@ const Patient = () => {
             alert('Receta transferida a la farmacia. Transacción hash: ' + response.data.transactionHash);
             setAlias('');
             setSelectedPrescriptionId(null);
+            navigate('/dashboard/patient'); // Redirigir a /dashboard/patient
         } catch (error) {
             console.error('Error al transferir la receta:', error);
             alert('Error al transferir la receta.');

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; 
 import "./styles.css"
 
 function EmitirReceta() {
@@ -15,6 +16,8 @@ function EmitirReceta() {
     quantity2: '',
     diagnosis: '',
   });
+
+  const navigate = useNavigate(); // Inicializa useNavigate
 
   // Manejar los cambios en los inputs del formulario
   const handleChange = (e) => {
@@ -64,6 +67,7 @@ function EmitirReceta() {
         }
       );
       alert('Receta emitida con éxito');
+      navigate('/dashboard/doctor'); 
     } catch (error) {
       console.error('Error al emitir la receta:', error);
 
