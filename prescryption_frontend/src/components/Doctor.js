@@ -4,7 +4,7 @@ import './styles.css';
 
 const Doctor = () => {
     const [recetas, setRecetas] = useState([]);
-    const [expandedReceta, setExpandedReceta] = useState(null); // Estado para controlar qué receta está expandida
+    const [selectedReceta, setSelectedReceta] = useState(null); // Estado para la receta seleccionada para mostrar en el modal
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -23,32 +23,55 @@ const Doctor = () => {
         .catch(error => console.error('Error al obtener las recetas:', error));
     }, [token]);
 
-    // Función para alternar la expansión de una receta
-    const toggleReceta = (index) => {
-        setExpandedReceta(expandedReceta === index ? null : index);
+    // Función para manejar el clic en una receta y mostrar el modal
+    const handleRecetaClick = (receta) => {
+        setSelectedReceta(receta);
+    };
+
+    // Función para cerrar el modal
+    const closeModal = () => {
+        setSelectedReceta(null);
     };
 
     return (
         <div className="receta-list-container">
             <h3>Recetas Emitidas</h3>
-            <ul className="receta-list">
-                {recetas.map((receta, index) => (
-                    <li key={index} className="receta-item">
-                        <div className="receta-header" onClick={() => toggleReceta(index)}>
-                            <strong>Paciente:</strong> {receta.patientName}
-                        </div>
-                        {expandedReceta === index && ( // Mostrar solo si está expandida
-                            <div className="receta-details">
-                                <p><strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}</p>
-                                <p><strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}</p>
-                                <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis}</p>
-                                <p><strong>Fecha de Emisión:</strong> {new Date(receta.issueDate).toLocaleDateString()}</p>
-                                <p><strong>Fecha de Expiración:</strong> {new Date(receta.expirationDate).toLocaleDateString()}</p>
-                            </div>
-                        )}
-                    </li>
-                ))}
-            </ul>
+            <table className="recetas-table">
+                <thead>
+                    <tr>
+                        <th>Obra Social</th>
+                        <th>Nombre y Apellido</th>
+                        <th>Fecha de Emisión</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {recetas.map((receta, index) => (
+                        <tr key={index} onClick={() => handleRecetaClick(receta)}>
+                            <td>{receta.insuranceName}</td>
+                            <td>{receta.patientName}</td>
+                            <td>{new Date(receta.issueDate).toLocaleDateString()}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
+            {/* Modal para mostrar detalles completos de la receta seleccionada */}
+            {selectedReceta && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <span className="close" onClick={closeModal}>&times;</span>
+                        <h3>Detalles de la Receta</h3>
+                        <p><strong>Paciente:</strong> {selectedReceta.patientName}</p>
+                        <p><strong>Obra Social:</strong> {selectedReceta.insuranceName}</p>
+                        <p><strong>Plan:</strong> {selectedReceta.insurancePlan}</p>
+                        <p><strong>Diagnóstico:</strong> {selectedReceta.meds.diagnosis}</p>
+                        <p><strong>Fecha de Emisión:</strong> {new Date(selectedReceta.issueDate).toLocaleDateString()}</p>
+                        <p><strong>Fecha de Expiración:</strong> {new Date(selectedReceta.expirationDate).toLocaleDateString()}</p>
+                        <p><strong>Medicamento 1:</strong> {selectedReceta.meds.med1}, <strong>Cantidad:</strong> {selectedReceta.meds.quantity1}</p>
+                        <p><strong>Medicamento 2:</strong> {selectedReceta.meds.med2}, <strong>Cantidad:</strong> {selectedReceta.meds.quantity2}</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
