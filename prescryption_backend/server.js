@@ -116,7 +116,7 @@ app.post('/register_patient', async (req, res) => {
     }
 });
 
-// Doctor registry
+
 app.post('/register_doctor', async (req, res) => {
     try {
         const { nid, license, name, surname, specialty, password, mail } = req.body;
@@ -125,7 +125,13 @@ app.post('/register_doctor', async (req, res) => {
             return res.status(400).send('Missing required fields');
         }
 
-        const verifyResponse = await axios.post('http://localhost:5000/verify', { nid, license });
+        // Añadir el tipo de profesional en la solicitud
+        const verifyResponse = await axios.post('http://localhost:5000/verify', { 
+            nid, 
+            license, 
+            profession_type: "doctor" 
+        });
+
         if (!verifyResponse.data.valid) {
             return res.status(400).send('Invalid license or NID');
         }
@@ -135,7 +141,6 @@ app.post('/register_doctor', async (req, res) => {
         // Generar una nueva cuenta Ethereum para el doctor
         const account = web3.eth.accounts.create();
 
-        // Crear el nuevo registro de doctor con address y privateKey
         const newDoctor = new Doctor({
             nid,
             license,
@@ -144,8 +149,8 @@ app.post('/register_doctor', async (req, res) => {
             specialty,
             password: hashedPassword,
             mail,
-            address: account.address,          // Guardar la dirección generada
-            privateKey: account.privateKey      // Guardar la clave privada generada
+            address: account.address,          
+            privateKey: account.privateKey      
         });
 
         await newDoctor.save();
@@ -156,12 +161,20 @@ app.post('/register_doctor', async (req, res) => {
 });
 
 
+
 // Pharmacy registry
+// Registro de farmacéuticos
 app.post('/register_pharmacy', async (req, res) => {
     const { nid, license, name, surname, pharmacy_name, pharmacy_nid, mail, password, alias } = req.body;
 
     try {
-        const verifyResponse = await axios.post('http://localhost:5000/verify', { license, nid });
+        // Añadir el tipo de profesional en la solicitud
+        const verifyResponse = await axios.post('http://localhost:5000/verify', { 
+            nid, 
+            license, 
+            profession_type: "pharmacist" 
+        });
+
         if (!verifyResponse.data.valid) {
             return res.status(400).send('Invalid license or NID.');
         }
@@ -182,7 +195,7 @@ app.post('/register_pharmacy', async (req, res) => {
         mail,
         password: hashedPassword,
         alias,
-        address: account.address  // Guardar la address generada
+        address: account.address  
     });
 
     try {

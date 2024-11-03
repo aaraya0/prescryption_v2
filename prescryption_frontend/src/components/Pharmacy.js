@@ -58,7 +58,14 @@ const Pharmacy = () => {
                         <strong>Medicamento 1:</strong> {prescription.meds.med1}, Cantidad: {prescription.meds.quantity1}<br />
                         <strong>Medicamento 2:</strong> {prescription.meds.med2}, Cantidad: {prescription.meds.quantity2}<br />
                         {prescription.used ? (
-                            <span className="status-dispensada">Dispensada</span>
+                            <div>
+                                <span className="status-dispensada">Dispensada</span>
+                                {prescription.invoiceNumber && (
+                                    <div>
+                                        <strong>Número de Factura:</strong> {prescription.invoiceNumber}
+                                    </div>
+                                )}
+                            </div>
                         ) : (
                             <button className="validate-button" onClick={() => handleValidate(prescription)}>Validar Receta</button>
                         )}

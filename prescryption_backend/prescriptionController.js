@@ -495,7 +495,8 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
                 },
                 issueDate: new Date(Number(prescription.issueDate) * 1000).toLocaleDateString('en-GB'),
                 expirationDate: new Date(Number(prescription.expirationDate) * 1000).toLocaleDateString('en-GB'),
-                used: prescription.used
+                used: prescription.used,
+                invoiceNumber: prescription.used ? prescription.invoiceNumber : "" // Incluir el número de factura solo si está usada
             };
         }));
 
@@ -509,6 +510,7 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
         res.status(500).send('Error obtaining prescriptions. Details: ' + error.message);
     }
 };
+
 
 
 // Endpoint to validate a prescription with two medications
@@ -613,21 +615,20 @@ exports.generateInvoiceAndMarkUsed = async (req, res) => {
         });
 
         const invoiceData = invoiceResponse.data;
-        console.log('Datos de la factura generada:', invoiceData); // <--- Verifica aquí
+        console.log('Datos de la factura generada:', invoiceData);
 
-        // Interactuar con la blockchain
         const accounts = await web3.eth.getAccounts();
         const fromAccount = accounts[0];
 
+        // Llama a la función de blockchain para marcar la receta como usada y agregar el número de factura
         const receipt = await prescriptionContract.methods
-            .markPrescriptionAsUsed(prescriptionId)
+            .markPrescriptionAsUsed(prescriptionId, invoiceData.invoice_number) // Pasa el número de factura
             .send({ from: fromAccount, gas: '200000' });
 
         if (!receipt.status) {
             return res.status(500).json({ message: 'Failed to mark prescription as used on blockchain.' });
         }
 
-         //Retornar datos de la factura al frontend
         res.json({
             message: 'Invoice generated and prescription marked as used',
             invoice: invoiceData
@@ -637,6 +638,7 @@ exports.generateInvoiceAndMarkUsed = async (req, res) => {
         res.status(500).json({ message: 'Error generating invoice or updating prescription', error: error.message });
     }
 };
+
 
 
 

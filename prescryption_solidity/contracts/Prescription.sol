@@ -17,25 +17,24 @@ contract PrescriptionContract {
         string insurancePlan;
     }
 
-
     struct Prescription {
-    uint id;  // ID único para cada receta
-    string patientName;
-    string patientNid;
-    MedicationInfo meds;
-    InsuranceInfo insurance;
-    string doctorNid;
-    address patientAddress;
-    address pharmacyAddress; // Agregado para almacenar la dirección de la farmacia
-    uint issueDate;
-    uint expirationDate;
-    bool used; // Indica si la receta ha sido utilizada
-
-}
-
+        uint id;
+        string patientName;
+        string patientNid;
+        MedicationInfo meds;
+        InsuranceInfo insurance;
+        string doctorNid;
+        address patientAddress;
+        address pharmacyAddress;
+        uint issueDate;
+        uint expirationDate;
+        bool used;
+        string invoiceNumber; // Campo nuevo para almacenar el número de factura
+    }
 
     Prescription[] public prescriptions;
     mapping(string => Doctor) public doctors;
+    uint public prescriptionCount;
 
     struct Doctor {
         string doctorName;
@@ -43,22 +42,20 @@ contract PrescriptionContract {
         string doctorSpecialty;
     }
 
-    uint public prescriptionCount;
-
     event IssuedPrescription(
-        uint id,  
+        uint id,
         string patientName,
         string patientNid,
         MedicationInfo meds,
         InsuranceInfo insurance,
         string doctorNid,
         address patientAddress,
-        address pharmacyAddress, 
+        address pharmacyAddress,
         uint issueDate,
         uint expirationDate
     );
 
-    // Emitir receta con fecha personalizada
+    // Función para emitir una receta con fecha personalizada
     function issuePrescription(
         string memory _patientName,
         string memory _patientNid,
@@ -66,144 +63,126 @@ contract PrescriptionContract {
         InsuranceInfo memory _insurance,
         string memory _doctorNid,
         address _patientAddress,
-        uint _issueDate  // Nueva variable para aceptar la fecha de emisión personalizada
+        uint _issueDate
     ) public {
-        prescriptionCount++;  // Incrementar el contador para el nuevo ID
+        prescriptionCount++;  // Incrementa el contador para el nuevo ID
 
-        uint expirationDate = _issueDate + 30 days;  // Calcular la fecha de vencimiento a partir de la fecha de emisión personalizada
+        uint expirationDate = _issueDate + 30 days;  // Calcula la fecha de vencimiento
 
-            Prescription memory newPrescription = Prescription({
-            id: prescriptionCount,  // Asignar el ID
+        Prescription memory newPrescription = Prescription({
+            id: prescriptionCount,
             patientName: _patientName,
             patientNid: _patientNid,
             meds: _meds,
             insurance: _insurance,
             doctorNid: _doctorNid,
             patientAddress: _patientAddress,
-            pharmacyAddress: address(0), // Inicialmente vacío
+            pharmacyAddress: address(0),
             issueDate: _issueDate,
             expirationDate: expirationDate,
-            used: false // Inicialmente, la receta no está utilizada
+            used: false,
+            invoiceNumber: "" // Inicialmente vacío
         });
-
 
         prescriptions.push(newPrescription);
 
         emit IssuedPrescription(
-            prescriptionCount,  // Emitir el ID
+            prescriptionCount,
             _patientName,
             _patientNid,
             _meds,
             _insurance,
             _doctorNid,
             _patientAddress,
-            address(0), // Inicialmente vacío
+            address(0),
             _issueDate,
             expirationDate
         );
     }
 
-    // Obtener una receta específica por ID
+    // Función para obtener una receta específica por ID
     function getPrescription(uint _prescriptionId) public view returns (Prescription memory) {
         require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
         return prescriptions[_prescriptionId - 1];
     }
 
-    // Obtener todas las recetas
+    // Función para obtener todas las recetas
     function getPrescriptions() public view returns (Prescription[] memory) {
         return prescriptions;
     }
 
-    // Obtener recetas por NID de médico
+    // Función para obtener recetas por NID de médico
     function getPresbyDoctorNid(string memory _doctorNid) public view returns (Prescription[] memory) {
         uint count = 0;
-
-        // Primer bucle para contar cuántas recetas pertenecen al médico
         for (uint i = 0; i < prescriptionCount; i++) {
             if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
                 count++;
             }
         }
 
-        // Crear un array para almacenar las recetas del médico
         Prescription[] memory doctorPrescriptions = new Prescription[](count);
         uint index = 0;
-
-        // Segundo bucle para almacenar las recetas correspondientes
         for (uint i = 0; i < prescriptionCount; i++) {
             if (keccak256(abi.encodePacked(prescriptions[i].doctorNid)) == keccak256(abi.encodePacked(_doctorNid))) {
                 doctorPrescriptions[index] = prescriptions[i];
                 index++;
             }
         }
-
         return doctorPrescriptions;
     }
 
-    // Obtener recetas por dirección del paciente
+    // Función para obtener recetas por dirección del paciente
     function getPresbyPatientAddress(address _patientAddress) public view returns (Prescription[] memory) {
         uint count = 0;
-
-        // Primer bucle para contar cuántas recetas pertenecen al paciente
         for (uint i = 0; i < prescriptionCount; i++) {
             if (prescriptions[i].patientAddress == _patientAddress) {
                 count++;
             }
         }
 
-        // Crear un array para almacenar las recetas del paciente
         Prescription[] memory patientPrescriptions = new Prescription[](count);
         uint index = 0;
-
-        // Segundo bucle para almacenar las recetas correspondientes
         for (uint i = 0; i < prescriptionCount; i++) {
             if (prescriptions[i].patientAddress == _patientAddress) {
                 patientPrescriptions[index] = prescriptions[i];
                 index++;
             }
         }
-
         return patientPrescriptions;
     }
 
-    // Nueva función para actualizar la dirección de la farmacia en la receta
+    // Función para actualizar la dirección de la farmacia en la receta
     function updatePrescription(uint _prescriptionId, address _pharmacyAddress) public {
         require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
-        prescriptions[_prescriptionId - 1].pharmacyAddress = _pharmacyAddress; // Actualizar la dirección de la farmacia
+        prescriptions[_prescriptionId - 1].pharmacyAddress = _pharmacyAddress;
     }
 
-    // Obtener recetas por dirección de la farmacia
+    // Función para obtener recetas por dirección de la farmacia
     function getPresbyPharmacyAddress(address _pharmacyAddress) public view returns (Prescription[] memory) {
         uint count = 0;
-
-        // Primer bucle para contar cuántas recetas pertenecen a la farmacia
         for (uint i = 0; i < prescriptionCount; i++) {
             if (prescriptions[i].pharmacyAddress == _pharmacyAddress) {
                 count++;
             }
         }
 
-        // Crear un array para almacenar las recetas de la farmacia
         Prescription[] memory pharmacyPrescriptions = new Prescription[](count);
         uint index = 0;
-
-        // Segundo bucle para almacenar las recetas correspondientes
         for (uint i = 0; i < prescriptionCount; i++) {
             if (prescriptions[i].pharmacyAddress == _pharmacyAddress) {
                 pharmacyPrescriptions[index] = prescriptions[i];
                 index++;
             }
         }
-
         return pharmacyPrescriptions;
     }
 
-        function markPrescriptionAsUsed(uint _prescriptionId) public {
+    // Función para marcar la receta como usada y agregar el número de factura
+    function markPrescriptionAsUsed(uint _prescriptionId, string memory _invoiceNumber) public {
         require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
         require(!prescriptions[_prescriptionId - 1].used, "Prescription already used.");
 
         prescriptions[_prescriptionId - 1].used = true;
+        prescriptions[_prescriptionId - 1].invoiceNumber = _invoiceNumber; // Almacena el número de factura
     }
-
-
 }
