@@ -302,13 +302,12 @@ body, html {
     background-color: #fff;
     padding: 40px;
     border-radius: 5px;
-    max-width: 800px;
-    width: 100%;
+    width: 900px;
   }
   
   form {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Two columns */
+    grid-template-columns: 1fr 1fr;
     gap: 30px;
   }
   
@@ -321,11 +320,13 @@ body, html {
     display: flex;
     flex-direction: column;
     margin-bottom: 10px;
+    gap: 6px;
   }
   label {
-    margin-bottom: 5px;
     font-size: 16px;
     font-weight: 500;
+    margin-top: 5px;
+    margin-bottom: -3px;
   }
 
   input, textarea {
@@ -418,9 +419,6 @@ body, html {
 
 
 
-
-
-
 .receta-list-container {
     padding: 1rem;
 }
@@ -499,4 +497,42 @@ body, html {
 
 .description-doctor {
     color: #333;
+}
+
+
+/*Profile view*/
+
+.perfil-container {
+    padding: 20px;
+}
+
+.perfil-card {
+    display: flex;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 500px;
+    margin: auto;
+}
+
+.perfil-image {
+    flex: 1;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.perfil-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px 0 0 8px;
+}
+
+.perfil-info {
+    flex: 2;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
