@@ -125,73 +125,78 @@ exports.issuePrescription = async (req, res) => {
 exports.getPresbyDoctorNid = async (req, res) => {
     try {
         const { nid } = req.user; // Doctor's NID from JWT token
-    
+
         // Find the doctor in the database
         const doctor = await Doctor.findOne({ nid });
         if (!doctor) {
             console.error(`Doctor with NID: ${nid} not found in the database.`);
             return res.status(404).send('Doctor not found.');
         }
-    
+
         // Get Ganache accounts
         const accounts = await web3.eth.getAccounts();
         const fromAccount = accounts[0]; // First Ganache account
-    
+
         // Call the smart contract function to get prescriptions by doctor's NID
         const prescriptions = await prescriptionContract.methods.getPresbyDoctorNid(doctor.nid).call({ from: fromAccount });
-    
+
         // Check if prescriptions were found
         if (prescriptions.length === 0) {
             console.warn(`No prescriptions found for doctor NID: ${doctor.nid}`);
             return res.status(404).send('Prescriptions not found for this doctor.');
         }
-    
-        // Process prescriptions, ensuring to handle BigInt
-        const formattedPrescriptions = prescriptions.map(prescription => {
-            const issueDate = new Date(Number(prescription.issueDate) * 1000);
-            const expirationDate = new Date(Number(prescription.expirationDate) * 1000);
-            const isExpired = new Date() > expirationDate;
-    
-            return {
-                prescriptionId: convertBigIntToString(prescription.id),
-                patientName: prescription.patientName,
-                patientNid: prescription.patientNid,
-                meds: {
-                    med1: prescription.meds.med1,
-                    quantity1: Number(prescription.meds.quantity1),
-                    med2: prescription.meds.med2,
-                    quantity2: Number(prescription.meds.quantity2),
-                    diagnosis: prescription.meds.diagnosis,
-                    observations: prescription.meds.observations
 
-                },
-                
-                insurance: {
-                    affiliateNum: prescription.insurance.affiliateNum,
-                    insuranceName: prescription.insurance.insuranceName,
-                    insurancePlan: prescription.insurance.insurancePlan
-                },
-                doctorNid: prescription.doctorNid,
-                issueDate: issueDate.toLocaleDateString(),
-                expirationDate: expirationDate.toLocaleDateString(),
-                patientAddress: prescription.patientAddress,
-                status: isExpired ? 'Expired' : 'Valid'
-            };
-        });
-    
+        // Process prescriptions, ensuring to handle BigInt
+        const formattedPrescriptions = await Promise.all(
+            prescriptions.map(async (prescription) => {
+                const issueDate = new Date(Number(prescription.issueDate) * 1000);
+                const expirationDate = new Date(Number(prescription.expirationDate) * 1000);
+                const isExpired = new Date() > expirationDate;
+
+                // Find the patient in the database to get the last name
+                const patient = await Patient.findOne({ nid: prescription.patientNid });
+                const patientSurname = patient ? patient.surname : 'N/A'; // Check if patient exists
+
+                return {
+                    prescriptionId: convertBigIntToString(prescription.id),
+                    patientName: prescription.patientName,
+                    patientSurname: patientSurname, // Add last name here
+                    patientNid: prescription.patientNid,
+                    meds: {
+                        med1: prescription.meds.med1,
+                        quantity1: Number(prescription.meds.quantity1),
+                        med2: prescription.meds.med2,
+                        quantity2: Number(prescription.meds.quantity2),
+                        diagnosis: prescription.meds.diagnosis,
+                        observations: prescription.meds.observations
+                    },
+                    insurance: {
+                        affiliateNum: prescription.insurance.affiliateNum,
+                        insuranceName: prescription.insurance.insuranceName,
+                        insurancePlan: prescription.insurance.insurancePlan
+                    },
+                    doctorNid: prescription.doctorNid,
+                    issueDate: issueDate.toLocaleDateString(),
+                    expirationDate: expirationDate.toLocaleDateString(),
+                    patientAddress: prescription.patientAddress,
+                    status: isExpired ? 'Expired' : 'Valid'
+                };
+            })
+        );
+
         // Convert all prescription objects to strings
         const responseToSend = convertBigIntToString({
             message: 'Prescriptions obtained successfully',
             prescriptions: formattedPrescriptions
         });
-    
+
         res.json(responseToSend);
     } catch (error) {
         console.error('Error obtaining prescriptions:', error);
         res.status(500).send('Error obtaining prescriptions. Details: ' + error.message);
     }
 };
-    
+
 
 // Function to convert all BigInts to strings in an object
 const convertBigIntToString = (obj) => {

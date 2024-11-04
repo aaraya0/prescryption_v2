@@ -28,7 +28,9 @@ const Doctor = () => {
 
     useEffect(() => {
         let filtered = recetas.filter(receta => 
-            receta.patientName.toLowerCase().includes(searchPaciente.toLowerCase())
+            receta.patientName.toLowerCase().includes(searchPaciente.toLowerCase()) ||
+            (receta.patientSurname && receta.patientSurname.toLowerCase().includes(searchPaciente.toLowerCase())) ||
+            (receta.patientNid && receta.patientNid.toString().includes(searchPaciente))
         );
         
         filtered = filtered.sort((a, b) => {
@@ -51,10 +53,10 @@ const Doctor = () => {
             {/* Filtros con descripciones */}
             <div className="filter-container">
                 <div className="filter-item">
-                    <label>Buscar por paciente:</label>
+                    <label>Buscar por paciente (nombre, apellido, DNI):</label>
                     <input
                         type="text"
-                        placeholder="Nombre del paciente"
+                        placeholder="Nombre, Apellido o DNI"
                         value={searchPaciente}
                         onChange={(e) => setSearchPaciente(e.target.value)}
                         className="search-input"
@@ -78,7 +80,8 @@ const Doctor = () => {
                     <li key={index} className="receta-item">
                         <div className="receta-box" onClick={() => toggleReceta(index)}>
                             <div className="receta-header">
-                                <strong>Paciente:</strong> {receta.patientName || 'N/A'}
+                                <strong>Paciente:</strong> {receta.patientName || 'N/A'} {receta.patientSurname || 'N/A'} <br />
+                                <strong>DNI:</strong> {receta.patientNid || 'N/A'}
                             </div>
                             {expandedReceta === index && (
                                 <div className="receta-details">

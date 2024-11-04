@@ -1,25 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import "./styles.css";
+import './styles.css';
 
 function Login() {
     const [nid, setNid] = useState('');
     const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [message, setMessage] = useState({ text: '', type: '' });
     const navigate = useNavigate();
 
-    // Obtener el tipo de usuario desde la cookie
     const userType = document.cookie
         .split('; ')
         .find(row => row.startsWith('userType='))
         ?.split('=')[1];
 
-    // Validar que el tipo de usuario esté en la cookie
     if (!userType) {
-        alert('No se seleccionó un tipo de usuario. Vuelve al menú principal.');
-        navigate('/'); // Redirige al menú principal si no se ha seleccionado un tipo de usuario
-        return null; // Evita renderizar el componente si no hay tipo de usuario
+        setMessage({ text: 'No se seleccionó un tipo de usuario. Vuelve al menú principal.', type: 'error' });
+        navigate('/');
+        return null;
     }
 
     const userTypeMap = {
@@ -29,24 +27,27 @@ function Login() {
         insurance: 'Iniciar Sesión como Obra Social'
     };
 
-    const displayUserType = userTypeMap[userType] || 'Iniciar Sesión'; // Texto por defecto si no se encuentra el tipo de usuario
+    const displayUserType = userTypeMap[userType] || 'Iniciar Sesión';
 
     const handleLogin = async () => {
         try {
             const response = await axios.post('http://localhost:3001/login', { nid, password, userType });
             const token = response.data.token;
-            localStorage.setItem('token', token); // Guarda el token en localStorage
-            alert('Login exitoso');
-            navigate(`/dashboard/${userType}`);
-
+            localStorage.setItem('token', token);
+            
+            setMessage({ text: 'Login exitoso', type: 'success' });
+            setTimeout(() => {
+                setMessage({ text: '', type: '' });
+                navigate(`/dashboard/${userType}`);
+            }, 3000);
         } catch (error) {
             if (error.response && error.response.status === 429) {
-                setErrorMessage('Has excedido el número de intentos de inicio de sesión. Intenta nuevamente en 15 minutos.');
+                setMessage({ text: 'Has excedido el número de intentos de inicio de sesión. Intenta nuevamente en 15 minutos.', type: 'error' });
             } else if (error.response && error.response.status === 401) {
-                setErrorMessage('Credenciales inválidas. Por favor, verifica tu DNI y contraseña.');
+                setMessage({ text: 'Credenciales inválidas. Por favor, verifica tu DNI y contraseña.', type: 'error' });
             } else {
                 console.error(error);
-                setErrorMessage('Hubo un error en el servidor. Intenta de nuevo más tarde.');
+                setMessage({ text: 'Hubo un error en el servidor. Intenta de nuevo más tarde.', type: 'error' });
             }
         }
     };
@@ -67,7 +68,15 @@ function Login() {
             <p>
                 ¿No tenés una cuenta? <button className='RegistrateButton' onClick={handleRegister}>Registrate</button>
             </p>
-            {errorMessage && <p className="error">{errorMessage}</p>} {/* Mostrar mensaje de error */}
+            {message.text && <Notification message={message.text} type={message.type} />} {/* Mostrar mensaje */}
+        </div>
+    );
+}
+
+function Notification({ message, type }) {
+    return (
+        <div className={`notification ${type}`}>
+            {message}
         </div>
     );
 }

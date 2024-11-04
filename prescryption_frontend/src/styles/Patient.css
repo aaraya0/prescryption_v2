@@ -1,0 +1,35 @@
+
+
+
+/* Botón de transferencia */
+.button_t {
+    background-color: #D8B7AF;
+    color: black;
+    border: none;
+    border-radius: 3px;
+    padding: 4px 6px;
+    cursor: pointer;
+    margin-top: 5px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    
+}
+
+.button_t:hover {
+    background-color: #c88270;
+}
+
+.status-valid {
+    color: green;
+    font-weight: bold;
+}
+
+.status-expired {
+    color: red;
+    font-weight: bold;
+}
+
+.status-dispensed {
+    color: blue;
+    font-weight: bold;
+}

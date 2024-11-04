@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import { Modal, Button, Form } from 'react-bootstrap';
+import '../styles/Patient.css';
 
 const Patient = () => {
     const [recetas, setRecetas] = useState([]);
     const [alias, setAlias] = useState('');
     const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null);
+    const [showModal, setShowModal] = useState(false);
     const token = localStorage.getItem('token');
     const [statusFilter, setStatusFilter] = useState('');
     const [specialtyFilter, setSpecialtyFilter] = useState('');
@@ -14,7 +17,6 @@ const Patient = () => {
     const [availableSpecialties, setAvailableSpecialties] = useState([]);
     const navigate = useNavigate();
 
-    // Actualizar recetas periódicamente
     useEffect(() => {
         const fetchPrescriptions = async () => {
             try {
@@ -56,10 +58,9 @@ const Patient = () => {
         return () => clearInterval(intervalId);
     }, [token, specialtyFilter, statusFilter, sortOrder]);
 
-    // Establecer la cookie al enviar la receta
     const handleTransfer = (prescriptionId) => {
         setSelectedPrescriptionId(prescriptionId);
-        Cookies.set(`pendingPrescription_${prescriptionId}`, 'true', { expires: 1 / 720 }); // 2 minutos
+        setShowModal(true);
     };
 
     const handleSubmit = async (e) => {
@@ -74,13 +75,12 @@ const Patient = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            setRecetas(prevRecetas =>
-                prevRecetas.filter(receta => receta.prescriptionId !== selectedPrescriptionId)
-            );
-
-            alert('Receta transferida a la farmacia.');
+            setShowModal(false);
             setAlias('');
             setSelectedPrescriptionId(null);
+
+            // Set a cookie for the transferred prescription to hide the button temporarily
+            Cookies.set(`pendingPrescription_${selectedPrescriptionId}`, 'true', { expires: 1 / 720 }); // 2 minutes
             navigate('/dashboard/patient');
         } catch (error) {
             console.error('Error al transferir la receta:', error);
@@ -88,42 +88,36 @@ const Patient = () => {
         }
     };
 
-    // Verificar y eliminar recetas expiradas
+    // Check pending prescriptions and clear expired cookies
     useEffect(() => {
-        const checkPendingPrescriptions = async () => {
-            recetas.forEach(async receta => {
-                if (Cookies.get(`pendingPrescription_${receta.prescriptionId}`)) {
-                    try {
-                        const response = await axios.get(`http://localhost:3001/api/pr_by_patient`, {
-                            headers: { Authorization: `Bearer ${token}` }
-                        });
-
-                        const prescription = response.data.prescriptions.find(p => p.prescriptionId === receta.prescriptionId);
-
-                        // Si la receta todavía es "Valid", restablece la dirección de la farmacia
-                        if (prescription && prescription.status === "Valid") {
-                            await axios.post('http://localhost:3001/api/address_reset', {
-                                prescriptionId: receta.prescriptionId
-                            }, {
-                                headers: { Authorization: `Bearer ${token}` }
-                            });
-                            Cookies.remove(`pendingPrescription_${receta.prescriptionId}`);
-                            setRecetas(prevRecetas =>
-                                prevRecetas.map(r => 
-                                    r.prescriptionId === receta.prescriptionId ? { ...r, status: "Valid" } : r
-                                )
-                            );
-                        }
-                    } catch (error) {
-                        console.error('Error al verificar receta pendiente:', error);
-                    }
-                }
-            });
+        const checkPendingPrescriptions = () => {
+            setRecetas(prevRecetas =>
+                prevRecetas.map((receta) => {
+                    const isPending = Cookies.get(`pendingPrescription_${receta.prescriptionId}`);
+                    return {
+                        ...receta,
+                        isPending: Boolean(isPending)
+                    };
+                })
+            );
         };
 
-        const intervalId = setInterval(checkPendingPrescriptions, 10000);
+        const intervalId = setInterval(checkPendingPrescriptions, 10000); // Check every 10 seconds
         return () => clearInterval(intervalId);
-    }, [recetas, token]);
+    }, [recetas]);
+
+    const getStatusClass = (status) => {
+        switch (status) {
+            case 'Valid':
+                return 'status-valid';
+            case 'Expired':
+                return 'status-expired';
+            case 'Dispensed':
+                return 'status-dispensed';
+            default:
+                return '';
+        }
+    };
 
     return (
         <div>
@@ -157,39 +151,51 @@ const Patient = () => {
                 </select>
             </label>
 
-            <ul>
+            <ul className="pres">  
                 {recetas.map((receta, index) => (
                     <li key={index}>
                         <strong>Médico:</strong> {receta.doctorName} ({receta.doctorSpecialty})<br />
                         <strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}<br />
                         <strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}<br />
                         <strong>Diagnóstico:</strong> {receta.meds.diagnosis}<br />
-                        <strong>Estado:</strong> {receta.status}<br />
+                        <div className="prescription-row">
+                            <strong>Observaciones:</strong> {receta.meds.observations}
+                        </div>
+                        <strong>Estado:</strong> <span className={getStatusClass(receta.status)}>{receta.status}</span><br />
                         <strong>Fecha de Emisión:</strong> {receta.issueDate}<br />
                         <strong>Fecha de Expiración:</strong> {receta.expirationDate}<br />
                         
-                        {!Cookies.get(`pendingPrescription_${receta.prescriptionId}`) && receta.status === "Valid" && (
-                            <button onClick={() => handleTransfer(receta.prescriptionId)}>Transferir Receta</button>
+                        {/* Show the transfer button only if there's no pending cookie */}
+                        {!receta.isPending && receta.status === "Valid" && (
+                            <button className="button_t" onClick={() => handleTransfer(receta.prescriptionId)}>
+                                Transferir Receta
+                            </button>
                         )}
                     </li>
                 ))}
             </ul>
 
-            {selectedPrescriptionId && (
-                <form onSubmit={handleSubmit}>
-                    <h4>Transferir Receta ID: {selectedPrescriptionId}</h4>
-                    <label>
-                        Alias de la Farmacia:
-                        <input 
-                            type="text" 
-                            value={alias} 
-                            onChange={(e) => setAlias(e.target.value)} 
-                            required 
-                        />
-                    </label>
-                    <button type="submit">Enviar</button>
-                </form>
-            )}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Transferir Receta ID: {selectedPrescriptionId}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group controlId="alias">
+                            <Form.Label>Alias de la Farmacia:</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={alias}
+                                onChange={(e) => setAlias(e.target.value)}
+                                required
+                            />
+                        </Form.Group>
+                        <Button variant="primary" type="submit" className="mt-3">
+                            Enviar
+                        </Button>
+                    </Form>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 };

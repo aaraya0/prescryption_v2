@@ -28,8 +28,6 @@ function Dashboard({ userType }) {
             case 'patient':
                 return (
                     <div>
-                        <p>Bienvenido al menú del paciente.</p>
-                        {/* Mostrar las recetas del paciente */}
                         <Patient />
                     </div>
                 );
@@ -46,7 +44,6 @@ function Dashboard({ userType }) {
             case 'pharmacy':
                 return (
                     <div>
-                        <p>Bienvenido al menú de la farmacia.</p>
                         <Pharmacy />
                     </div>
                 );
@@ -59,14 +56,23 @@ function Dashboard({ userType }) {
 
     return (
         <div>
-            {/* Container for top-right buttons */}
-            <div className="top-right-buttons">
-                <button className="dashboard-button" onClick={() => navigate(`/perfil/${userType}`)}>Ver Perfil</button>
-                <button className="dashboard-button" onClick={handleLogout}>Cerrar Sesión</button>
+            {/* Encabezado fijo con título, mensaje de bienvenida y botones */}
+            <div className="fixed-header">
+                <div className="header-text">
+                    <h2>Menú de {userType}</h2>
+                    <p>Bienvenido al menú del {userType === 'patient' ? 'paciente' : userType}</p>
+                </div>
+                
+                <div className="top-right-buttons">
+                    <button className="dashboard-button" onClick={() => navigate(`/perfil/${userType}`)}>Ver Perfil</button>
+                    <button className="dashboard-button" onClick={handleLogout}>Cerrar Sesión</button>
+                </div>
             </div>
             
-            <h2>Menú de {userType}</h2>
-            {renderMenu()}
+            {/* Contenido desplazable debajo del encabezado fijo */}
+            <div className="content">
+                {renderMenu()}
+            </div>
         </div>
     );
 }

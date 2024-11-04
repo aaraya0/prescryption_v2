@@ -546,3 +546,111 @@ body, html {
     flex-direction: column;
     justify-content: center;
 }
+
+/* Botones en la esquina superior derecha, fijos */
+.top-right-buttons {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000; /* Asegura que estén por encima de otros elementos */
+}
+
+.dashboard-button {
+    background-color: #D8B7AF;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: text-decoration 0.2s ease-in-out;
+}
+
+.dashboard-button:hover {
+    text-decoration: underline;
+}
+/* Contenedor fijo para el encabezado y los botones */
+.fixed-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #e0f7fa; /* Fondo celeste claro */
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezado y mensaje de bienvenida */
+.header-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-text h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.header-text p {
+    margin: 0;
+    font-size: 16px;
+    color: #666;
+}
+
+/* Botones en la esquina superior derecha */
+.top-right-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.dashboard-button {
+    background-color: #D8B7AF;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: text-decoration 0.2s ease-in-out;
+}
+
+.dashboard-button:hover {
+    text-decoration: underline;
+}
+
+/* Margen superior para el contenido para evitar solapamiento con el encabezado fijo */
+.content {
+    margin-top: 100px; /* Ajusta esta altura según el tamaño del encabezado */
+}
+
+
+
+
+
+.notification.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.notification.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0;
+    }
+    20%, 80% {
+        opacity: 1;
+    }
+}
