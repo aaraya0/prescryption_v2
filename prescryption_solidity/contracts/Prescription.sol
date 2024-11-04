@@ -185,4 +185,8 @@ contract PrescriptionContract {
         prescriptions[_prescriptionId - 1].used = true;
         prescriptions[_prescriptionId - 1].invoiceNumber = _invoiceNumber; // Almacena el número de factura
     }
+    function resetPharmacyAddress(uint _prescriptionId) public {
+        require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
+        prescriptions[_prescriptionId - 1].pharmacyAddress = address(0); // Resetea la dirección de la farmacia
+    }
 }

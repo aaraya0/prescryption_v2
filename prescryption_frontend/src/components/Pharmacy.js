@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import PrescriptionValidation from './PrescriptionValidation'; // Componente para validar recetas
+import PrescriptionValidation from './PrescriptionValidation';
 import '../styles/Pharmacy.css';
 
 const Pharmacy = () => {
@@ -9,18 +9,19 @@ const Pharmacy = () => {
     const [selectedPrescription, setSelectedPrescription] = useState(null);
     const token = localStorage.getItem('token');
 
+    const fetchPrescriptions = async () => {
+        try {
+            const response = await axios.get('http://localhost:3001/api/pr_by_pharmacy', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setPrescriptions(response.data.prescriptions || []);
+        } catch (error) {
+            console.error('Error al obtener las recetas:', error);
+        }
+    };
+
     useEffect(() => {
-        axios.get('http://localhost:3001/api/pr_by_pharmacy', {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        .then(response => {
-            if (Array.isArray(response.data.prescriptions)) {
-                setPrescriptions(response.data.prescriptions);
-            } else {
-                setPrescriptions([]);
-            }
-        })
-        .catch(error => console.error('Error al obtener las recetas:', error));
+        fetchPrescriptions();
     }, [token]);
 
     const handleSearch = (e) => {
@@ -28,7 +29,12 @@ const Pharmacy = () => {
     };
 
     const handleValidate = (prescription) => {
-        setSelectedPrescription(prescription); // Abrir modal con la receta seleccionada
+        setSelectedPrescription(prescription);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedPrescription(null);
+        fetchPrescriptions(); // Refresca la lista de recetas
     };
 
     const filteredPrescriptions = prescriptions.filter(prescription => 
@@ -38,7 +44,6 @@ const Pharmacy = () => {
     return (
         <div className="pharmacy-dashboard">
             <h3>Recetas de Farmacia</h3>
-            
             <label>
                 Buscar por NID del Paciente:
                 <input 
@@ -76,7 +81,7 @@ const Pharmacy = () => {
             {selectedPrescription && (
                 <PrescriptionValidation 
                     prescription={selectedPrescription} 
-                    onClose={() => setSelectedPrescription(null)} 
+                    onClose={handleCloseModal}
                 />
             )}
         </div>

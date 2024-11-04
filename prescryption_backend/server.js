@@ -163,7 +163,7 @@ app.post('/register_doctor', async (req, res) => {
 
 
 // Pharmacy registry
-// Registro de farmacéuticos
+
 app.post('/register_pharmacy', async (req, res) => {
     const { nid, license, name, surname, pharmacy_name, pharmacy_nid, mail, password, alias } = req.body;
 

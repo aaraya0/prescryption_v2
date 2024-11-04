@@ -639,6 +639,29 @@ exports.generateInvoiceAndMarkUsed = async (req, res) => {
     }
 };
 
+// Endpoint para resetear la dirección de la farmacia en una receta específica
+exports.resetPharmacyAddress = async (req, res) => {
+    const { prescriptionId } = req.body;
+
+    try {
+        const accounts = await web3.eth.getAccounts();
+        const fromAccount = accounts[0];
+
+        // Llamada al contrato para resetear la dirección de la farmacia en la receta
+        const receipt = await prescriptionContract.methods
+            .resetPharmacyAddress(prescriptionId)
+            .send({ from: fromAccount, gas: '200000' });
+
+        if (!receipt.status) {
+            return res.status(500).json({ message: 'Failed to reset pharmacy address.' });
+        }
+
+        res.json({ message: 'Pharmacy address reset successfully.' });
+    } catch (error) {
+        console.error('Error resetting pharmacy address:', error);
+        res.status(500).json({ message: 'Error resetting pharmacy address', error: error.message });
+    }
+};
 
 
 

@@ -5,7 +5,7 @@ import PrintableInvoice from './PrintableInvoice';
 import { jsPDF } from 'jspdf';
 import ReactDOMServer from 'react-dom/server';
 
-const PrescriptionValidation = ({ prescription }) => {
+const PrescriptionValidation = ({ prescription, onClose }) => {
     const [validationResult, setValidationResult] = useState([]);
     const [invoiceData, setInvoiceData] = useState(null);
     const [showModal, setShowModal] = useState(true);
@@ -29,6 +29,21 @@ const PrescriptionValidation = ({ prescription }) => {
         }
     };
 
+    // Función para resetear la dirección de la farmacia
+    const handleResetPharmacyAddress = async () => {
+        try {
+            await axios.post('http://localhost:3001/api/address_reset', {
+                prescriptionId: prescription?.prescriptionId,
+            }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            // Cerrar el modal y refrescar la lista de recetas
+            handleCloseAndRefresh();
+        } catch (error) {
+            console.error('Error al resetear la dirección de la farmacia:', error);
+        }
+    };
+
     // Función para generar la factura
     const handleGenerateInvoice = async () => {
         try {
@@ -49,8 +64,6 @@ const PrescriptionValidation = ({ prescription }) => {
     // Función para generar el PDF
     const handleGeneratePDF = () => {
         const doc = new jsPDF('p', 'pt', 'a4');
-
-        // Renderizamos el contenido en HTML usando ReactDOMServer
         const content = (
             <PrintableInvoice
                 prescription={prescription}
@@ -60,10 +73,8 @@ const PrescriptionValidation = ({ prescription }) => {
         );
         const htmlString = ReactDOMServer.renderToString(content);
 
-        // Convertimos el contenido HTML en PDF
         doc.html(htmlString, {
             callback: function (doc) {
-                // Guardamos el PDF con el nombre "FacturaReceta.pdf"
                 doc.save('FacturaReceta.pdf');
             },
             x: 10,
@@ -71,8 +82,14 @@ const PrescriptionValidation = ({ prescription }) => {
         });
     };
 
+    // Función para cerrar el modal y actualizar la lista de recetas
+    const handleCloseAndRefresh = () => {
+        setShowModal(false);
+        onClose(); // Llama a la función `onClose` para que el componente padre actualice la lista de recetas
+    };
+
     return (
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal show={showModal} onHide={handleCloseAndRefresh}>
             <Modal.Header closeButton>
                 <Modal.Title>Detalles de Validación y Factura</Modal.Title>
             </Modal.Header>
@@ -109,6 +126,7 @@ const PrescriptionValidation = ({ prescription }) => {
                                 <hr />
                             </div>
                         ))}
+                        <Button onClick={handleResetPharmacyAddress} variant="warning">Cancelar Dispensación</Button>
                     </div>
                 )}
 
@@ -128,7 +146,7 @@ const PrescriptionValidation = ({ prescription }) => {
                 ) : (
                     <Button variant="primary" onClick={handleGeneratePDF}>Guardar como PDF</Button>
                 )}
-                <Button variant="secondary" onClick={() => setShowModal(false)}>Cerrar</Button>
+                <Button variant="secondary" onClick={handleCloseAndRefresh}>Cerrar</Button>
             </Modal.Footer>
         </Modal>
     );

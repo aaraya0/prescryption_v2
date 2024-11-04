@@ -1,45 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 const Patient = () => {
     const [recetas, setRecetas] = useState([]);
     const [alias, setAlias] = useState('');
     const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null);
     const token = localStorage.getItem('token');
-    const [statusFilter, setStatusFilter] = useState(''); // Filtro por estado
-    const [specialtyFilter, setSpecialtyFilter] = useState(''); // Filtro por especialidad
-    const [sortOrder, setSortOrder] = useState('asc'); // Orden por fecha
-    const [availableSpecialties, setAvailableSpecialties] = useState([]); // Almacenar las especialidades disponibles
+    const [statusFilter, setStatusFilter] = useState('');
+    const [specialtyFilter, setSpecialtyFilter] = useState('');
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [availableSpecialties, setAvailableSpecialties] = useState([]);
     const navigate = useNavigate();
 
+    // Actualizar recetas periódicamente
     useEffect(() => {
-        axios.get('http://localhost:3001/api/pr_by_patient', {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        .then(response => {
-            if (Array.isArray(response.data.prescriptions)) {
+        const fetchPrescriptions = async () => {
+            try {
+                const response = await axios.get('http://localhost:3001/api/pr_by_patient', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 let filteredPrescriptions = response.data.prescriptions;
 
-                // Obtener todas las especialidades disponibles de las recetas
                 const specialties = [...new Set(filteredPrescriptions.map(receta => receta.doctorSpecialty))];
                 setAvailableSpecialties(specialties);
 
-                // Filtrar por especialidad si está seleccionado
                 if (specialtyFilter) {
                     filteredPrescriptions = filteredPrescriptions.filter(
                         receta => receta.doctorSpecialty === specialtyFilter
                     );
                 }
 
-                // Filtrar por estado si está seleccionado
                 if (statusFilter) {
                     filteredPrescriptions = filteredPrescriptions.filter(
                         receta => receta.status === statusFilter
                     );
                 }
 
-                // Ordenar por fecha de emisión
                 filteredPrescriptions = filteredPrescriptions.sort((a, b) => {
                     const dateA = new Date(a.issueDate.split('/').reverse().join('-'));
                     const dateB = new Date(b.issueDate.split('/').reverse().join('-'));
@@ -47,15 +45,21 @@ const Patient = () => {
                 });
 
                 setRecetas(filteredPrescriptions);
-            } else {
-                setRecetas([]);
+            } catch (error) {
+                console.error('Error al obtener las recetas:', error);
             }
-        })
-        .catch(error => console.error('Error al obtener las recetas:', error));
+        };
+
+        fetchPrescriptions();
+        const intervalId = setInterval(fetchPrescriptions, 10000);
+
+        return () => clearInterval(intervalId);
     }, [token, specialtyFilter, statusFilter, sortOrder]);
 
-    const handleTransfer = async (prescriptionId) => {
+    // Establecer la cookie al enviar la receta
+    const handleTransfer = (prescriptionId) => {
         setSelectedPrescriptionId(prescriptionId);
+        Cookies.set(`pendingPrescription_${prescriptionId}`, 'true', { expires: 1 / 720 }); // 2 minutos
     };
 
     const handleSubmit = async (e) => {
@@ -63,14 +67,18 @@ const Patient = () => {
         if (!selectedPrescriptionId || !alias) return;
 
         try {
-            const response = await axios.post('http://localhost:3001/api/pr_to_pharmacy', {
+            await axios.post('http://localhost:3001/api/pr_to_pharmacy', {
                 alias,
                 prescriptionId: selectedPrescriptionId
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            alert('Receta transferida a la farmacia. Transacción hash: ' + response.data.transactionHash);
+            setRecetas(prevRecetas =>
+                prevRecetas.filter(receta => receta.prescriptionId !== selectedPrescriptionId)
+            );
+
+            alert('Receta transferida a la farmacia.');
             setAlias('');
             setSelectedPrescriptionId(null);
             navigate('/dashboard/patient');
@@ -80,11 +88,47 @@ const Patient = () => {
         }
     };
 
+    // Verificar y eliminar recetas expiradas
+    useEffect(() => {
+        const checkPendingPrescriptions = async () => {
+            recetas.forEach(async receta => {
+                if (Cookies.get(`pendingPrescription_${receta.prescriptionId}`)) {
+                    try {
+                        const response = await axios.get(`http://localhost:3001/api/pr_by_patient`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+
+                        const prescription = response.data.prescriptions.find(p => p.prescriptionId === receta.prescriptionId);
+
+                        // Si la receta todavía es "Valid", restablece la dirección de la farmacia
+                        if (prescription && prescription.status === "Valid") {
+                            await axios.post('http://localhost:3001/api/address_reset', {
+                                prescriptionId: receta.prescriptionId
+                            }, {
+                                headers: { Authorization: `Bearer ${token}` }
+                            });
+                            Cookies.remove(`pendingPrescription_${receta.prescriptionId}`);
+                            setRecetas(prevRecetas =>
+                                prevRecetas.map(r => 
+                                    r.prescriptionId === receta.prescriptionId ? { ...r, status: "Valid" } : r
+                                )
+                            );
+                        }
+                    } catch (error) {
+                        console.error('Error al verificar receta pendiente:', error);
+                    }
+                }
+            });
+        };
+
+        const intervalId = setInterval(checkPendingPrescriptions, 10000);
+        return () => clearInterval(intervalId);
+    }, [recetas, token]);
+
     return (
         <div>
             <h3>Mis Recetas</h3>
             
-            {/* Filtro por especialidad */}
             <label>
                 Filtrar por Especialidad:
                 <select value={specialtyFilter} onChange={(e) => setSpecialtyFilter(e.target.value)}>
@@ -95,7 +139,6 @@ const Patient = () => {
                 </select>
             </label>
 
-            {/* Filtro por estado */}
             <label>
                 Filtrar por Estado:
                 <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -106,7 +149,6 @@ const Patient = () => {
                 </select>
             </label>
 
-            {/* Ordenar por fecha */}
             <label>
                 Ordenar por Fecha de Emisión:
                 <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
@@ -126,7 +168,7 @@ const Patient = () => {
                         <strong>Fecha de Emisión:</strong> {receta.issueDate}<br />
                         <strong>Fecha de Expiración:</strong> {receta.expirationDate}<br />
                         
-                        {receta.status !== "Dispensed" && (
+                        {!Cookies.get(`pendingPrescription_${receta.prescriptionId}`) && receta.status === "Valid" && (
                             <button onClick={() => handleTransfer(receta.prescriptionId)}>Transferir Receta</button>
                         )}
                     </li>
