@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Doctor from './Doctor';
-import Patient from './Patient'; 
+import Patient from './Patient';
 import Pharmacy from './Pharmacy';
 
 function Dashboard({ userType }) {
@@ -35,11 +35,13 @@ function Dashboard({ userType }) {
                 );
             case 'doctor':
                 return (
-                    <div>
+                    <div className="doctor-menu">
                         <p>Bienvenido al menú del médico.</p>
+                        <Doctor userType={userType} />
                         {/* Botón para emitir receta solo para el médico */}
-                        <button className="dashboard-button" onClick={() => navigate('/issue-prescription')}>Emitir Receta</button>
-                        <Doctor />
+                        <button className="emitir-receta-btn" onClick={() => navigate('/issue-prescription')}>
+                            Emitir Receta
+                        </button>
                     </div>
                 );
             case 'pharmacy':
