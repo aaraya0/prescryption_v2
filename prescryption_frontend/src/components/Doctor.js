@@ -7,7 +7,7 @@ const Doctor = () => {
     const [filteredRecetas, setFilteredRecetas] = useState([]);
     const [expandedReceta, setExpandedReceta] = useState(null);
     const [searchPaciente, setSearchPaciente] = useState('');
-    const [sortOrder, setSortOrder] = useState('asc'); // asc o desc
+    const [sortOrder, setSortOrder] = useState('asc');
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -27,12 +27,10 @@ const Doctor = () => {
     }, [token]);
 
     useEffect(() => {
-        // Filtrar y ordenar recetas cada vez que cambian el paciente o el orden
         let filtered = recetas.filter(receta => 
             receta.patientName.toLowerCase().includes(searchPaciente.toLowerCase())
         );
         
-        // Ordenar las recetas por fecha de emisión
         filtered = filtered.sort((a, b) => {
             const dateA = new Date(a.issueDate);
             const dateB = new Date(b.issueDate);
@@ -48,25 +46,31 @@ const Doctor = () => {
 
     return (
         <div className="receta-list-container">
-            <h3>Recetas Emitidas</h3>
+            <h4>Recetas Emitidas</h4>
             
-            {/* Filtros */}
+            {/* Filtros con descripciones */}
             <div className="filter-container">
-                <input
-                    type="text"
-                    placeholder="Buscar por paciente"
-                    value={searchPaciente}
-                    onChange={(e) => setSearchPaciente(e.target.value)}
-                    className="search-input"
-                />
-                <select
-                    value={sortOrder}
-                    onChange={(e) => setSortOrder(e.target.value)}
-                    className="sort-select"
-                >
-                    <option value="asc">Fecha Ascendente</option>
-                    <option value="desc">Fecha Descendente</option>
-                </select>
+                <div className="filter-item">
+                    <label>Buscar por paciente:</label>
+                    <input
+                        type="text"
+                        placeholder="Nombre del paciente"
+                        value={searchPaciente}
+                        onChange={(e) => setSearchPaciente(e.target.value)}
+                        className="search-input"
+                    />
+                </div>
+                <div className="filter-item">
+                    <label>Ordenar por fecha:</label>
+                    <select
+                        value={sortOrder}
+                        onChange={(e) => setSortOrder(e.target.value)}
+                        className="sort-select"
+                    >
+                        <option value="asc">Ascendente</option>
+                        <option value="desc">Descendente</option>
+                    </select>
+                </div>
             </div>
 
             <ul className="receta-list">

@@ -36,7 +36,6 @@ function Dashboard({ userType }) {
             case 'doctor':
                 return (
                     <div className="doctor-menu">
-                        <p>Bienvenido al menú del médico.</p>
                         <Doctor userType={userType} />
                         {/* Botón para emitir receta solo para el médico */}
                         <button className="emitir-receta-btn" onClick={() => navigate('/issue-prescription')}>
@@ -66,7 +65,7 @@ function Dashboard({ userType }) {
                 <button className="dashboard-button" onClick={handleLogout}>Cerrar Sesión</button>
             </div>
             
-            <h2>Dashboard {userType}</h2>
+            <h2>Menú de {userType}</h2>
             {renderMenu()}
         </div>
     );

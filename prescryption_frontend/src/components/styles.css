@@ -395,9 +395,6 @@ body, html {
 }
 
 
-
-
-
 /* Contenedor para los filtros */
 .filter-container {
     display: flex;
@@ -417,50 +414,66 @@ body, html {
     padding: 5px;
     font-size: 14px;
     border-radius: 4px;
-    border: 1px solid #ccc;
 }
 
-/* Estilos para la lista de recetas */
+
+
+
+
+
 .receta-list-container {
-    padding: 20px;
-    width: 1000px;
+    padding: 1rem;
+}
+
+.filter-container {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .receta-list {
-    list-style-type: none;
+    list-style: none;
     padding: 0;
 }
 
 .receta-item {
-    margin-bottom: 15px;
-}
-
-.receta-box {
-    background-color: #f9f9f9;
-    padding: 15px;
-    border: 1px solid #ddd;
     border-radius: 8px;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: white;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+
 }
 
-.receta-box:hover {
-    background-color: #e6f7ff;
-}
-
-.receta-header {
-    font-weight: bold;
+.receta-item:hover {
+    background-color: gainsboro;
 }
 
 .receta-details {
-    margin-top: 10px;
-    font-size: 14px;
+    margin-top: 0.5rem;
 }
+
+@media (max-width: 768px) {
+    .filter-container {
+        flex-direction: column;
+    }
+    .receta-box {
+        font-size: 0.9rem;
+    }
+}
+
 
 /* Estilos para el menú del doctor */
 .doctor-menu {
     position: relative;
-    padding-bottom: 60px; /* Espacio extra para evitar solaparse con el botón */
+    padding-bottom: 60px; 
 }
 
 /* Estilos para el botón de Emitir Receta */
@@ -468,8 +481,8 @@ body, html {
     position: absolute;
     bottom: 20px;
     right: 20px;
-    background-color: #4CAF50;
-    color: white;
+    background-color: #D8B7AF;
+    color: black;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
@@ -479,5 +492,11 @@ body, html {
 }
 
 .emitir-receta-btn:hover {
-    background-color: #45a049;
+    background-color: #D8B7AF;
+    text-decoration: underline;
+}
+
+
+.description-doctor {
+    color: #333;
 }
