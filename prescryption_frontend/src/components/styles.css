@@ -152,7 +152,13 @@ body, html {
     text-decoration: underline;
 }
 
-
+.loginInput {
+    padding: 20px !important;
+}
+.loginInput::placeholder {
+    font-size: 14px; 
+    text-align: left;
+}
 /* Register styles*/
 
 .register-container {
@@ -302,7 +308,8 @@ body, html {
     background-color: #fff;
     padding: 40px;
     border-radius: 5px;
-    width: 900px;
+    height: 500px;
+    width: auto;
   }
   
   form {
@@ -323,34 +330,37 @@ body, html {
     gap: 6px;
   }
   label {
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 500;
     margin-top: 5px;
     margin-bottom: -3px;
   }
 
   input, textarea {
-    padding: 8px;
+    padding: 4px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 14px;
-    width: 92%;
+    font-size: 12px;
+    width: 100%;
     margin: 3px 0px;
+    height: 25px;
   }
-
+  ::placeholder{
+    font-size: 12px;
+  }
   .textarea {
-    height: 125px;
+    height: 80px;
     resize: none;
   }
   .buttonGenerarReceta{
     display: flex;
     justify-content: flex-start; 
-    margin-top: 10px;
+    margin-top: -20px;
   }
   .button {
     background-color: #A6C4CA;
     color: black;
-    padding: 10px 20px;
+    padding: 5px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
