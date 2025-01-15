@@ -1,54 +1,81 @@
-# verify_service.py
 from flask import Flask, request, jsonify
+import json
+import logging
 
 app = Flask(__name__)
 
-# Definir ejemplos de DNI y licencias válidos para médicos y farmacéuticos
-VALID_DOCTORS = {
-    "12345678": "MED123",  # DNI: License
-    "87654321": "MED456",
-    "24615446": "MED789"
-}
+# ✅ Configurar logs
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-VALID_PHARMACISTS = {
-    "55555555": "PHA123",
-    "44444444": "PHA456",
-    "33333333": "PHA789"
-}
+# ✅ Cargar datos desde un archivo JSON
+try:
+    with open('professionals_data.json', 'r') as f:
+        data = json.load(f)
+        VALID_DOCTORS = data.get('doctors', {})
+        VALID_PHARMACISTS = data.get('pharmacists', {})
+except FileNotFoundError:
+    logging.error("❌ File 'professionals_data.json' not found.")
+    VALID_DOCTORS = {}
+    VALID_PHARMACISTS = {}
 
-def search_professional(license, nid, profession_type):
-    """
-    Simulación de búsqueda de profesional.
-    Solo devuelve True si el DNI y la matrícula coinciden en las listas correctas
-    de médicos o farmacéuticos.
-    """
-    print(f"Mockup search: Matricula: {license}, DNI: {nid}, Profesión: {profession_type}")
+# ✅ Autenticación Básica
+AUTH_TOKEN = "securetoken123"
 
-    if profession_type == "doctor":
-        return VALID_DOCTORS.get(nid) == license
-    elif profession_type == "pharmacist":
-        return VALID_PHARMACISTS.get(nid) == license
-    else:
+def authenticate(request):
+    token = request.headers.get('Authorization')
+    if not token or token != f"Bearer {AUTH_TOKEN}":
         return False
+    return True
 
+# 📌 Buscar profesional
+def search_professional(license, nid, user_type):
+    """
+    Valida si la matrícula y el DNI coinciden con el tipo de profesional.
+    """
+    logging.info(f"🔍 Validating {user_type} - NID: {nid}, License: {license}")
+    if user_type == "doctor":
+        return VALID_DOCTORS.get(nid) == license
+    elif user_type == "pharmacist":
+        return VALID_PHARMACISTS.get(nid) == license
+    return False
+
+# 📌 Endpoint de verificación
 @app.route('/verify', methods=['POST'])
 def verify():
+    if not authenticate(request):
+        logging.warning("❌ Unauthorized access attempt.")
+        return jsonify({"error": "Unauthorized"}), 401
+
     data = request.json
-    print(f"Received data: {data}")
+    logging.info(f"📥 Received data: {data}")
 
-    license = data.get('license')
-    nid = data.get('nid')
-    profession_type = data.get('profession_type')  # Nuevo campo para especificar el tipo de profesional
+    # ✅ Validación de datos
+    license = data.get('license', '').strip()
+    nid = data.get('nid', '').strip()
+    user_type = data.get('user_type', '').strip().lower()
 
-    if not license or not nid or not profession_type:
-        return jsonify({"error": "Missing matricula, dni, or profession type"}), 400
+    if not license or not nid:
+        logging.warning("⚠️ Missing required fields.")
+        return jsonify({"error": "Missing license or nid"}), 400
 
-    is_valid = search_professional(license, nid, profession_type)
+    if user_type not in ["doctor", "pharmacist"]:
+        logging.warning("⚠️ Invalid user_type.")
+        return jsonify({"error": "Invalid user_type"}), 400
+
+    # ✅ Buscar profesional
+    is_valid = search_professional(license, nid, user_type)
 
     if is_valid:
+        logging.info(f"✅ {user_type.capitalize()} validation passed.")
         return jsonify({"valid": True})
     else:
+        logging.warning(f"❌ {user_type.capitalize()} validation failed.")
         return jsonify({"valid": False}), 404
+
+# ✅ Ruta de Salud para Diagnóstico
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({"status": "running", "service": "verify_service"}), 200
 
 if __name__ == "__main__":
     app.run(port=5000)

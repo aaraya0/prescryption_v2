@@ -1,21 +1,17 @@
-// models/Pharmacist.js
 const mongoose = require('mongoose');
 
 const pharmacySchema = new mongoose.Schema({
     nid: { type: String, required: true, unique: true },
-    license: { type: String, required: true },
-    name: { type: String, required: true },
-    surname: { type: String, required: true },
     pharmacy_name: { type: String, required: true },
-    pharmacy_nid: { type: String, required: true },
     password: { type: String, required: true },
     mail: { type: String, required: true },
-    alias: {
-        type: String,
-        unique: true,
-        required: true
-    },
-    address: { type: String, required: true } 
+    address: { type: String, required: true },
+    physicalAddress: { type: String, required: true },
+    contactInfo: { type: String },
+    isActive: { type: Boolean, default: true },
+    verificationCode: { type: String, required: true } // Código único de registro
+}, {
+    timestamps: true,
 });
 
 module.exports = mongoose.model('Pharmacy', pharmacySchema);
