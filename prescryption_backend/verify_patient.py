@@ -2,64 +2,104 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Datos de ejemplo para diferentes afiliados
-mock_data = [
-    {
-        "name": "Agustin",
-        "surname": "Visa",
-        "nid": "34325636",
-        "insurance_name": "SWISS MEDICAL",
-        "affiliate_num": "80000062728191",
-        "insurance_plan": "SMG02"
+# Base de datos simulada de afiliaciones
+INSURANCE_DB = {
+    "SWISS MEDICAL": {
+        "12345678": {
+            "affiliate_number": "SM-987654",
+            "insurance_plan": "P063"
+        },
+        "23456789": {
+            "affiliate_number": "SM-123456",
+            "insurance_plan": "SM02"
+        },
+        "34567890": {
+            "affiliate_number": "SM-789012",
+            "insurance_plan": "SMG2"
+        }
     },
-    {
-        "name": "Manuela",
-        "surname": "Cara",
-        "nid": "12345678",
-        "insurance_name": "OSDE",
-        "affiliate_num": "90000012345678",
-        "insurance_plan": "OSDE 310"
+    "SANCOR SALUD": {
+        "45678901": {
+            "affiliate_number": "SS-345678",
+            "insurance_plan": "3000B"
+        },
+        "56789012": {
+            "affiliate_number": "SS-901234",
+            "insurance_plan": "1000B CC"
+        },
+        "67890123": {
+            "affiliate_number": "SS-567890",
+            "insurance_plan": "4000"
+        },
+        "78901234": {
+            "affiliate_number": "SS-432109",
+            "insurance_plan": "5000"
+        }
     },
-    {
-        "name": "Adriana",
-        "surname": "Perez",
-        "nid": "87654321",
-        "insurance_name": "GALENO",
-        "affiliate_num": "70000087654321",
-        "insurance_plan": "Galeno 100"
+    "PREVENCION SALUD": {
+        "89012345": {
+            "affiliate_number": "PS-567432",
+            "insurance_plan": "A5"
+        },
+        "90123456": {
+            "affiliate_number": "PS-678543",
+            "insurance_plan": "A2"
+        },
+        "01234567": {
+            "affiliate_number": "PS-789654",
+            "insurance_plan": "A4"
+        }
     },
-    {
-        "name": "Sofia",
-        "surname": "Blanco",
-        "nid": "11223344",
-        "insurance_name": "MEDIFE",
-        "affiliate_num": "60000011223344",
-        "insurance_plan": "MEDIFE PLATA"
+    "PAMI": {
+        "11111111": {
+            "affiliate_number": "PAMI-001122",
+            "insurance_plan": "GENERICO"
+        },
+        "22222222": {
+            "affiliate_number": "PAMI-112233",
+            "insurance_plan": "GENERICO"
+        }
+    },
+    "MPN": {
+        "33333333": {
+            "affiliate_number": "MPN-445566",
+            "insurance_plan": "GENERICO"
+        },
+        "44444444": {
+            "affiliate_number": "MPN-778899",
+            "insurance_plan": "GENERICO"
+        }
     }
-]
+}
 
-# Endpoint para verificar el plan de obra social del paciente
-@app.route('/verify_patient', methods=['GET'])
-def verify_patient():
-    # Obtener los parámetros de la solicitud
-    name = request.args.get('name')
-    surname = request.args.get('surname')
-    nid = request.args.get('nid')
-    insurance_name = request.args.get('insurance_name')
-    affiliate_num = request.args.get('affiliate_num')
 
-    # Buscar los datos del paciente en el mock_data
-    for patient in mock_data:
-        if (patient["name"] == name and
-                patient["surname"] == surname and
-                patient["nid"] == nid and
-                patient["insurance_name"] == insurance_name and
-                patient["affiliate_num"] == affiliate_num):
-            return jsonify({"insurance_plan": patient["insurance_plan"]})
+@app.route('/get_affiliation', methods=['POST'])
+def get_affiliation():
+    data = request.json
+    nid = data.get("nid")
+    insurance_name = data.get("insurance_name")
 
-    # Si no se encuentra el paciente, devolver un error 404
-    return jsonify({"message": "Usuario no encontrado o datos incorrectos"}), 404
+    if not nid or not insurance_name:
+        return jsonify({"error": "DNI and insurance_name are required"}), 400
 
-# Ejecutar la aplicación
+    insurance_data = INSURANCE_DB.get(insurance_name, {})
+    patient_data = insurance_data.get(nid)
+
+    if patient_data:
+        return jsonify({
+            "nid": nid,
+            "insurance_name": insurance_name,
+            "affiliate_number": patient_data["affiliate_number"],
+            "insurance_plan": patient_data["insurance_plan"],
+            "status": "active"
+        }), 200
+    else:
+        return jsonify({
+            "nid": nid,
+            "insurance_name": insurance_name,
+            "status": "not_found"
+        }), 404
+
+
 if __name__ == '__main__':
-    app.run(port=5001)
+    app.run(port=5003)

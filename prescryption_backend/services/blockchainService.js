@@ -21,7 +21,7 @@ try {
 }
 
 // ✅ Leer ABI del contrato
-const prescriptionContractPath = 'D:\\prescryption_v3\\prescryption_solidity\\PrescriptionContract.json';
+const prescriptionContractPath = 'D:\\prescryption_v3\\prescryption_solidity\\build\\contracts\\PrescriptionContract.json';
 let prescriptionContractJSON;
 
 try {
@@ -215,3 +215,153 @@ exports.getAllPrescriptions = async () => {
     return formattedPrescriptions;
 };
 
+exports.updatePrescriptionPharmacyAddress = async (prescriptionId, pharmacyAddress) => {
+    try {
+        const accounts = await web3.eth.getAccounts();
+
+        console.log('🔍 Updating prescription:', prescriptionId, 'with pharmacy address:', pharmacyAddress);
+
+        const result = await prescriptionContract.methods
+            .updatePrescription(prescriptionId, pharmacyAddress)
+            .send({ from: accounts[0], gas: '2000000' });
+
+        console.log('✅ Prescription updated successfully:', result);
+
+        return {
+            transactionHash: result.transactionHash,
+            blockNumber: result.blockNumber,
+            gasUsed: result.gasUsed
+        };
+    } catch (error) {
+        console.error('❌ Error updating prescription pharmacy address:', error);
+
+        // Extraer la razón de la reversión desde Ganache
+        const revertReason = extractRevertReason(error);
+        if (revertReason) {
+            console.error('❌ Revert reason:', revertReason);
+            throw new Error(revertReason); // Devolver solo el mensaje relevante
+        }
+
+        throw new Error('An unexpected error occurred while updating the prescription pharmacy address.');
+    }
+};
+
+// 📌 Función para extraer la razón de la reversión
+function extractRevertReason(error) {
+    try {
+        // Verificar si el error contiene `cause.message` con la razón de la reversión
+        if (error.cause?.message && error.cause.message.includes("revert")) {
+            return error.cause.message.split("revert ")[1]; // Extraer solo la razón
+        }
+
+        // Buscar en `error.message`
+        if (error.message.includes("revert")) {
+            return error.message.split("revert ")[1];
+        }
+
+        // Verificar en `error.data` (estructura alternativa de Ganache)
+        if (error.data) {
+            for (let key in error.data) {
+                if (error.data[key]?.reason) {
+                    return error.data[key].reason;
+                }
+            }
+        }
+    } catch (parseError) {
+        console.error('❌ Failed to extract revert reason:', parseError.message);
+    }
+
+    return null; // Si no se encuentra ninguna razón específica
+}
+
+exports.getPrescriptionsByPharmacy = async (pharmacyAddress) => {
+    try {
+        const accounts = await web3.eth.getAccounts();
+
+        console.log('🔍 Fetching prescriptions for pharmacy:', pharmacyAddress);
+
+        const prescriptions = await prescriptionContract.methods
+            .getPresbyPharmacyAddress(pharmacyAddress)
+            .call({ from: accounts[0] });
+
+        console.log('✅ Prescriptions retrieved:', prescriptions);
+
+        return prescriptions.map(prescription => ({
+            prescriptionId: prescription.id,
+            patientName: prescription.patientName,
+            patientNid: prescription.patientNid,
+            meds: {
+                med1: prescription.meds.med1,
+                quantity1: Number(prescription.meds.quantity1),
+                med2: prescription.meds.med2,
+                quantity2: Number(prescription.meds.quantity2),
+                diagnosis: prescription.meds.diagnosis,
+                observations: prescription.meds.observations
+            },
+            insurance: {
+                affiliateNum: prescription.insurance.affiliateNum,
+                insuranceName: prescription.insurance.insuranceName,
+                insurancePlan: prescription.insurance.insurancePlan
+            },
+            doctorNid: prescription.doctorNid,
+            issueDate: new Date(Number(prescription.issueDate) * 1000).toLocaleDateString(),
+            expirationDate: new Date(Number(prescription.expirationDate) * 1000).toLocaleDateString(),
+            used: prescription.used,
+            invoiceNumber: prescription.invoiceNumber || "",
+            isPendingValidation: prescription.isPendingValidation
+        }));
+    } catch (error) {
+        console.error('❌ Error fetching prescriptions for pharmacy:', error.message);
+        throw new Error('Error fetching prescriptions for pharmacy');
+    }
+};
+
+exports.getPrescriptionById = async (prescriptionId) => {
+    try {
+        const accounts = await web3.eth.getAccounts();
+        
+        console.log(`🔍 Fetching prescription with ID: ${prescriptionId}`);
+        
+        const prescription = await prescriptionContract.methods
+            .getPrescription(prescriptionId)
+            .call({ from: accounts[0] });
+
+        if (!prescription) {
+            throw new Error(`❌ Prescription with ID ${prescriptionId} not found.`);
+        }
+
+        console.log("✅ Prescription retrieved:", prescription);
+
+        // Convertir BigInt a String para evitar errores con JSON
+        const formattedPrescription = {
+            id: prescription.id.toString(),
+            patientName: prescription.patientName,
+            patientNid: prescription.patientNid,
+            meds: {
+                med1: prescription.meds.med1,
+                quantity1: prescription.meds.quantity1.toString(),
+                med2: prescription.meds.med2,
+                quantity2: prescription.meds.quantity2.toString(),
+                diagnosis: prescription.meds.diagnosis,
+                observations: prescription.meds.observations
+            },
+            insurance: {
+                affiliateNum: prescription.insurance.affiliateNum,
+                insuranceName: prescription.insurance.insuranceName,
+                insurancePlan: prescription.insurance.insurancePlan
+            },
+            doctorNid: prescription.doctorNid,
+            patientAddress: prescription.patientAddress,
+            pharmacyAddress: prescription.pharmacyAddress,
+            issueDate: new Date(Number(prescription.issueDate) * 1000).toISOString(),
+            expirationDate: new Date(Number(prescription.expirationDate) * 1000).toISOString(),
+            used: prescription.used,
+            invoiceNumber: prescription.invoiceNumber || ""
+        };
+
+        return formattedPrescription;
+    } catch (error) {
+        console.error("❌ Error fetching prescription:", error.message);
+        throw new Error("Error fetching prescription from blockchain");
+    }
+};

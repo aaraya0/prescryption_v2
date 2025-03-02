@@ -29,7 +29,8 @@ contract PrescriptionContract {
         uint issueDate;
         uint expirationDate;
         bool used;
-        string invoiceNumber; // Campo nuevo para almacenar el número de factura
+        bool isPendingValidation; // Nuevo campo para bloquear el reenvío
+        string invoiceNumber;
     }
 
     Prescription[] public prescriptions;
@@ -55,6 +56,9 @@ contract PrescriptionContract {
         uint expirationDate
     );
 
+    event PrescriptionUpdated(uint prescriptionId, address pharmacyAddress);
+    event PrescriptionCleared(uint prescriptionId);
+
     // Función para emitir una receta con fecha personalizada
     function issuePrescription(
         string memory _patientName,
@@ -65,9 +69,9 @@ contract PrescriptionContract {
         address _patientAddress,
         uint _issueDate
     ) public {
-        prescriptionCount++;  // Incrementa el contador para el nuevo ID
+        prescriptionCount++;
 
-        uint expirationDate = _issueDate + 30 days;  // Calcula la fecha de vencimiento
+        uint expirationDate = _issueDate + 30 days;
 
         Prescription memory newPrescription = Prescription({
             id: prescriptionCount,
@@ -81,7 +85,8 @@ contract PrescriptionContract {
             issueDate: _issueDate,
             expirationDate: expirationDate,
             used: false,
-            invoiceNumber: "" // Inicialmente vacío
+            isPendingValidation: false, // Inicialmente no está pendiente de validación
+            invoiceNumber: ""
         });
 
         prescriptions.push(newPrescription);
@@ -104,6 +109,27 @@ contract PrescriptionContract {
     function getPrescription(uint _prescriptionId) public view returns (Prescription memory) {
         require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
         return prescriptions[_prescriptionId - 1];
+    }
+
+    // Función para actualizar la dirección de la farmacia en la receta
+    function updatePrescription(uint _prescriptionId, address _pharmacyAddress) public {
+        require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
+        require(!prescriptions[_prescriptionId - 1].isPendingValidation, "Prescription already pending validation.");
+        require(_pharmacyAddress != address(0), "Invalid pharmacy address.");
+
+        prescriptions[_prescriptionId - 1].pharmacyAddress = _pharmacyAddress;
+        prescriptions[_prescriptionId - 1].isPendingValidation = true;
+
+        emit PrescriptionUpdated(_prescriptionId, _pharmacyAddress);
+    }
+
+    // Función para liberar la receta de la farmacia
+    function clearPendingValidation(uint _prescriptionId) public {
+        require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
+        prescriptions[_prescriptionId - 1].isPendingValidation = false;
+        prescriptions[_prescriptionId - 1].pharmacyAddress = address(0);
+
+        emit PrescriptionCleared(_prescriptionId);
     }
 
     // Función para obtener todas las recetas
@@ -151,12 +177,6 @@ contract PrescriptionContract {
         return patientPrescriptions;
     }
 
-    // Función para actualizar la dirección de la farmacia en la receta
-    function updatePrescription(uint _prescriptionId, address _pharmacyAddress) public {
-        require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
-        prescriptions[_prescriptionId - 1].pharmacyAddress = _pharmacyAddress;
-    }
-
     // Función para obtener recetas por dirección de la farmacia
     function getPresbyPharmacyAddress(address _pharmacyAddress) public view returns (Prescription[] memory) {
         uint count = 0;
@@ -183,10 +203,6 @@ contract PrescriptionContract {
         require(!prescriptions[_prescriptionId - 1].used, "Prescription already used.");
 
         prescriptions[_prescriptionId - 1].used = true;
-        prescriptions[_prescriptionId - 1].invoiceNumber = _invoiceNumber; // Almacena el número de factura
-    }
-    function resetPharmacyAddress(uint _prescriptionId) public {
-        require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
-        prescriptions[_prescriptionId - 1].pharmacyAddress = address(0); // Resetea la dirección de la farmacia
+        prescriptions[_prescriptionId - 1].invoiceNumber = _invoiceNumber;
     }
 }
