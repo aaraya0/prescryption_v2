@@ -8,17 +8,14 @@ exports.scrapeMedicationData = async (drugName) => {
     await page.goto("https://www.argentina.gob.ar/precios-de-medicamentos");
 
     try {
-        // ✅ Esperar a que la página cargue completamente
         await new Promise(r => setTimeout(r, 3000));
 
-        // ✅ Buscar todos los iframes
         const frames = await page.frames();
         let searchInput = null;
         let targetFrame = null;
 
         console.log(`🧐 Se encontraron ${frames.length} iframes. Buscando el correcto...`);
 
-        // ✅ Iterar sobre los iframes hasta encontrar el input de búsqueda
         for (let frame of frames) {
             searchInput = await frame.$("#searchInput");
             if (searchInput) {
@@ -28,67 +25,81 @@ exports.scrapeMedicationData = async (drugName) => {
             }
         }
 
-        // ✅ Si no se encontró el input, lanzar un error
         if (!targetFrame) {
             throw new Error("❌ No se encontró el input de búsqueda en ningún iframe.");
         }
 
-        // ✅ Escribir en el campo de búsqueda
         await searchInput.type(drugName);
         await searchInput.press("Enter");
 
         console.log("✅ Se ingresó el medicamento en la búsqueda.");
 
-        // ✅ Esperar a que los resultados se carguen
-        await new Promise(r => setTimeout(r, 5000)); // Simula waitForTimeout()
+        await new Promise(r => setTimeout(r, 5000));
 
-        // ✅ Extraer los primeros 30 resultados
         const rows = await targetFrame.$$("table tbody tr");
         const medications = [];
 
         console.log(`📌 Se encontraron ${rows.length} filas en la tabla.`);
 
-        for (let i = 0; i < Math.min(rows.length, 15); i++) {
+        for (let i = 0; i < Math.min(rows.length, 10); i++) {
             const columns = await rows[i].$$("td");
             if (columns.length >= 3) {
                 const name = await columns[0].evaluate(el => el.innerText.trim());
-                const price = await columns[1].evaluate(el => el.innerText.trim());
-                const pamiPrice = await columns[2].evaluate(el => el.innerText.trim());
+                let priceText = await columns[1].evaluate(el => el.innerText.trim());
+                let pamiPriceText = await columns[2].evaluate(el => el.innerText.trim());
 
-                let details = {};
-
-                // ✅ Buscar y hacer clic en el botón "Ver más"
                 try {
+                    let details = {};  
+                    let detailsText = "";  
+
                     const verMasButton = await rows[i].$("button");
                     if (verMasButton) {
-                        await verMasButton.click();
-                        console.log(`🔍 Obteniendo información adicional de: ${name}`);
+                        for (let attempt = 0; attempt < 2; attempt++) {  // Intentamos dos veces
+                            await verMasButton.click();
+                            console.log(`🔍 Intento ${attempt + 1} de obtener información de: ${name}`);
 
-                        await new Promise(r => setTimeout(r, 2000)); // Esperar a que cargue el modal
+                            await new Promise(r => setTimeout(r, 3000));
 
-                        // ✅ Extraer información del modal
-                        const modal = await targetFrame.$(".modal-body");
-                        if (modal) {
-                            const detailsText = await modal.evaluate(el => el.innerText);
-                            details = parseDetails(detailsText);
+                            try {
+                                await page.waitForSelector(".modal-body", { visible: true, timeout: 3000 });
+                                const modal = await targetFrame.$(".modal-body");
+                                if (modal) {
+                                    detailsText = await modal.evaluate(el => el.innerText);
+                                    details = parseDetails(detailsText);
+                                    break; // Salimos del bucle si logramos obtener los detalles
+                                }
+                            } catch (error) {
+                                console.warn(`⚠️ No se pudo extraer detalles en el intento ${attempt + 1} para ${name}`);
+                            }
                         }
 
-                        // ✅ Cerrar el modal
                         const closeButton = await targetFrame.$(".close");
                         if (closeButton) {
                             await closeButton.click();
+                            await new Promise(r => setTimeout(r, 1000));
                         }
                     }
-                } catch (error) {
-                    console.error(`⚠️ No se pudo obtener detalles de ${name}: ${error.message}`);
-                }
 
-                medications.push({
-                    name,
-                    price,
-                    pamiPrice,
-                    details
-                });
+                    if (!detailsText) {
+                        console.warn(`⚠️ No se encontraron detalles para ${name}`);
+                    }
+
+                    const price = formatPrice(priceText);
+                    const pamiPrice = parsePamiPrice(pamiPriceText, details.discountPami);
+
+                    medications.push({
+                        brandName: name,
+                        genericName: drugName,
+                        activeComponentsList: details.activeComponent ? details.activeComponent.split("+").map(c => c.trim().replace(/\.$/, "")) : [],
+                        price,
+                        pamiPrice,
+                        details
+                    });
+
+                    console.log(`📝 Agregado: ${name} | Precio: ${price} | PAMI: ${pamiPrice}`);
+                } catch (error) {
+                    console.error(`⚠️ Error procesando ${name}: ${error.message}`);
+                }
             }
         }
 
@@ -103,7 +114,6 @@ exports.scrapeMedicationData = async (drugName) => {
     }
 };
 
-// ✅ Función para parsear los detalles del modal
 function parseDetails(detailsText) {
     const details = {};
     const lines = detailsText.split("\n");
@@ -116,9 +126,29 @@ function parseDetails(detailsText) {
         if (line.includes("Acción:")) details.action = line.split(":")[1].trim();
         if (line.includes("Origen:")) details.origin = line.split(":")[1].trim();
         if (line.includes("Tipo de Venta:")) details.saleType = line.split(":")[1].trim();
-        if (line.includes("Descuento PAMI:")) details.discountPami = line.split(":")[1].trim();
-        if (line.includes("Precio Unitario:")) details.unitPrice = line.split(":")[1].trim();
+        if (line.includes("Descuento PAMI:")) details.discountPami = extractDiscountPercentage(line.split(":")[1].trim());
+        if (line.includes("Precio Unitario:")) details.unitPrice = formatPrice(line.split(":")[1].trim());
     });
 
     return details;
+}
+
+function formatPrice(priceText) {
+    if (!priceText || priceText.trim() === "") return 0;
+
+    let cleanedText = priceText.replace(/[^\d,]/g, "").replace(",", ".");
+    return parseFloat(cleanedText) || 0;
+}
+
+function parsePamiPrice(pamiPriceText, discountPami) {
+    if (!pamiPriceText || pamiPriceText.trim() === "" || pamiPriceText.includes("Sin descuento")) {
+        return 0;
+    }
+
+    return formatPrice(pamiPriceText);
+}
+
+function extractDiscountPercentage(text) {
+    const match = text.match(/(\d+)%/);
+    return match ? parseInt(match[1]) : 0;
 }

@@ -31,12 +31,12 @@ app.use('/api/public/pharmacies', publicPharmacyRoutes);
 app.use('/api/auth', authRoutes); // Ruta de autenticación
 
 // ✅ Middleware de autenticación para rutas protegidas
-app.use(authMiddleware);
+//app.use(authMiddleware);
 
 // ✅ Rutas Protegidas
-app.use('/api/patients', patientRoutes);
-app.use('/api/doctors', doctorRoutes);
-app.use('/api/prescriptions', prescriptionRoutes);
-app.use('/api/pharmacies', pharmacyRoutes);
+app.use('/api/patients', authMiddleware("patient"), patientRoutes);
+app.use('/api/doctors', authMiddleware("doctor"), doctorRoutes);
+app.use('/api/prescriptions', authMiddleware("doctor"), prescriptionRoutes);
+app.use('/api/pharmacies', authMiddleware("pharmacy"), pharmacyRoutes);
 
 app.listen(3001, () => console.log('✅ Server running on port 3001'));

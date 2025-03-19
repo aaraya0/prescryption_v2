@@ -205,4 +205,25 @@ contract PrescriptionContract {
         prescriptions[_prescriptionId - 1].used = true;
         prescriptions[_prescriptionId - 1].invoiceNumber = _invoiceNumber;
     }
+
+    // 📌 Función para validar la receta en la blockchain
+function validatePrescription(uint _prescriptionId, address _pharmacyAddress, uint _validationTimestamp) public {
+    require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid prescription ID.");
+    Prescription storage prescription = prescriptions[_prescriptionId - 1];
+
+    require(!prescription.used, "Prescription already used.");
+    require(prescription.pharmacyAddress == _pharmacyAddress, "Pharmacy does not match the assigned pharmacy.");
+    require(prescription.isPendingValidation, "Prescription is not pending validation.");
+
+    // 📌 Marcar la receta como validada y lista para facturación
+    prescription.used = true;
+    prescription.isPendingValidation = false;
+
+    // 📌 Agregar un timestamp de validación
+    emit PrescriptionValidated(_prescriptionId, _pharmacyAddress, _validationTimestamp);
+}
+
+// 📌 Evento para registrar la validación de la receta
+event PrescriptionValidated(uint prescriptionId, address pharmacyAddress, uint validationTimestamp);
+
 }

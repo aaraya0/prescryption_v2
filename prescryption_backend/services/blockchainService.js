@@ -365,3 +365,68 @@ exports.getPrescriptionById = async (prescriptionId) => {
         throw new Error("Error fetching prescription from blockchain");
     }
 };
+
+exports.validatePrescriptionOnBlockchain = async (prescriptionId, pharmacyAddress) => {
+    try {
+        const accounts = await web3.eth.getAccounts();
+        const validationTimestamp = Math.floor(Date.now() / 1000); // Timestamp actual
+
+        console.log(`🔄 Validating prescription ID ${prescriptionId} on blockchain...`);
+
+        const result = await prescriptionContract.methods
+            .validatePrescription(prescriptionId, pharmacyAddress, validationTimestamp)
+            .send({ from: accounts[0], gas: "2000000" });
+
+        console.log("✅ Prescription validated successfully on blockchain:", result);
+        return {
+            transactionHash: result.transactionHash,
+            blockNumber: result.blockNumber,
+            gasUsed: result.gasUsed,
+            validationTimestamp
+        };
+    } catch (error) {
+        console.error("❌ Error validating prescription on blockchain:", error.message);
+        throw new Error("Error validating prescription on blockchain.");
+    }
+};
+
+exports.clearPendingValidation = async (prescriptionId) => {
+    try {
+        const accounts = await web3.eth.getAccounts();
+        console.log(`🔄 Clearing prescription ID ${prescriptionId}...`);
+
+        const result = await prescriptionContract.methods
+            .clearPendingValidation(prescriptionId)
+            .send({ from: accounts[0], gas: "2000000" });
+
+        console.log("✅ Prescription cleared successfully:", result);
+        return {
+            transactionHash: result.transactionHash,
+            blockNumber: result.blockNumber,
+            gasUsed: result.gasUsed
+        };
+    } catch (error) {
+        console.error("❌ Error clearing prescription:", error.message);
+        throw new Error("Error clearing prescription.");
+    }
+};
+
+exports.markPrescriptionAsUsed = async (prescriptionId, invoiceNumber, pharmacyAddress) => {
+    try {
+        console.log(`🔗 Enviando transacción a la blockchain para marcar la receta ${prescriptionId} como usada.`);
+        
+        const accounts = await web3.eth.getAccounts();
+        const sender = accounts[0]; // Se usa la dirección de la farmacia o la cuenta 0
+
+        await prescriptionContract.methods.markPrescriptionAsUsed(prescriptionId, invoiceNumber).send({
+            from: sender,
+            gas: 3000000
+        });
+
+        console.log(`✅ Receta ${prescriptionId} marcada como usada en la blockchain.`);
+        return { success: true, message: `Prescription ${prescriptionId} marked as used.` };
+    } catch (error) {
+        console.error("❌ Error al marcar la receta como usada:", error);
+        return { success: false, message: "Failed to mark prescription as used." };
+    }
+};
