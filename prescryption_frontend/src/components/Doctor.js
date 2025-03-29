@@ -11,13 +11,13 @@ const Doctor = () => {
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        axios.get('http://localhost:3001/api/pr_by_doctor', {
+        axios.get('http://localhost:3001/api/doctors/prescriptions', {
             headers: { Authorization: `Bearer ${token}` }
         })
         .then(response => {
-            if (Array.isArray(response.data.prescriptions)) {
-                setRecetas(response.data.prescriptions);
-                setFilteredRecetas(response.data.prescriptions);
+            if (Array.isArray(response.data)) {
+                setRecetas(response.data);
+                setFilteredRecetas(response.data);
             } else {
                 setRecetas([]);
                 setFilteredRecetas([]);
@@ -27,12 +27,12 @@ const Doctor = () => {
     }, [token]);
 
     useEffect(() => {
-        let filtered = recetas.filter(receta => 
-            receta.patientName.toLowerCase().includes(searchPaciente.toLowerCase()) ||
-            (receta.patientSurname && receta.patientSurname.toLowerCase().includes(searchPaciente.toLowerCase())) ||
-            (receta.patientNid && receta.patientNid.toString().includes(searchPaciente))
+        let filtered = recetas.filter(receta =>
+            receta.patientName?.toLowerCase().includes(searchPaciente.toLowerCase()) ||
+            receta.patientSurname?.toLowerCase().includes(searchPaciente.toLowerCase()) ||
+            receta.patientNid?.toString().includes(searchPaciente)
         );
-        
+
         filtered = filtered.sort((a, b) => {
             const dateA = new Date(a.issueDate);
             const dateB = new Date(b.issueDate);
@@ -49,8 +49,8 @@ const Doctor = () => {
     return (
         <div className="receta-list-container">
             <h4>Recetas Emitidas</h4>
-            
-            {/* Filtros con descripciones */}
+
+            {/* Filtros */}
             <div className="filter-container">
                 <div className="filter-item">
                     <label>Buscar por paciente (nombre, apellido, DNI):</label>
@@ -75,32 +75,37 @@ const Doctor = () => {
                 </div>
             </div>
 
+            {/* Lista de recetas */}
             <ul className="receta-list">
-                {filteredRecetas.map((receta, index) => (
-                    <li key={index} className="receta-item">
-                        <div className="receta-box" onClick={() => toggleReceta(index)}>
-                            <div className="receta-header">
-                                <strong>Paciente:</strong> {receta.patientName || 'N/A'} {receta.patientSurname || 'N/A'} <br />
-                                <strong>DNI:</strong> {receta.patientNid || 'N/A'}
-                            </div>
-                            {expandedReceta === index && (
-                                <div className="receta-details">
-                                    {receta.meds && typeof receta.meds === 'object' ? (
-                                        <>
-                                            <p><strong>Medicamento 1:</strong> {receta.meds.med1 || 'N/A'}, Cantidad: {receta.meds.quantity1 || 'N/A'}</p>
-                                            <p><strong>Medicamento 2:</strong> {receta.meds.med2 || 'N/A'}, Cantidad: {receta.meds.quantity2 || 'N/A'}</p>
-                                            <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis || 'N/A'}</p>
-                                        </>
-                                    ) : (
-                                        <p>No se encontraron detalles de medicamentos.</p>
-                                    )}
-                                    <p><strong>Fecha de Emisión:</strong> {receta.issueDate ? new Date(receta.issueDate).toLocaleDateString() : 'N/A'}</p>
-                                    <p><strong>Fecha de Expiración:</strong> {receta.expirationDate ? new Date(receta.expirationDate).toLocaleDateString() : 'N/A'}</p>
+                {filteredRecetas.length === 0 ? (
+                    <p>No hay recetas emitidas aún.</p>
+                ) : (
+                    filteredRecetas.map((receta, index) => (
+                        <li key={index} className="receta-item">
+                            <div className="receta-box" onClick={() => toggleReceta(index)}>
+                                <div className="receta-header">
+                                    <strong>Paciente:</strong> {receta.patientName || 'N/A'} {receta.patientSurname || 'N/A'}<br />
+                                    <strong>DNI:</strong> {receta.patientNid || 'N/A'}
                                 </div>
-                            )}
-                        </div>
-                    </li>
-                ))}
+                                {expandedReceta === index && (
+                                    <div className="receta-details">
+                                        {receta.meds && typeof receta.meds === 'object' ? (
+                                            <>
+                                                <p><strong>Medicamento 1:</strong> {receta.meds.med1 || 'N/A'}, Cantidad: {receta.meds.quantity1 || 'N/A'}</p>
+                                                <p><strong>Medicamento 2:</strong> {receta.meds.med2 || 'N/A'}, Cantidad: {receta.meds.quantity2 || 'N/A'}</p>
+                                                <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis || 'N/A'}</p>
+                                            </>
+                                        ) : (
+                                            <p>No se encontraron detalles de medicamentos.</p>
+                                        )}
+                                        <p><strong>Fecha de Emisión:</strong> {receta.issueDate ? new Date(receta.issueDate).toLocaleDateString() : 'N/A'}</p>
+                                        <p><strong>Fecha de Expiración:</strong> {receta.expirationDate ? new Date(receta.expirationDate).toLocaleDateString() : 'N/A'}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </li>
+                    ))
+                )}
             </ul>
         </div>
     );
