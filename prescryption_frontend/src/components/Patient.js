@@ -7,7 +7,7 @@ import '../styles/Patient.css';
 
 const Patient = () => {
     const [recetas, setRecetas] = useState([]);
-    const [alias, setAlias] = useState('');
+    const [pharmacyNid, setPharmacyNid] = useState('');
     const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const token = localStorage.getItem('token');
@@ -20,10 +20,13 @@ const Patient = () => {
     useEffect(() => {
         const fetchPrescriptions = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/api/pr_by_patient', {
+                const response = await axios.get('http://localhost:3001/api/patients/prescriptions', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                let filteredPrescriptions = response.data.prescriptions;
+
+                let filteredPrescriptions = Array.isArray(response.data.prescriptions)
+                    ? response.data.prescriptions
+                    : [];
 
                 const specialties = [...new Set(filteredPrescriptions.map(receta => receta.doctorSpecialty))];
                 setAvailableSpecialties(specialties);
@@ -65,22 +68,21 @@ const Patient = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedPrescriptionId || !alias) return;
+        if (!selectedPrescriptionId || !pharmacyNid) return;
 
         try {
-            await axios.post('http://localhost:3001/api/pr_to_pharmacy', {
-                alias,
+            await axios.post('http://localhost:3001/api/patients/send_prescription', {
+                pharmacyNid,
                 prescriptionId: selectedPrescriptionId
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
             setShowModal(false);
-            setAlias('');
+            setPharmacyNid('');
             setSelectedPrescriptionId(null);
 
-            // Set a cookie for the transferred prescription to hide the button temporarily
-            Cookies.set(`pendingPrescription_${selectedPrescriptionId}`, 'true', { expires: 1 / 720 }); // 2 minutes
+            Cookies.set(`pendingPrescription_${selectedPrescriptionId}`, 'true', { expires: 1 / 720 }); 
             navigate('/dashboard/patient');
         } catch (error) {
             console.error('Error al transferir la receta:', error);
@@ -102,7 +104,7 @@ const Patient = () => {
             );
         };
 
-        const intervalId = setInterval(checkPendingPrescriptions, 10000); // Check every 10 seconds
+        const intervalId = setInterval(checkPendingPrescriptions, 10000); 
         return () => clearInterval(intervalId);
     }, [recetas]);
 
@@ -185,8 +187,8 @@ const Patient = () => {
                             <Form.Label>Alias de la Farmacia:</Form.Label>
                             <Form.Control
                                 type="text"
-                                value={alias}
-                                onChange={(e) => setAlias(e.target.value)}
+                                value={pharmacyNid}
+                                onChange={(e) => setPharmacyNid(e.target.value)}
                                 required
                             />
                         </Form.Group>
