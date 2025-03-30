@@ -10,7 +10,6 @@ import PrescriptionValidation from './components/PrescriptionValidation';
 import Header from './components/Header';
 
 function App() {
-    // Agrega las rutas de dashboard en las que no quieres que aparezca el Header
     const noHeaderRoutes = ["/", "/dashboard/patient", "/dashboard/doctor", "/dashboard/pharmacy", "/dashboard/insurance"];
 
     return (
