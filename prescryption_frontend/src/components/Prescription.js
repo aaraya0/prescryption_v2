@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch } from 'react-icons/fa';
-import "./styles.css";
+import './styles.css';
 
 function EmitirReceta() {
   const [formData, setFormData] = useState({
@@ -23,7 +23,6 @@ function EmitirReceta() {
 
   const navigate = useNavigate();
 
-  // Manejar cambios en el formulario
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -31,10 +30,8 @@ function EmitirReceta() {
     });
   };
 
-  // Buscar datos del paciente
   const handleSearchPatient = async () => {
     console.log("Buscando paciente con NID:", formData.patientNid);
-
     const token = localStorage.getItem('token');
     if (!token) {
       alert('No estás autenticado. Por favor, inicia sesión nuevamente.');
@@ -42,16 +39,18 @@ function EmitirReceta() {
     }
 
     try {
-      const response = await axios.get(`http://localhost:3001/api/patient/${formData.patientNid}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `http://localhost:3001/api/doctors/patients/${formData.patientNid}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
 
       const patientData = response.data.profile;
       console.log("Datos del paciente encontrados:", patientData);
 
-      // Actualizar los campos del formulario con los datos recibidos
-      setFormData((prevFormData) => ({
-        ...prevFormData,
+      setFormData((prev) => ({
+        ...prev,
         patientName: patientData.name || '',
         patientSurname: patientData.surname || '',
         affiliateNum: patientData.affiliate_num || '',
@@ -64,7 +63,6 @@ function EmitirReceta() {
     }
   };
 
-  // Enviar el formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
@@ -91,9 +89,13 @@ function EmitirReceta() {
     }
 
     try {
-      await axios.post('http://localhost:3001/api/issue_pres', formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post(
+        'http://localhost:3001/api/prescriptions/issue',
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
       alert('Receta emitida con éxito');
       navigate('/dashboard/doctor');
     } catch (error) {
@@ -161,7 +163,7 @@ function EmitirReceta() {
               <textarea name="observations" className="textarea" placeholder="Ingresar observaciones (opcional)" onChange={handleChange}></textarea>
             </div>
           </div>
-          <div className='buttonGenerarReceta'>
+          <div className="buttonGenerarReceta">
             <button type="submit" className="button">Generar Receta</button>
           </div>
         </form>

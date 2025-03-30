@@ -24,8 +24,8 @@ const Patient = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
-                let filteredPrescriptions = Array.isArray(response.data.prescriptions)
-                    ? response.data.prescriptions
+                let filteredPrescriptions = Array.isArray(response.data)
+                    ? response.data
                     : [];
 
                 const specialties = [...new Set(filteredPrescriptions.map(receta => receta.doctorSpecialty))];
@@ -157,6 +157,7 @@ const Patient = () => {
                 {recetas.map((receta, index) => (
                     <li key={index}>
                         <strong>Médico:</strong> {receta.doctorName} ({receta.doctorSpecialty})<br />
+                        <strong>Médico NID:</strong> {receta.doctorNid}<br />
                         <strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}<br />
                         <strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}<br />
                         <strong>Diagnóstico:</strong> {receta.meds.diagnosis}<br />
