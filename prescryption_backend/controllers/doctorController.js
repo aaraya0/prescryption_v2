@@ -7,6 +7,9 @@ const { Web3 } = require('web3');
 // ✅ Configuración de Web3
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 
+
+const Patient = require('../models/Patient');
+
 // 📌 Registrar Médico (Ruta Pública)
 exports.registerDoctor = async (req, res) => {
     const { nid, license, name, surname, specialty, password, mail } = req.body;
@@ -62,3 +65,22 @@ exports.getPresbyDoctorNid = async (req, res) => {
         res.status(500).send(err.message);
     }
 };
+
+
+
+// 📌 Obtener datos del paciente por NID (visible para el médico)
+exports.getPatientByNid = async (req, res) => {
+    const { nid } = req.params;
+  
+    try {
+      const patient = await Patient.findOne({ nid });
+      if (!patient) {
+        return res.status(404).json({ message: 'Paciente no encontrado' });
+      }
+  
+      res.json({ profile: patient });
+    } catch (error) {
+      console.error('❌ Error al buscar paciente:', error);
+      res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  };
