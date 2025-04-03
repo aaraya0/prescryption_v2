@@ -37,6 +37,6 @@ app.use('/api/auth', authRoutes); // Ruta de autenticación
 app.use('/api/patients', authMiddleware("patient"), patientRoutes);
 app.use('/api/doctors', authMiddleware("doctor"), doctorRoutes);
 app.use('/api/prescriptions', authMiddleware("doctor"), prescriptionRoutes);
-app.use('/api/pharmacies', authMiddleware("pharmacy"), pharmacyRoutes);
+app.use('/api/pharmacies', authMiddleware("pharmacyUser"), pharmacyRoutes);
 
 app.listen(3001, () => console.log('✅ Server running on port 3001'));
