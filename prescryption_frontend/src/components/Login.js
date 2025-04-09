@@ -6,11 +6,11 @@ import './styles.css';
 function Login() {
     const [nid, setNid] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false); // 👈 nuevo estado
     const [userType, setUserType] = useState('');
     const [message, setMessage] = useState({ text: '', type: '' });
     const navigate = useNavigate();
 
-    // Leer userType desde la cookie al cargar el componente
     useEffect(() => {
         const cookieType = document.cookie
             .split('; ')
@@ -68,9 +68,14 @@ function Login() {
         navigate('/register');
     };
 
+    const togglePasswordVisibility = () => {
+        setShowPassword(prev => !prev);
+    };
+
     return (
         <div className="formLogin">
             <h2 className="loginTitle">{displayUserType}</h2>
+
             <p className="inputTitle">DNI</p>
             <input
                 className="loginInput"
@@ -79,20 +84,30 @@ function Login() {
                 value={nid}
                 onChange={e => setNid(e.target.value)}
             />
+
             <p className="inputTitle">Contraseña</p>
-            <input
-                className="loginInput"
-                type="password"
-                placeholder="Contraseña"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-            />
+
+            <div className="password-container">
+  <input
+    className="loginInput password-field"
+    type={showPassword ? "text" : "password"}
+    placeholder="Contraseña"
+    value={password}
+    onChange={e => setPassword(e.target.value)}
+  />
+  <span className="eye-icon" onClick={() => setShowPassword(!showPassword)}>
+    {showPassword ? '🙈' : '👁️'}
+  </span>
+</div>
+
+
             <button className="loginButton" onClick={handleLogin}>Ingresar</button>
             <button className="RecordarButton">Recordar Contraseña</button>
             <p>
                 ¿No tenés una cuenta?{' '}
                 <button className="RegistrateButton" onClick={handleRegister}>Registrate</button>
             </p>
+
             {message.text && <Notification message={message.text} type={message.type} />}
         </div>
     );
