@@ -6,7 +6,7 @@ import './styles.css';
 function Login() {
     const [nid, setNid] = useState('');
     const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false); // 👈 nuevo estado
+    const [showPassword, setShowPassword] = useState(false); 
     const [userType, setUserType] = useState('');
     const [message, setMessage] = useState({ text: '', type: '' });
     const navigate = useNavigate();
@@ -68,10 +68,6 @@ function Login() {
         navigate('/register');
     };
 
-    const togglePasswordVisibility = () => {
-        setShowPassword(prev => !prev);
-    };
-
     return (
         <div className="formLogin">
             <h2 className="loginTitle">{displayUserType}</h2>
@@ -95,9 +91,13 @@ function Login() {
     value={password}
     onChange={e => setPassword(e.target.value)}
   />
-  <span className="eye-icon" onClick={() => setShowPassword(!showPassword)}>
-    {showPassword ? '🙈' : '👁️'}
-  </span>
+<span 
+  className="eye-icon" 
+  onClick={() => setShowPassword(!showPassword)} 
+  title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+>
+  {showPassword ? '🙈' : '👁️'}
+</span>
 </div>
 
 
