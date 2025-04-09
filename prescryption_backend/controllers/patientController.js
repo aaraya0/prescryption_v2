@@ -133,3 +133,18 @@ exports.sendPrescriptionToPharmacy = async (req, res) => {
         res.status(500).json({ message: 'Error sending prescription to pharmacy' });
     }
 };
+
+
+exports.getPatientProfile = async (req, res) => {
+    try {
+      const nid = req.user.nid;
+      const patient = await Patient.findOne({ nid }).select('-password'); // no enviar contraseña
+      if (!patient) return res.status(404).json({ message: "Patient not found" });
+  
+      res.json(patient);
+    } catch (err) {
+      console.error("❌ Error retrieving patient profile:", err.message);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+  

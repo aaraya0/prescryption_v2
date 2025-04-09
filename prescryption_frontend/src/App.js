@@ -4,10 +4,10 @@ import Register from './components/Register';
 import Login from './components/Login';
 import MainMenu from './components/MainMenu';
 import Dashboard from './components/Dashboard';
-import Perfil from './components/Perfil';
 import EmitirReceta from './components/Prescription';
 import PrescriptionValidation from './components/PrescriptionValidation';
 import Header from './components/Header';
+import PatientProfile from './components/patientProfile';
 
 function App() {
     const noHeaderRoutes = ["/", "/dashboard/patient", "/dashboard/doctor", "/dashboard/pharmacy", "/dashboard/insurance"];
@@ -26,7 +26,7 @@ function App() {
                     <Route path="/dashboard/doctor" element={<Dashboard userType="doctor" />} />
                     <Route path="/dashboard/pharmacy" element={<Dashboard userType="pharmacy" />} />
                     <Route path="/dashboard/insurance" element={<Dashboard userType="insurance" />} />
-                    <Route path="/perfil/:userType" element={<Perfil />} /> {/* Ruta para el perfil */}
+                    <Route path="/perfil/patient" element={<PatientProfile />} />
                     <Route path="/issue-prescription" element={<EmitirReceta />} />
                     <Route path="/validate-prescription" element={<PrescriptionValidation />} />
                 </Routes>

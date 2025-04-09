@@ -9,8 +9,8 @@ const Doctor = require('../models/Doctor');
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 
 // ✅ Leer la dirección del contrato
-//const contractsDataPath = path.join(__dirname, '..', '..', 'prescryption_solidity', 'contracts_data.json');                                           //para Belu
-const contractsDataPath = 'D:\\prescryption_v3\\prescryption_solidity\\contracts_data.json';
+const contractsDataPath = path.join(__dirname, '..', '..', 'prescryption_solidity', 'contracts_data.json');                                           //para Belu
+//const contractsDataPath = 'D:\\prescryption_v3\\prescryption_solidity\\contracts_data.json';
 let contractsData;
 
 try {
@@ -22,8 +22,8 @@ try {
 }
 
 // ✅ Leer ABI del contrato
-//const prescriptionContractPath = path.join(__dirname, '..', '..', 'prescryption_solidity', 'build', 'contracts', 'PrescriptionContract.json');        //para Belu
-const prescriptionContractPath = 'D:\\prescryption_v3\\prescryption_solidity\\build\\contracts\\PrescriptionContract.json';
+const prescriptionContractPath = path.join(__dirname, '..', '..', 'prescryption_solidity', 'build', 'contracts', 'PrescriptionContract.json');        //para Belu
+//const prescriptionContractPath = 'D:\\prescryption_v3\\prescryption_solidity\\build\\contracts\\PrescriptionContract.json';
 let prescriptionContractJSON;
 
 try {
