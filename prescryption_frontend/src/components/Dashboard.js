@@ -64,7 +64,7 @@ function Dashboard({ userType }) {
                 </div>
                 
                 <div className="top-right-buttons">
-                    <button className="dashboard-button" onClick={() => navigate(`/perfil/${userType}`)}>Ver Perfil</button>
+                    <button className="dashboard-button" onClick={() => navigate('/perfil')}>Ver Perfil</button>
                     <button className="dashboard-button" onClick={handleLogout}>Cerrar Sesión</button>
                 </div>
             </div>

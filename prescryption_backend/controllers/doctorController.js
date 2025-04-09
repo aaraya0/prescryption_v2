@@ -84,3 +84,20 @@ exports.getPatientByNid = async (req, res) => {
       res.status(500).json({ message: 'Error interno del servidor' });
     }
   };
+
+  // 📌 Obtener el perfil del doctor autenticado
+exports.getDoctorProfile = async (req, res) => {
+    try {
+        const nid = req.user.nid;
+      const doctor = await Doctor.findOne({ nid }).select('-password'); // no enviar contraseña
+
+        if (!doctor) {
+            return res.status(404).json({ message: 'Doctor no encontrado' });
+        }
+
+        res.json(doctor);
+    } catch (error) {
+        console.error('❌ Error al obtener perfil del doctor:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
