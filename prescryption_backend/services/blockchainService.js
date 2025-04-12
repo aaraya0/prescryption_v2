@@ -45,32 +45,46 @@ exports.getPrescriptionsByPatient = async (patientAddress) => {
     // Formatear los datos
     const formattedPrescriptions = convertBigIntToString(rawPrescriptions);
 
-    return formattedPrescriptions.map(prescription => ({
-        id: prescription.id,
-        patientName: prescription.patient.name,
-        patientSurname: prescription.patient.surname,
-        patientNid: prescription.patient.nid,
-        meds: {
-            med1: prescription.meds.med1,
-            quantity1: prescription.meds.quantity1,
-            med2: prescription.meds.med2,
-            quantity2: prescription.meds.quantity2,
-            diagnosis: prescription.meds.diagnosis,
-            observations: prescription.meds.observations
-        },
-        insurance: {
-            affiliateNum: prescription.insurance.affiliateNum,
-            insuranceName: prescription.insurance.insuranceName,
-            insurancePlan: prescription.insurance.insurancePlan
-        },
-        doctorNid: prescription.doctorNid,
-        patientAddress: prescription.patientAddress,
-        pharmacyAddress: prescription.pharmacyAddress,
-        issueDate: new Date(Number(prescription.issueDate) * 1000).toISOString(),
-        expirationDate: new Date(Number(prescription.expirationDate) * 1000).toISOString(),
-        used: prescription.used,
-        invoiceNumber: prescription.invoiceNumber
-    }));
+    return formattedPrescriptions.map(prescription => {
+        const expiration = new Date(Number(prescription.expirationDate) * 1000);
+        const now = new Date();
+    
+        let status = 'Válida';
+        if (prescription.used) {
+            status = 'Dispensada';
+        } else if (expiration < now) {
+            status = 'Expirada';
+        }
+    
+        return {
+            id: prescription.id,
+            patientName: prescription.patient.name,
+            patientSurname: prescription.patient.surname,
+            patientNid: prescription.patient.nid,
+            meds: {
+                med1: prescription.meds.med1,
+                quantity1: prescription.meds.quantity1,
+                med2: prescription.meds.med2,
+                quantity2: prescription.meds.quantity2,
+                diagnosis: prescription.meds.diagnosis,
+                observations: prescription.meds.observations
+            },
+            insurance: {
+                affiliateNum: prescription.insurance.affiliateNum,
+                insuranceName: prescription.insurance.insuranceName,
+                insurancePlan: prescription.insurance.insurancePlan
+            },
+            doctorNid: prescription.doctorNid,
+            patientAddress: prescription.patientAddress,
+            pharmacyAddress: prescription.pharmacyAddress,
+            issueDate: new Date(Number(prescription.issueDate) * 1000).toISOString(),
+            expirationDate: expiration.toISOString(),
+            used: prescription.used,
+            invoiceNumber: prescription.invoiceNumber,
+            status // ✅ nuevo campo calculado
+        };
+    });
+    
 };
 
 
