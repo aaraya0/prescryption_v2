@@ -169,9 +169,9 @@ const Patient = () => {
                                 <p><strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}</p>
                             )}
                             <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis}</p>
-                            {receta.meds.observations && (
-                                <p><strong>Observaciones:</strong> {receta.meds.observations}</p>
-                            )}
+                            {receta.meds.observations && receta.meds.observations.trim() !== '' && (
+                                        <p><strong>Observaciones:</strong> {receta.meds.observations}</p>
+                                    )}
                             <p><strong>Fecha de Expiración:</strong> {formatDate(receta.expirationDate)}</p>
 
                             {!receta.isPending && receta.status === "Valid" && (
