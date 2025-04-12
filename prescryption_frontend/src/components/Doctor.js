@@ -90,14 +90,20 @@ const Doctor = () => {
                                 {expandedReceta === index && (
                                     <div className="receta-details">
                                         {receta.meds && typeof receta.meds === 'object' ? (
-                                            <>
-                                                <p><strong>Medicamento 1:</strong> {receta.meds.med1 || 'N/A'}, Cantidad: {receta.meds.quantity1 || 'N/A'}</p>
-                                                <p><strong>Medicamento 2:</strong> {receta.meds.med2 || 'N/A'}, Cantidad: {receta.meds.quantity2 || 'N/A'}</p>
-                                                <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis || 'N/A'}</p>
-                                            </>
-                                        ) : (
-                                            <p>No se encontraron detalles de medicamentos.</p>
-                                        )}
+    <>
+        <p><strong>Medicamento 1:</strong> {receta.meds.med1 || 'N/A'}, Cantidad: {receta.meds.quantity1 || 'N/A'}</p>
+        
+        {(receta.meds.med2 && receta.meds.med2 !== 'N/A') || Number(receta.meds.quantity2) > 0 ? (
+            <p><strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}</p>
+        ) : null}
+        
+        <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis || 'N/A'}</p>
+        <p><strong>Observaciones:</strong> {receta.meds.observations || 'N/A'}</p>
+    </>
+) : (
+    <p>No se encontraron detalles de medicamentos.</p>
+)}
+
                                         <p><strong>Fecha de Emisión:</strong> {receta.issueDate ? new Date(receta.issueDate).toLocaleDateString() : 'N/A'}</p>
                                         <p><strong>Fecha de Expiración:</strong> {receta.expirationDate ? new Date(receta.expirationDate).toLocaleDateString() : 'N/A'}</p>
                                     </div>

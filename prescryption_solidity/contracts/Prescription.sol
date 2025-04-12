@@ -17,10 +17,15 @@ contract PrescriptionContract {
         string insurancePlan;
     }
 
+    struct PatientInfo {
+        string name;
+        string surname;
+        string nid;
+    }
+
     struct Prescription {
         uint id;
-        string patientName;
-        string patientNid;
+        PatientInfo patient;
         MedicationInfo meds;
         InsuranceInfo insurance;
         string doctorNid;
@@ -45,8 +50,7 @@ contract PrescriptionContract {
 
     event IssuedPrescription(
         uint id,
-        string patientName,
-        string patientNid,
+        PatientInfo patient,
         MedicationInfo meds,
         InsuranceInfo insurance,
         string doctorNid,
@@ -59,10 +63,10 @@ contract PrescriptionContract {
     event PrescriptionUpdated(uint prescriptionId, address pharmacyAddress);
     event PrescriptionCleared(uint prescriptionId);
 
+
     // Función para emitir una receta con fecha personalizada
     function issuePrescription(
-        string memory _patientName,
-        string memory _patientNid,
+        PatientInfo memory _patient,
         MedicationInfo memory _meds,
         InsuranceInfo memory _insurance,
         string memory _doctorNid,
@@ -75,8 +79,7 @@ contract PrescriptionContract {
 
         Prescription memory newPrescription = Prescription({
             id: prescriptionCount,
-            patientName: _patientName,
-            patientNid: _patientNid,
+            patient: _patient,
             meds: _meds,
             insurance: _insurance,
             doctorNid: _doctorNid,
@@ -93,8 +96,7 @@ contract PrescriptionContract {
 
         emit IssuedPrescription(
             prescriptionCount,
-            _patientName,
-            _patientNid,
+            _patient,
             _meds,
             _insurance,
             _doctorNid,

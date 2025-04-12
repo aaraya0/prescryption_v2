@@ -47,8 +47,9 @@ exports.getPrescriptionsByPatient = async (patientAddress) => {
 
     return formattedPrescriptions.map(prescription => ({
         id: prescription.id,
-        patientName: prescription.patientName,
-        patientNid: prescription.patientNid,
+        patientName: prescription.patient.name,
+        patientSurname: prescription.patient.surname,
+        patientNid: prescription.patient.nid,
         meds: {
             med1: prescription.meds.med1,
             quantity1: prescription.meds.quantity1,
@@ -77,38 +78,25 @@ exports.getPrescriptionsByDoctor = async (nid) => {
     const accounts = await web3.eth.getAccounts();
     const rawPrescriptions = await prescriptionContract.methods.getPresbyDoctorNid(nid).call({ from: accounts[0] });
 
-    // Convertir y formatear los datos
     const formattedPrescriptions = convertBigIntToString(rawPrescriptions);
 
-    return formattedPrescriptions.map(prescription => ({
-        id: prescription.id,
-        patientName: prescription.patientName,
-        patientNid: prescription.patientNid,
-        meds: {
-            med1: prescription.meds.med1,
-            quantity1: prescription.meds.quantity1,
-            med2: prescription.meds.med2,
-            quantity2: prescription.meds.quantity2,
-            diagnosis: prescription.meds.diagnosis,
-            observations: prescription.meds.observations
-        },
-        insurance: {
-            affiliateNum: prescription.insurance.affiliateNum,
-            insuranceName: prescription.insurance.insuranceName,
-            insurancePlan: prescription.insurance.insurancePlan
-        },
-        doctorNid: prescription.doctorNid,
-        patientAddress: prescription.patientAddress,
-        pharmacyAddress: prescription.pharmacyAddress,
-        issueDate: new Date(Number(prescription.issueDate) * 1000).toISOString(),
-        expirationDate: new Date(Number(prescription.expirationDate) * 1000).toISOString(),
-        used: prescription.used,
-        invoiceNumber: prescription.invoiceNumber
+    return formattedPrescriptions.map(p => ({
+        id: p.id,
+        patientName: p.patient.name,
+        patientSurname: p.patient.surname,
+        patientNid: p.patient.nid,
+        meds: p.meds,
+        insurance: p.insurance,
+        doctorNid: p.doctorNid,
+        patientAddress: p.patientAddress,
+        pharmacyAddress: p.pharmacyAddress,
+        issueDate: new Date(Number(p.issueDate) * 1000).toISOString(),
+        expirationDate: new Date(Number(p.expirationDate) * 1000).toISOString(),
+        used: p.used,
+        invoiceNumber: p.invoiceNumber
     }));
+    
 };
-
-
-
 
 
 function convertBigIntToString(obj) {
@@ -126,26 +114,27 @@ function convertBigIntToString(obj) {
 
 exports.issuePrescription = async (prescriptionData, doctorNid) => {
     try {
-        // Buscar la clave privada del doctor
         const doctor = await Doctor.findOne({ nid: doctorNid });
         if (!doctor) {
             throw new Error('Doctor not found');
         }
 
         const doctorPrivateKey = doctor.privateKey;
-
-        // Crear cuenta temporal con la clave privada
         const doctorAccount = web3.eth.accounts.privateKeyToAccount(doctorPrivateKey);
         web3.eth.accounts.wallet.add(doctorAccount);
 
-        // Usar una cuenta administrativa para pagar el gas
         const accounts = await web3.eth.getAccounts();
-        const adminAccount = accounts[0]; // Cuenta administrativa
+        const adminAccount = accounts[0];
+
+        const patientStruct = {
+            name: prescriptionData.patientName,
+            surname: prescriptionData.patientSurname,
+            nid: prescriptionData.patientNid
+        };
 
         const receipt = await prescriptionContract.methods
             .issuePrescription(
-                prescriptionData.patientName,
-                prescriptionData.patientNid,
+                patientStruct,
                 prescriptionData.meds,
                 prescriptionData.insurance,
                 doctorNid,
@@ -153,16 +142,14 @@ exports.issuePrescription = async (prescriptionData, doctorNid) => {
                 Math.floor(Date.now() / 1000)
             )
             .send({
-                from: adminAccount, // Usar la cuenta administrativa para pagar el gas
+                from: adminAccount,
                 gas: '2000000',
                 signTransaction: doctorAccount.signTransaction
             });
 
-        // Eliminar cuenta temporal
         web3.eth.accounts.wallet.remove(doctorAccount.address);
 
-        // Convertir BigInt a String
-        const formattedReceipt = convertBigIntToString({
+        return convertBigIntToString({
             message: 'Prescription issued and saved in blockchain',
             prescriptionId: receipt.events.IssuedPrescription.returnValues.id,
             transactionHash: receipt.transactionHash,
@@ -170,13 +157,12 @@ exports.issuePrescription = async (prescriptionData, doctorNid) => {
             gasUsed: receipt.gasUsed
         });
 
-        return formattedReceipt;
-
     } catch (error) {
         console.error('Error issuing prescription:', error);
         throw error;
     }
 };
+
 
 
 BigInt.prototype.toJSON = function () {
@@ -190,8 +176,9 @@ exports.getAllPrescriptions = async () => {
     // Limpiar y formatear los datos
     const formattedPrescriptions = rawPrescriptions.map(prescription => ({
         id: prescription.id,
-        patientName: prescription.patientName,
-        patientNid: prescription.patientNid,
+        patientName: prescription.patient.name,
+        patientSurname: prescription.patient.surname,
+        patientNid: prescription.patient.nid,
         meds: {
             med1: prescription.meds.med1,
             quantity1: prescription.meds.quantity1,
@@ -290,8 +277,9 @@ exports.getPrescriptionsByPharmacy = async (pharmacyAddress) => {
 
         return prescriptions.map(prescription => ({
             prescriptionId: prescription.id,
-            patientName: prescription.patientName,
-            patientNid: prescription.patientNid,
+            patientName: prescription.patient.name,
+            patientSurname: prescription.patient.surname,
+            patientNid: prescription.patient.nid,
             meds: {
                 med1: prescription.meds.med1,
                 quantity1: Number(prescription.meds.quantity1),
@@ -337,8 +325,9 @@ exports.getPrescriptionById = async (prescriptionId) => {
         // Convertir BigInt a String para evitar errores con JSON
         const formattedPrescription = {
             id: prescription.id.toString(),
-            patientName: prescription.patientName,
-            patientNid: prescription.patientNid,
+            patientName: prescription.patient.name,
+            patientSurname: prescription.patient.surname,
+            patientNid: prescription.patient.nid,
             meds: {
                 med1: prescription.meds.med1,
                 quantity1: prescription.meds.quantity1.toString(),

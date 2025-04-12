@@ -5,6 +5,7 @@ const Patient = require('../models/Patient');
 exports.issuePrescription = async (req, res) => {
     const {
         patientName,
+        patientSurname,
         patientNid,
         affiliateNum,
         insuranceName,
@@ -21,7 +22,7 @@ exports.issuePrescription = async (req, res) => {
 
     try {
         // Validaciones
-        if (!patientName || !patientNid || !affiliateNum || !insuranceName || !insurancePlan || !med1 || !quantity1 || !diagnosis) {
+        if (!patientName || !patientSurname || !patientNid || !affiliateNum || !insuranceName || !insurancePlan || !med1 || !quantity1 || !diagnosis) {
             return res.status(400).send('Missing necessary data.');
         }
 
@@ -34,6 +35,7 @@ exports.issuePrescription = async (req, res) => {
         // Preparar los datos de la receta
         const prescriptionData = {
             patientName,
+            patientSurname,
             patientNid,
             meds: {
                 med1,
