@@ -107,10 +107,6 @@ body, html {
     height: 100%;
 }
 
-
-
-
-
 .formLogin input.loginInput {
     padding: 10px;
     font-size: 14px;
@@ -414,6 +410,13 @@ body, html {
     color: #333;
   }
 
+  .filtros-container {
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
 
 /* Style for Dashboard buttons */
 .dashboard-button {
@@ -440,43 +443,27 @@ body, html {
 
 
 /* Contenedor para los filtros */
-.filter-container {
+
+.filtros-container, .filter-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    gap: 15px;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-bottom: 2rem;
 }
 
-.filter-container label {
+.filtros-container label, .filter-container label {
     display: flex;
     flex-direction: column;
     font-size: 14px;
 }
 
-.filter-container select {
+.filtros-container select, .filter-container select,
+.filter-container input.search-input {
     padding: 5px;
     font-size: 14px;
     border-radius: 4px;
-}
-
-
-
-.receta-list-container {
-    padding: 1rem;
-}
-
-.filter-container {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-}
-
-.filter-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    border: 1px solid #ccc;
 }
 
 .receta-list {
@@ -487,29 +474,89 @@ body, html {
 .receta-item {
     border-radius: 8px;
     margin-bottom: 1rem;
-    padding: 1rem;
-    background-color: white;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
     cursor: pointer;
-
+    transition: background-color 0.3s ease;
 }
 
 .receta-item:hover {
-    background-color: gainsboro;
+    background-color: #f1f1f1;
+}
+
+.receta-box {
+    padding: 1rem 1.25rem;
+}
+
+.receta-header {
+    font-size: 15px;
+    font-weight: 500;
 }
 
 .receta-details {
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
+/* Colores para el estado (si se llegara a usar) */
+.status-valid {
+    color: green;
+    font-weight: bold;
+}
+
+.status-expired {
+    color: red;
+    font-weight: bold;
+}
+
+.status-dispensed {
+    color: #555;
+    font-weight: bold;
+}
+
+/* Botón de transferencia */
+.button_t {
+    background-color: #D8B7AF;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 10px;
+    color: black;
+}
+
+.button_t:hover {
+    background-color: #c6a6a0;
+    text-decoration: underline;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-    .filter-container {
+    .filtros-container, .filter-container {
         flex-direction: column;
+        align-items: stretch;
     }
     .receta-box {
-        font-size: 0.9rem;
+        font-size: 14px;
+    }
+    .receta-details {
+        font-size: 13px;
     }
 }
 
+.receta-list-container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+h3, h4 {
+    margin-bottom: 2rem;
+    text-align: center;
+}
 
 /* Estilos para el menú del doctor */
 .doctor-menu {
@@ -662,10 +709,6 @@ body, html {
 .content {
     margin-top: 100px; /* Ajusta esta altura según el tamaño del encabezado */
 }
-
-
-
-
 
 .notification.success {
     background-color: #d4edda;

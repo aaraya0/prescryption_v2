@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import { Modal, Button, Form } from 'react-bootstrap';
+import { Modal, Button, Form, Accordion } from 'react-bootstrap';
 import '../styles/Patient.css';
 
 const Patient = () => {
@@ -24,9 +24,7 @@ const Patient = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
-                let filteredPrescriptions = Array.isArray(response.data)
-                    ? response.data
-                    : [];
+                let filteredPrescriptions = Array.isArray(response.data) ? response.data : [];
 
                 const specialties = [...new Set(filteredPrescriptions.map(receta => receta.doctorSpecialty))];
                 setAvailableSpecialties(specialties);
@@ -90,7 +88,6 @@ const Patient = () => {
         }
     };
 
-    // Check pending prescriptions and clear expired cookies
     useEffect(() => {
         const checkPendingPrescriptions = () => {
             setRecetas(prevRecetas =>
@@ -110,73 +107,82 @@ const Patient = () => {
 
     const getStatusClass = (status) => {
         switch (status) {
-            case 'Valid':
-                return 'status-valid';
-            case 'Expired':
-                return 'status-expired';
-            case 'Dispensed':
-                return 'status-dispensed';
-            default:
-                return '';
+            case 'Valid': return 'status-valid';
+            case 'Expired': return 'status-expired';
+            case 'Dispensed': return 'status-dispensed';
+            default: return '';
         }
     };
 
+    const formatDate = (isoDate) => {
+        if (!isoDate) return 'N/A';
+        const date = new Date(isoDate);
+        return date.toLocaleDateString('es-AR');
+    };
+
     return (
-        <div>
+        <div className="receta-list-container">
             <h3>Mis Recetas</h3>
-            
-            <label>
-                Filtrar por Especialidad:
-                <select value={specialtyFilter} onChange={(e) => setSpecialtyFilter(e.target.value)}>
-                    <option value="">Todas</option>
-                    {availableSpecialties.map((specialty, index) => (
-                        <option key={index} value={specialty}>{specialty}</option>
-                    ))}
-                </select>
-            </label>
 
-            <label>
-                Filtrar por Estado:
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                    <option value="">Todos</option>
-                    <option value="Valid">Válido</option>
-                    <option value="Expired">Expirada</option>
-                    <option value="Dispensed">Dispensada</option>
-                </select>
-            </label>
+            <div className="filtros-container">
+                <label>
+                    Filtrar por Especialidad:
+                    <select value={specialtyFilter} onChange={(e) => setSpecialtyFilter(e.target.value)}>
+                        <option value="">Todas</option>
+                        {availableSpecialties.map((specialty, index) => (
+                            <option key={index} value={specialty}>{specialty}</option>
+                        ))}
+                    </select>
+                </label>
 
-            <label>
-                Ordenar por Fecha de Emisión:
-                <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-                    <option value="asc">Ascendente</option>
-                    <option value="desc">Descendente</option>
-                </select>
-            </label>
+                <label>
+                    Filtrar por Estado:
+                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                        <option value="">Todos</option>
+                        <option value="Valid">Válido</option>
+                        <option value="Expired">Expirada</option>
+                        <option value="Dispensed">Dispensada</option>
+                    </select>
+                </label>
 
-            <ul className="pres">  
+                <label>
+                    Ordenar por Fecha de Emisión:
+                    <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+                        <option value="asc">Ascendente</option>
+                        <option value="desc">Descendente</option>
+                    </select>
+                </label>
+            </div>
+
+            <Accordion defaultActiveKey="">
                 {recetas.map((receta, index) => (
-                    <li key={index}>
-                        <strong>Médico:</strong> {receta.doctorName} ({receta.doctorSpecialty})<br />
-                        <strong>Médico NID:</strong> {receta.doctorNid}<br />
-                        <strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}<br />
-                        <strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}<br />
-                        <strong>Diagnóstico:</strong> {receta.meds.diagnosis}<br />
-                        <div className="prescription-row">
-                            <strong>Observaciones:</strong> {receta.meds.observations}
-                        </div>
-                        <strong>Estado:</strong> <span className={getStatusClass(receta.status)}>{receta.status}</span><br />
-                        <strong>Fecha de Emisión:</strong> {receta.issueDate}<br />
-                        <strong>Fecha de Expiración:</strong> {receta.expirationDate}<br />
-                        
-                        {/* Show the transfer button only if there's no pending cookie */}
-                        {!receta.isPending && receta.status === "Valid" && (
-                            <button className="button_t" onClick={() => handleTransfer(receta.prescriptionId)}>
-                                Transferir Receta
-                            </button>
-                        )}
-                    </li>
+                    <Accordion.Item eventKey={index.toString()} key={index} className="receta-item">
+                        <Accordion.Header>
+                            <div style={{ width: '100%' }}>
+                                <strong>Médico:</strong> {receta.doctorName} {receta.doctorSurname} ({receta.doctorSpecialty}) | <strong>Estado:</strong> <span className={getStatusClass(receta.status)}>{receta.status}</span> | <strong>Fecha:</strong> {formatDate(receta.issueDate)}
+                            </div>
+                        </Accordion.Header>
+                        <Accordion.Body className="receta-details">
+                            <p><strong>Médico NID:</strong> {receta.doctorNid}</p>
+                            <p><strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}</p>
+                            {receta.meds.med2 !== 'N/A' && receta.meds.quantity2 > 0 && (
+                                <p><strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}</p>
+                            )}
+                            <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis}</p>
+                            {receta.meds.observations && (
+                                <p><strong>Observaciones:</strong> {receta.meds.observations}</p>
+                            )}
+                            <p><strong>Fecha de Expiración:</strong> {formatDate(receta.expirationDate)}</p>
+
+                            {!receta.isPending && receta.status === "Valid" && (
+                                <button className="button_t" onClick={() => handleTransfer(receta.prescriptionId)}>
+                                    Transferir Receta
+                                </button>
+                            )}
+                        </Accordion.Body>
+                    </Accordion.Item>
                 ))}
-            </ul>
+            </Accordion>
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>

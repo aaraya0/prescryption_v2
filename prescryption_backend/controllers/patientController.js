@@ -2,8 +2,10 @@ const bcrypt = require('bcrypt');
 const Patient = require('../models/Patient');
 const blockchainService = require('../services/blockchainService');
 const Pharmacy = require('../models/Pharmacy');
+const Doctor = require('../models/Doctor'); 
 const { Web3 } = require('web3');
 const axios = require('axios');
+
 
 
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
@@ -83,29 +85,35 @@ exports.registerPatient = async (req, res) => {
 // 📌 Obtener Recetas por Paciente (Ruta Protegida)
 exports.getPresbyPatientAddress = async (req, res) => {
     try {
-        // Obtener el NID del token del usuario autenticado
         const nid = req.user.nid;
-
-        // Buscar al paciente en la base de datos
         const patient = await Patient.findOne({ nid });
-        if (!patient) {
-            return res.status(404).json({ message: 'Patient not found' });
-        }
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
 
-        // Obtener la dirección del paciente
         const patientAddress = patient.address;
-        if (!patientAddress) {
-            return res.status(400).json({ message: 'Patient address not available' });
-        }
+        if (!patientAddress) return res.status(400).json({ message: 'Patient address not available' });
 
-        // Consultar las recetas en la blockchain
         const prescriptions = await blockchainService.getPrescriptionsByPatient(patientAddress);
-        res.json(prescriptions);
+
+        // 🔍 Buscar info del médico para cada receta
+        const enrichedPrescriptions = await Promise.all(
+            prescriptions.map(async (prescription) => {
+                const doctor = await Doctor.findOne({ nid: prescription.doctorNid });
+                return {
+                    ...prescription,
+                    doctorName: doctor ? doctor.name : 'N/A',
+                    doctorSurname: doctor ? doctor.surname : 'N/A',
+                    doctorSpecialty: doctor ? doctor.specialty : 'N/A'
+                };
+            })
+        );
+
+        res.json(enrichedPrescriptions);
     } catch (err) {
         console.error('Error retrieving prescriptions:', err.message);
         res.status(500).send(err.message);
     }
 };
+
 
 
 // 📌 Enviar Receta a Farmacia
