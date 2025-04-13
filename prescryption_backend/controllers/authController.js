@@ -4,6 +4,7 @@ const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 const PharmacyUser = require('../models/PharmacyUser');
 const Insurance = require('../models/Insurance');
+const AdminUser = require('../models/AdminUser'); 
 require('dotenv').config();
 
 // 📌 Login General (Paciente, Médico, Usuario de Farmacia, Insurance)
@@ -31,6 +32,9 @@ exports.login = async (req, res) => {
             case 'insurance':
                 userIdentifier = "insurance_nid"; // 📌 Cambiar clave para buscar en `Insurance`
                 user = await Insurance.findOne({ insurance_nid: nid });
+                break;
+            case 'admin': // ✅ Nuevo caso para administrador
+                user = await AdminUser.findOne({ nid });
                 break;
             default:
                 return res.status(400).send('❌ Invalid user type');

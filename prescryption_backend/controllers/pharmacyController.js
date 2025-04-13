@@ -408,20 +408,22 @@ exports.validatePrescription = async (req, res) => {
             // 🔍 Verificar si algún componente activo está en las listas del gobierno
             if (med.activeComponentsList) {
                 console.log(`📌 Componentes activos del medicamento: ${JSON.stringify(med.activeComponentsList)}`);
-                for (const component of med.activeComponentsList) {
-                    const componentLower = component.trim().toLowerCase();
+                try {
+                    const coverageResponse = await axios.post("http://localhost:5004/api/insurance/coverage", {
+                        insurance_name: prescription.insurance.insuranceName,
+                        plan: prescription.insurance.insurancePlan,
+                        drug_name: med.genericName
+                    });
 
-                    if (PMO_MEDICATIONS.has(componentLower)) {
-                        governmentCoverage = 100; // Cobertura total por PMO
-                        console.log(`✅ ${component} está en PMO_MEDICATIONS. Cobertura del 100%`);
-                        break; // No necesitamos seguir verificando
-                    }
-                    
-                    if (RESOLUCION_27_2022.has(componentLower)) {
-                        governmentCoverage = Math.max(governmentCoverage, 70);
-                        console.log(`✅ ${component} está en RESOLUCION_27_2022. Cobertura del 70%`);
-                    }
+                    console.log(`✅ Respuesta de cobertura: ${JSON.stringify(coverageResponse.data)}`);
+                    insuranceCoverage = coverageResponse.data.coverage || 0;
+                } catch (error) {
+                    console.log("❌ Error al consultar cobertura:", 
+                        error.response ? JSON.stringify(error.response.data) : error.message
+                    );
+                    return res.status(500).json({ message: "Error fetching insurance coverage.", details: error.response?.data || error.message });
                 }
+
             }
 
             if (prescription.insurance.insuranceName === "PAMI" && med.pamiPrice) {

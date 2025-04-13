@@ -1,45 +1,23 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const Insurance = require('../models/Insurance');
 const blockchainService = require('../services/blockchainService');
 
-// Obtener perfil de usuario de obra social
-exports.getUserProfile = async (req, res) => {
-    try {
-        const { nid } = req.user;
-        const insurance = await Insurance.findOne({ nid });
-        if (!insurance) {
-            return res.status(404).send('Insurance provider not found.');
-        }
-        res.json(insurance);
-    } catch (err) {
-        res.status(500).send('Error fetching profile: ' + err.message);
-    }
-};
-
-const bcrypt = require("bcryptjs");
-const Insurance = require("../models/Insurance");
-
+// ✅ Registro
 exports.registerInsurance = async (req, res) => {
     try {
         const { insurance_name, insurance_nid, password, mail } = req.body;
 
-        console.log(`🔍 Intentando registrar obra social: ${insurance_name} (NID: ${insurance_nid})`);
-
-        // 📌 Verificar que todos los campos estén completos
         if (!insurance_name || !insurance_nid || !password || !mail) {
-            return res.status(400).json({ message: "❌ Todos los campos son obligatorios." });
+            return res.status(400).json({ message: "❌ All fields are required" });
         }
 
-        // 📌 Verificar si el `insurance_nid` ya está registrado
-        const existingInsurance = await Insurance.findOne({ insurance_nid });
-        if (existingInsurance) {
-            return res.status(400).json({ message: "❌ La obra social ya está registrada." });
+        const existing = await Insurance.findOne({ insurance_nid });
+        if (existing) {
+            return res.status(409).json({ message: "❌ Insurance already registered" });
         }
 
-        // 📌 Hashear la contraseña antes de guardarla
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // 📌 Crear la nueva obra social
+        const hashedPassword = await bcrypt.hash(password, 10);
         const newInsurance = new Insurance({
             insurance_name,
             insurance_nid,
@@ -47,14 +25,69 @@ exports.registerInsurance = async (req, res) => {
             mail
         });
 
-        // 📌 Guardar en la base de datos
         await newInsurance.save();
-        console.log(`✅ Obra social registrada exitosamente: ${insurance_name}`);
+        res.status(201).json({ message: "✅ Registration submitted. Awaiting verification." });
+    } catch (err) {
+        console.error("❌ Error in registration:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
 
-        res.status(201).json({ message: "✅ Registro exitoso.", insurance_name, insurance_nid });
+// ✅ Login
+exports.loginInsurance = async (req, res) => {
+    try {
+        const { insurance_nid, password } = req.body;
 
-    } catch (error) {
-        console.error("❌ Error en el registro:", error.message);
-        res.status(500).json({ message: "Error en el registro." });
+        const insurance = await Insurance.findOne({ insurance_nid });
+        if (!insurance) return res.status(404).json({ message: "❌ Insurance not found" });
+
+        if (!insurance.isVerified) {
+            return res.status(403).json({ message: "❌ Your account is pending admin verification." });
+        }
+
+        const validPass = await bcrypt.compare(password, insurance.password);
+        if (!validPass) return res.status(401).json({ message: "❌ Invalid credentials" });
+
+        const token = jwt.sign(
+            { insurance_nid: insurance.insurance_nid, userType: "insurance" },
+            process.env.SECRET_KEY,
+            { expiresIn: "1h" }
+        );
+
+        res.status(200).json({ message: "✅ Login successful", token });
+    } catch (err) {
+        console.error("❌ Login error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+// ✅ Ver recetas usadas
+exports.getUsedPrescriptionsByInsurance = async (req, res) => {
+    try {
+        const { insurance_nid } = req.user;
+
+        // 🔍 Buscar el nombre de la obra social a partir de su NID
+        const insurance = await Insurance.findOne({ insurance_nid });
+        if (!insurance) {
+            return res.status(404).json({ message: "❌ Insurance not found" });
+        }
+
+        const insuranceName = insurance.insurance_name.trim().toLowerCase();
+
+        // 📦 Obtener todas las recetas desde blockchain
+        const prescriptions = await blockchainService.getAllPrescriptions();
+
+        // 📌 Filtrar recetas usadas que pertenecen a esta obra social
+        const filtered = prescriptions.filter(p =>
+            p.used &&
+            p.insurance &&
+            p.insurance.insuranceName &&
+            p.insurance.insuranceName.trim().toLowerCase() === insuranceName
+        );
+
+        res.status(200).json({ message: "✅ Used prescriptions fetched", prescriptions: filtered });
+    } catch (err) {
+        console.error("❌ Error fetching prescriptions:", err);
+        res.status(500).json({ message: "Server error" });
     }
 };
