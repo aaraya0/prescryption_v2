@@ -17,23 +17,33 @@ function Register() {
     };
 
     const fetchInsurancePlan = async () => {
-        const { name, surname, nid, insurance_name, affiliate_num } = formData;
+        const { nid, insurance_name} = formData;
 
-        if (!name || !surname || !nid || !insurance_name || !affiliate_num) {
-            alert('Por favor, completa Nombre, Apellido, DNI, Obra Social y Número de Afiliado.');
+        if (!nid || !insurance_name) {
+            alert('Por favor, completa tus datos');
             return;
         }
 
         try {
-            const response = await axios.get('http://localhost:3001/insurance/plan', {
-                params: { name, surname, nid, insurance_name, affiliate_num }
+            const response = await axios.post('http://localhost:5003/get_affiliation', {
+                params: {nid, insurance_name}
             });
-            setInsurancePlan(response.data.plan);
-            setFormData({ ...formData, insurance_plan: response.data.plan }); // Guarda el plan en el formulario
-            setErrorMessage('');
-        } catch (error) {
-            console.error('Error fetching insurance plan:', error);
-            setErrorMessage('No se encontró un plan para este afiliado.');
+
+            const plan = response.data.insurance_plan;
+        const affiliateNum = response.data.affiliate_number;
+
+        setInsurancePlan(plan);
+        setFormData({
+            ...formData,
+            insurance_plan: plan,
+            affiliate_num: affiliateNum
+        });
+
+        setErrorMessage('');
+    } catch (error) {
+        console.error('Error fetching insurance plan:', error);
+        setInsurancePlan('');
+        setErrorMessage('No se encontró un plan para este afiliado.');
             setInsurancePlan(''); // Limpiar el plan si hay error
         }
     };

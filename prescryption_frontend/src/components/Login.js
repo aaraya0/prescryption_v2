@@ -6,7 +6,7 @@ import './styles.css';
 function Login() {
     const [nid, setNid] = useState('');
     const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false); 
+    const [showPassword, setShowPassword] = useState(false);
     const [userType, setUserType] = useState('');
     const [message, setMessage] = useState({ text: '', type: '' });
     const navigate = useNavigate();
@@ -51,7 +51,6 @@ function Login() {
                 setMessage({ text: '', type: '' });
                 navigate(`/dashboard/${userType}`);
             }, 3000);
-
         } catch (error) {
             if (error.response && error.response.status === 429) {
                 setMessage({ text: 'Has excedido el número de intentos. Esperá 15 minutos.', type: 'error' });
@@ -61,6 +60,10 @@ function Login() {
                 console.error(error);
                 setMessage({ text: 'Hubo un error en el servidor. Intentalo más tarde.', type: 'error' });
             }
+
+            setTimeout(() => {
+                setMessage({ text: '', type: '' });
+            }, 4000);
         }
     };
 
@@ -84,22 +87,21 @@ function Login() {
             <p className="inputTitle">Contraseña</p>
 
             <div className="password-container">
-  <input
-    className="loginInput password-field"
-    type={showPassword ? "text" : "password"}
-    placeholder="Contraseña"
-    value={password}
-    onChange={e => setPassword(e.target.value)}
-  />
-<span 
-  className="eye-icon" 
-  onClick={() => setShowPassword(!showPassword)} 
-  title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
->
-  {showPassword ? '🙈' : '👁️'}
-</span>
-</div>
-
+                <input
+                    className="loginInput password-field"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Contraseña"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                />
+                <span
+                    className="eye-icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                    title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                    {showPassword ? '🙈' : '👁️'}
+                </span>
+            </div>
 
             <button className="loginButton" onClick={handleLogin}>Ingresar</button>
             <button className="RecordarButton">Recordar Contraseña</button>
@@ -108,12 +110,29 @@ function Login() {
                 <button className="RegistrateButton" onClick={handleRegister}>Registrate</button>
             </p>
 
-            {message.text && <Notification message={message.text} type={message.type} />}
+            {message.text && (
+                <>
+                    {message.type === 'success' && <div className="notification-backdrop"></div>}
+                    <Notification message={message.text} type={message.type} />
+                </>
+            )}
         </div>
     );
 }
 
 function Notification({ message, type }) {
+    if (type === 'success') {
+        return (
+            <div className="login-success">
+                <div className="checkmark-circle">
+                    <span className="checkmark">&#10003;</span>
+                </div>
+                <h2>¡Bienvenido!</h2>
+                <p>{message}</p>
+            </div>
+        );
+    }
+
     return (
         <div className={`notification ${type}`}>
             {message}

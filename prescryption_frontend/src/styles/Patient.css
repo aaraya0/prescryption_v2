@@ -17,6 +17,7 @@
 
 .button_t:hover {
     background-color: #c88270;
+    transform: translateX(-1px);
 }
 
 .status-valid {

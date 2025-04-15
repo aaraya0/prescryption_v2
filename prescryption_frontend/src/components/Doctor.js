@@ -70,8 +70,8 @@ const Doctor = () => {
                     {filteredRecetas.map((receta, index) => (
                         <Accordion.Item eventKey={index.toString()} key={index} className="receta-item">
                             <Accordion.Header>
-                                <div style={{ width: '100%' }}>
-                                    <strong>Paciente:</strong> {receta.patientName} {receta.patientSurname} | <strong>DNI:</strong> {receta.patientNid} | <strong>Fecha:</strong> {formatDate(receta.issueDate)}
+                            <div className="receta-header-info">
+                                    <strong>Paciente:</strong> {receta.patientName} {receta.patientSurname}  <strong>DNI:</strong> {receta.patientNid}  <strong>Fecha:</strong> {formatDate(receta.issueDate)}
                                 </div>
                             </Accordion.Header>
                             <Accordion.Body className="receta-details">

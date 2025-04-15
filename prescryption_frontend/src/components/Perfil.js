@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import './styles.css';
+import { FaUser, FaEnvelope, FaIdCard, FaBirthdayCake, FaVenusMars, FaBriefcaseMedical, FaStethoscope, FaClinicMedical, FaBuilding } from 'react-icons/fa';
 
 function Perfil() {
     const [profile, setProfile] = useState(null);
@@ -30,55 +32,62 @@ function Perfil() {
         if (userType) fetchProfile();
     }, [userType]);
 
-    if (loading) return <p>Cargando perfil...</p>;
-    if (error) return <p>{error}</p>;
+    if (loading) return <p className="perfil-loading">Cargando perfil...</p>;
+    if (error) return <p className="perfil-error">{error}</p>;
+
+    const Field = ({ icon, label, value }) => (
+        <div className="perfil-item">
+            <span className="perfil-icon">{icon}</span>
+            <strong>{label}:</strong> {value}
+        </div>
+    );
 
     const renderFields = () => {
         switch (userType) {
             case 'patient':
                 return (
                     <>
-                        <p><strong>Nombre:</strong> {profile.name}</p>
-                        <p><strong>Apellido:</strong> {profile.surname}</p>
-                        <p><strong>DNI:</strong> {profile.nid}</p>
-                        <p><strong>Fecha de nacimiento:</strong> {profile.birth_date}</p>
-                        <p><strong>Sexo:</strong> {profile.sex}</p>
-                        <p><strong>Obra Social:</strong> {profile.insurance_name}</p>
-                        <p><strong>Plan:</strong> {profile.insurance_plan}</p>
-                        <p><strong>N° de Afiliado:</strong> {profile.affiliate_num}</p>
-                        <p><strong>Correo:</strong> {profile.mail}</p>
+                        <Field icon={<FaUser />} label="Nombre" value={profile.name} />
+                        <Field icon={<FaUser />} label="Apellido" value={profile.surname} />
+                        <Field icon={<FaIdCard />} label="DNI" value={profile.nid} />
+                        <Field icon={<FaBirthdayCake />} label="Fecha de nacimiento" value={profile.birth_date} />
+                        <Field icon={<FaVenusMars />} label="Sexo" value={profile.sex} />
+                        <Field icon={<FaBriefcaseMedical />} label="Obra Social" value={profile.insurance_name} />
+                        <Field icon={<FaIdCard />} label="Plan" value={profile.insurance_plan} />
+                        <Field icon={<FaIdCard />} label="N° de Afiliado" value={profile.affiliate_num} />
+                        <Field icon={<FaEnvelope />} label="Correo" value={profile.mail} />
                     </>
                 );
             case 'doctor':
                 return (
                     <>
-                        <p><strong>Nombre:</strong> {profile.name}</p>
-                        <p><strong>Apellido:</strong> {profile.surname}</p>
-                        <p><strong>DNI:</strong> {profile.nid}</p>
-                        <p><strong>Especialidad:</strong> {profile.specialty}</p>
-                        <p><strong>Licencia:</strong> {profile.license}</p>
-                        <p><strong>Correo:</strong> {profile.mail}</p>
+                        <Field icon={<FaUser />} label="Nombre" value={profile.name} />
+                        <Field icon={<FaUser />} label="Apellido" value={profile.surname} />
+                        <Field icon={<FaIdCard />} label="DNI" value={profile.nid} />
+                        <Field icon={<FaStethoscope />} label="Especialidad" value={profile.specialty} />
+                        <Field icon={<FaIdCard />} label="Licencia" value={profile.license} />
+                        <Field icon={<FaEnvelope />} label="Correo" value={profile.mail} />
                     </>
                 );
             case 'pharmacy':
                 return (
                     <>
-                        <p><strong>Nombre:</strong> {profile.name}</p>
-                        <p><strong>Apellido:</strong> {profile.surname}</p>
-                        <p><strong>CUIT Farmacia:</strong> {profile.pharmacy_nid}</p>
-                        <p><strong>Nombre Farmacia:</strong> {profile.pharmacy_name}</p>
-                        <p><strong>Alias:</strong> {profile.alias}</p>
-                        <p><strong>Correo:</strong> {profile.mail}</p>
+                        <Field icon={<FaUser />} label="Nombre" value={profile.name} />
+                        <Field icon={<FaUser />} label="Apellido" value={profile.surname} />
+                        <Field icon={<FaIdCard />} label="CUIT Farmacia" value={profile.pharmacy_nid} />
+                        <Field icon={<FaClinicMedical />} label="Nombre Farmacia" value={profile.pharmacy_name} />
+                        <Field icon={<FaIdCard />} label="Alias" value={profile.alias} />
+                        <Field icon={<FaEnvelope />} label="Correo" value={profile.mail} />
                     </>
                 );
             case 'insurance':
                 return (
                     <>
-                        <p><strong>Nombre:</strong> {profile.name}</p>
-                        <p><strong>Apellido:</strong> {profile.surname}</p>
-                        <p><strong>CUIT Obra Social:</strong> {profile.cuit_os}</p>
-                        <p><strong>Razón Social:</strong> {profile.razon_social}</p>
-                        <p><strong>Correo:</strong> {profile.mail}</p>
+                        <Field icon={<FaUser />} label="Nombre" value={profile.name} />
+                        <Field icon={<FaUser />} label="Apellido" value={profile.surname} />
+                        <Field icon={<FaIdCard />} label="CUIT Obra Social" value={profile.cuit_os} />
+                        <Field icon={<FaBuilding />} label="Razón Social" value={profile.razon_social} />
+                        <Field icon={<FaEnvelope />} label="Correo" value={profile.mail} />
                     </>
                 );
             default:
@@ -87,9 +96,11 @@ function Perfil() {
     };
 
     return (
-        <div className="perfil-container">
-            <h2>Perfil de {userType}</h2>
-            {renderFields()}
+        <div className="perfil-card-aesthetic">
+            <h2 className="perfil-title">Perfil de {userType}</h2>
+            <div className="perfil-content">
+                {renderFields()}
+            </div>
         </div>
     );
 }
