@@ -70,7 +70,7 @@ function Dashboard({ userType }) {
             </div>
             
             {/* Contenido desplazable debajo del encabezado fijo */}
-            <div className="content">
+            <div className="content" style={{ paddingTop: '100px' }}>
                 {renderMenu()}
             </div>
         </div>

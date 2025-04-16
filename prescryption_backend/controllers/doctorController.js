@@ -20,7 +20,7 @@ exports.registerDoctor = async (req, res) => {
         }
 
         // ✅ Validar mediante el servicio de verificación
-        const verifyResponse = await axios.post('http://localhost:5000/verify', {
+        /*const verifyResponse = await axios.post('http://localhost:5000/verify', {
             nid,
             license,
             user_type: "doctor"
@@ -30,7 +30,7 @@ exports.registerDoctor = async (req, res) => {
 
         if (!verifyResponse.data.valid) {
             return res.status(400).send('❌ Invalid license or NID');
-        }
+        }*/
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const account = web3.eth.accounts.create();

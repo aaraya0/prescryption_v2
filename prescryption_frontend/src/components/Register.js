@@ -26,7 +26,8 @@ function Register() {
 
         try {
             const response = await axios.post('http://localhost:5003/get_affiliation', {
-                params: {nid, insurance_name}
+                nid, 
+                insurance_name
             });
 
             const plan = response.data.insurance_plan;
@@ -50,7 +51,7 @@ function Register() {
 
     const handleRegister = async () => {
         try {
-            await axios.post(`http://localhost:3001/register_${userType}`, formData);
+            await axios.post(`http://localhost:3001/api/public/${userType}s/register`, formData);
             alert('Registro exitoso');
             navigate('/login');
         } catch (error) {
@@ -188,8 +189,9 @@ function Register() {
     };
 
     return (
+        <div className="register-wrapper">
         <div className="register-container">
-            <div className="form-header">
+            <div className="form-header" >
                 <h2>Formulario de Registro de {userType}</h2>
             </div>
             <div className="form-body">
@@ -199,6 +201,7 @@ function Register() {
                     ¿Ya tenés una cuenta?<button className="login-link" onClick={handleLogin}> Ingresar</button>
                 </p>
             </div>
+        </div>
         </div>
     );
 }

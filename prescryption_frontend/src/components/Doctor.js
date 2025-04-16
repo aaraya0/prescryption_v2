@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './styles.css';
 import { Accordion } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 const Doctor = () => {
     const [recetas, setRecetas] = useState([]);
     const [searchPaciente, setSearchPaciente] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
     const token = localStorage.getItem('token');
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get('http://localhost:3001/api/doctors/prescriptions', {
@@ -40,7 +42,7 @@ const Doctor = () => {
     };
 
     return (
-        <div className="receta-list-container">
+        <div className="receta-list-container doctor-menu">
             <h3>Recetas Emitidas</h3>
 
             <div className="filtros-container">
@@ -63,32 +65,38 @@ const Doctor = () => {
                 </label>
             </div>
 
-            {filteredRecetas.length === 0 ? (
-                <p>No hay recetas emitidas aún.</p>
-            ) : (
-                <Accordion defaultActiveKey="">
-                    {filteredRecetas.map((receta, index) => (
-                        <Accordion.Item eventKey={index.toString()} key={index} className="receta-item">
-                            <Accordion.Header>
-                            <div className="receta-header-info">
-                                    <strong>Paciente:</strong> {receta.patientName} {receta.patientSurname}  <strong>DNI:</strong> {receta.patientNid}  <strong>Fecha:</strong> {formatDate(receta.issueDate)}
-                                </div>
-                            </Accordion.Header>
-                            <Accordion.Body className="receta-details">
-                                <p><strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}</p>
-                                {(receta.meds.med2 !== 'N/A' && receta.meds.quantity2 > 0) && (
-                                    <p><strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}</p>
-                                )}
-                                <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis}</p>
-                                {receta.meds.observations && receta.meds.observations.trim() !== '' && (
+            {/* 👇 Scroll solo para el listado */}
+            <div className="receta-scroll">
+                {filteredRecetas.length === 0 ? (
+                    <p>No hay recetas emitidas aún.</p>
+                ) : (
+                    <Accordion defaultActiveKey="">
+                        {filteredRecetas.map((receta, index) => (
+                            <Accordion.Item eventKey={index.toString()} key={index} className="receta-item">
+                                <Accordion.Header>
+                                    <div className="receta-header-info">
+                                        <strong>Paciente:</strong> {receta.patientName} {receta.patientSurname}  
+                                        <strong> DNI:</strong> {receta.patientNid}  
+                                        <strong> Fecha de Emisión:</strong> {formatDate(receta.issueDate)}
+                                    </div>
+                                </Accordion.Header>
+                                <Accordion.Body className="receta-details">
+                                    <p><strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}</p>
+                                    {(receta.meds.med2 !== 'N/A' && receta.meds.quantity2 > 0) && (
+                                        <p><strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}</p>
+                                    )}
+                                    <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis}</p>
+                                    {receta.meds.observations && receta.meds.observations.trim() !== '' && (
                                         <p><strong>Observaciones:</strong> {receta.meds.observations}</p>
                                     )}
-                                <p><strong>Fecha de Expiración:</strong> {formatDate(receta.expirationDate)}</p>
-                            </Accordion.Body>
-                        </Accordion.Item>
-                    ))}
-                </Accordion>
-            )}
+                                    <p><strong>Fecha de Expiración:</strong> {formatDate(receta.expirationDate)}</p>
+                                </Accordion.Body>
+                            </Accordion.Item>
+                        ))}
+                    </Accordion>
+                )}
+            </div>
+
         </div>
     );
 };

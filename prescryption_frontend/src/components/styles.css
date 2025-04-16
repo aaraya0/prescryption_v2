@@ -5,6 +5,7 @@ body, html {
     justify-content: center; 
     align-items: center; 
 }
+ 
 
 .error{
     color: red;
@@ -249,6 +250,29 @@ body, html {
     text-align: center;
 }
 
+.register-wrapper {
+    margin-top: 5px; /* espacio para que el header no tape nada */
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    min-height: calc(100vh - 120px);
+  }
+  
+  @media (max-width: 768px) {
+    .register-container {
+      width: 90%;
+      padding: 20px;
+    }
+  
+    .form-body {
+      gap: 10px;
+    }
+  
+    .form-header h2 {
+      font-size: 20px;
+    }
+  }  
+
 .form-body .inputTitle {
     font-size: 16px;
     font-weight: 500;
@@ -461,6 +485,34 @@ body, html {
     border: 1px solid #ccc;
 }
 
+.dni-search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .search-patient-button {
+    background-color: #D8B7AF;
+    margin-left: 5px;
+    border: none;
+    padding: 3px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  .search-patient-button:hover {
+    background-color: #D8B7AF;
+    transform: scale(1.05);
+  }
+  
+  .search-patient-button svg {
+    fill: white;
+  }
+
 .receta-list {
     list-style: none;
     padding: 0;
@@ -545,7 +597,7 @@ body, html {
 
 .receta-list-container {
     padding: 3rem 1.1rem;
-    width: 650px;
+    width: 800px;
     box-sizing: border-box;
 }
 
@@ -566,6 +618,14 @@ h3, h4 {
     align-items: center;
     font-size: 15px;
 }
+
+.receta-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-bottom: 20px;
+}
+
 
 /* Estilos para el botón de Emitir Receta */
 .emitir-receta-btn {
@@ -714,7 +774,7 @@ h3, h4 {
     color: #333;
     border: none;
     padding: 8px 16px;
-    border-radius: 25px;
+    border-radius: 5px;
     font-size: 15px;
     font-weight: 500;
     display: flex;
@@ -865,3 +925,4 @@ h3, h4 {
         transform: scale(1) translate(-50%, -50%);
     }
 }
+
