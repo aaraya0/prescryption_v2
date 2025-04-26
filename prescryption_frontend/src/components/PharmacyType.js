@@ -13,7 +13,7 @@ function PharmacyType() {
 
     return (
         <div className="formUserOptions">
-            <h2 className="loginTitle">Elegí el tipo de usuario</h2>
+            <h2 className="title">Elegí el tipo de usuario</h2>
             <div className="buttons">
                 <button className="patientButton" onClick={() => handleSelection('pharmacist')}>Usuario de Farmacia</button>
                 <button className="doctorsButton" onClick={() => handleSelection('pharmacyAdmin')}>Farmacia (Administrador)</button>

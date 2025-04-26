@@ -61,9 +61,6 @@ const Patient = () => {
         };
 
         fetchPrescriptions();
-        const intervalId = setInterval(fetchPrescriptions, 10000);
-
-        return () => clearInterval(intervalId);
     }, [token, specialtyFilter, statusFilter, sortOrder]);
 
     const handleTransfer = (prescriptionId) => {
@@ -87,7 +84,7 @@ const Patient = () => {
             setPharmacyNid('');
             setSelectedPrescriptionId(null);
 
-            Cookies.set(`pendingPrescription_${selectedPrescriptionId}`, 'true', { expires: 1 / 720 }); 
+            Cookies.set(`pendingPrescription_${selectedPrescriptionId}`, 'true', { expires: 1 / 720 });
             navigate('/dashboard/patient');
         } catch (error) {
             console.error('Error al transferir la receta:', error);
@@ -108,16 +105,39 @@ const Patient = () => {
             );
         };
 
-        const intervalId = setInterval(checkPendingPrescriptions, 10000); 
-        return () => clearInterval(intervalId);
+        checkPendingPrescriptions();
     }, []);
 
     const getStatusClass = (status) => {
         switch (status) {
-            case 'Valid': return 'status-valid';
-            case 'Expired': return 'status-expired';
-            case 'Dispensed': return 'status-dispensed';
-            default: return '';
+            case 'Valid':
+            case 'Válida':
+                return 'status-valid';
+            case 'Expired':
+            case 'Expirada':
+                return 'status-expired';
+            case 'Dispensed':
+            case 'Dispensada':
+                return 'status-dispensed';
+            default:
+                return '';
+        }
+    };
+    
+
+    const getStatusBackground = (status) => {
+        switch (status) {
+            case 'Valid':
+            case 'Válida':
+                return 'accordion-valid';
+            case 'Expired':
+            case 'Expirada':
+                return 'accordion-expired';
+            case 'Dispensed':
+            case 'Dispensada':
+                return 'accordion-dispensed';
+            default:
+                return '';
         }
     };
 
@@ -136,9 +156,9 @@ const Patient = () => {
             </p>
         </div>
     );
-    
 
     return (
+        
         <div className="receta-list-container">
             <h3>Mis Recetas</h3>
 
@@ -157,9 +177,9 @@ const Patient = () => {
                     Filtrar por Estado:
                     <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                         <option value="">Todos</option>
-                        <option value="Valid">Válido</option>
-                        <option value="Expired">Expirada</option>
-                        <option value="Dispensed">Dispensada</option>
+                        <option value="Válida">Válida</option>
+                        <option value="Expirada">Expirada</option>
+                        <option value="Dispensada">Dispensada</option>
                     </select>
                 </label>
 
@@ -174,17 +194,26 @@ const Patient = () => {
 
             <Accordion defaultActiveKey="">
                 {recetas.map((receta, index) => (
-                    <Accordion.Item eventKey={index.toString()} key={index} className="receta-item">
+                    <React.Fragment key={index}>
+                    {console.log("Receta:", receta)}
+                    <Accordion.Item
+                        eventKey={index.toString()}
+                        className={`receta-item ${getStatusBackground(receta.status)}`}
+                    >                        
                         <Accordion.Header>
                             <div style={{ width: '100%' }}>
-                                <strong>Médico:</strong> {receta.doctorName} {receta.doctorSurname} ({receta.doctorSpecialty}) | <strong>Estado:</strong> <span className={getStatusClass(receta.status)}>{receta.status}</span> | <strong>Fecha:</strong> {formatDate(receta.issueDate)}
+                                <strong>Médico: </strong> {receta.doctorName} {receta.doctorSurname} | <strong>Especialidad: </strong> {receta.doctorSpecialty} | <strong>Estado: </strong> <span className={getStatusClass(receta.status)}>{receta.status}</span> | <strong>Fecha de Emisión: </strong> {formatDate(receta.issueDate)}
                             </div>
                         </Accordion.Header>
                         <Accordion.Body className="receta-details">
-                            <p><strong>Médico NID:</strong> {receta.doctorNid}</p>
-                            <p><strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}</p>
+                            <p><strong>DNI del Médico:</strong> {receta.doctorNid}</p>
+                            <p><strong>Medicamento:</strong> {receta.meds.med1}</p>
+                            <p><strong>Cantidad: </strong> {receta.meds.quantity1}</p>
                             {receta.meds.med2 !== 'N/A' && receta.meds.quantity2 > 0 && (
-                                <p><strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}</p>
+                                <>
+                                    <p><strong>Medicamento:</strong> {receta.meds.med2}</p>
+                                    <p><strong>Cantidad: </strong> {receta.meds.quantity2}</p>
+                                </>
                             )}
                             <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis}</p>
                             {receta.meds.observations && receta.meds.observations.trim() !== '' && (
@@ -192,13 +221,14 @@ const Patient = () => {
                             )}
                             <p><strong>Fecha de Expiración:</strong> {formatDate(receta.expirationDate)}</p>
 
-                            {!receta.isPending && receta.status === "Valid" && (
+                            {!receta.isPending && (receta.status === "Valid" || receta.status === "Válida") && (
                                 <button className="button_t" onClick={() => handleTransfer(receta.prescriptionId)}>
                                     Transferir Receta
                                 </button>
                             )}
                         </Accordion.Body>
                     </Accordion.Item>
+                    </React.Fragment>
                 ))}
             </Accordion>
 
