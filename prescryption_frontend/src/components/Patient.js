@@ -10,6 +10,8 @@ const Patient = () => {
     const [pharmacyNid, setPharmacyNid] = useState('');
     const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const token = localStorage.getItem('token');
     const [statusFilter, setStatusFilter] = useState('');
     const [specialtyFilter, setSpecialtyFilter] = useState('');
@@ -20,6 +22,7 @@ const Patient = () => {
     useEffect(() => {
         const fetchPrescriptions = async () => {
             try {
+                setLoading(true);
                 const response = await axios.get('http://localhost:3001/api/patients/prescriptions', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -48,8 +51,12 @@ const Patient = () => {
                 });
 
                 setRecetas(filteredPrescriptions);
+                setError('');
             } catch (error) {
                 console.error('Error al obtener las recetas:', error);
+                setError('Error al obtener tus recetas. Intentalo más tarde.');
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -103,7 +110,7 @@ const Patient = () => {
 
         const intervalId = setInterval(checkPendingPrescriptions, 10000); 
         return () => clearInterval(intervalId);
-    }, [recetas]);
+    }, []);
 
     const getStatusClass = (status) => {
         switch (status) {
@@ -119,6 +126,17 @@ const Patient = () => {
         const date = new Date(isoDate);
         return date.toLocaleDateString('es-AR');
     };
+
+    if (loading) return <p className="perfil-loading">Cargando recetas...</p>;
+    if (error) return <p className="perfil-error">{error}</p>;
+    if (recetas.length === 0) return (
+        <div className="no-recetas-container">
+            <p className="no-recetas-text">
+                Todavía no tenés recetas emitidas.<br />
+            </p>
+        </div>
+    );
+    
 
     return (
         <div className="receta-list-container">
@@ -170,8 +188,8 @@ const Patient = () => {
                             )}
                             <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis}</p>
                             {receta.meds.observations && receta.meds.observations.trim() !== '' && (
-                                        <p><strong>Observaciones:</strong> {receta.meds.observations}</p>
-                                    )}
+                                <p><strong>Observaciones:</strong> {receta.meds.observations}</p>
+                            )}
                             <p><strong>Fecha de Expiración:</strong> {formatDate(receta.expirationDate)}</p>
 
                             {!receta.isPending && receta.status === "Valid" && (

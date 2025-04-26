@@ -92,7 +92,17 @@ exports.getPresbyPatientAddress = async (req, res) => {
         const patientAddress = patient.address;
         if (!patientAddress) return res.status(400).json({ message: 'Patient address not available' });
 
+        let prescriptions = [];
+        try {
+            prescriptions = await blockchainService.getPrescriptionsByPatient(patientAddress);
+        } catch (blockchainError) {
+            console.warn('⚠️ No se pudieron obtener recetas del blockchain:', blockchainError.message);
+            prescriptions = [];
+        }
+
+        /* 
         const prescriptions = await blockchainService.getPrescriptionsByPatient(patientAddress);
+        */
 
         // 🔍 Buscar info del médico para cada receta
         const enrichedPrescriptions = await Promise.all(
@@ -109,8 +119,9 @@ exports.getPresbyPatientAddress = async (req, res) => {
 
         res.json(enrichedPrescriptions);
     } catch (err) {
-        console.error('Error retrieving prescriptions:', err.message);
-        res.status(500).send(err.message);
+        console.error('❌ Error retrieving prescriptions:', err.message);
+        res.status(500).json({ message: 'Internal server error' });
+        //res.status(500).send(err.message);
     }
 };
 
