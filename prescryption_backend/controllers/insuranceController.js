@@ -91,3 +91,16 @@ exports.getUsedPrescriptionsByInsurance = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+exports.getInsuranceProfile = async (req, res) => {
+    try {
+        const nid = req.user.insurance_nid; 
+        const insurance = await Insurance.findOne({ insurance_nid: nid }).select('-password'); 
+        if (!insurance) return res.status(404).json({ message: "Insurance not found" });
+
+        res.json(insurance);
+    } catch (err) {
+        console.error("❌ Error retrieving insurance profile:", err.message);
+        res.status(500).json({ message: "Server error" });
+    }
+};
