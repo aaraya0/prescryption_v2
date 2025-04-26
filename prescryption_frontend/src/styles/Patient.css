@@ -34,3 +34,13 @@
     color: blue;
     font-weight: bold;
 }
+
+.no-recetas-container {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.no-recetas-text {
+    font-size: 18px;
+    color: #555;
+}

@@ -6,6 +6,7 @@ function Register() {
     const [formData, setFormData] = useState({});
     const [insurancePlan, setInsurancePlan] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
     const userType = document.cookie
         .split('; ')
         .find(row => row.startsWith('userType='))
@@ -48,17 +49,35 @@ function Register() {
             setInsurancePlan(''); // Limpiar el plan si hay error
         }
     };
-
     const handleRegister = async () => {
         try {
-            await axios.post(`http://localhost:3001/api/public/${userType}s/register`, formData);
-            alert('Registro exitoso');
-            navigate('/login');
+            let payload = formData;
+    
+            if (userType === 'insurance') {
+                // ✨ Limpiar el payload SOLO con los campos que necesita el backend
+                payload = {
+                    insurance_name: formData.insurance_name,
+                    insurance_nid: formData.insurance_nid,
+                    password: formData.password,
+                    mail: formData.mail
+                };
+            }
+    
+            console.log("Payload enviado:", payload); // 👀 Verificación
+    
+            await axios.post(`http://localhost:3001/api/public/${userType}s/register`, payload);
+            setShowSuccess(true); // activa animación
+            setTimeout(() => {
+                setShowSuccess(false);
+                navigate('/login'); // redirige a login
+            }, 3000); // espera 3 segundos antes de redirigir
+            
         } catch (error) {
-            console.error(error);
+            console.error("❌ Error al registrar:", error.response?.data || error);
             alert('Error en el registro');
         }
     };
+    
 
     const handleLogin = () => {
         navigate('/login'); 
@@ -88,22 +107,22 @@ function Register() {
                         <input className="form-input" type="text" name="insurance_name" placeholder="Obra Social" onChange={handleChange} />
                         <p className="inputTitle">Número de Afiliado</p>
                         <div className="affiliate-input-container">
-    <input 
-        className="form-input" 
-        type="text" 
-        name="affiliate_num" 
-        placeholder="Número de Afiliado" 
-        onChange={handleChange} 
-    />
-    <button 
-        type="button" 
-        onClick={fetchInsurancePlan} 
-        className="fetch-plan-button"
-        title="Fetch Insurance Plan"
-    >
-        ➔ {/* Icono de flecha */}
-    </button>
-</div>
+                        <input 
+                            className="form-input" 
+                            type="text" 
+                            name="affiliate_num" 
+                            placeholder="Número de Afiliado" 
+                            onChange={handleChange} 
+                        />
+                        <button 
+                            type="button" 
+                            onClick={fetchInsurancePlan} 
+                            className="fetch-plan-button"
+                            title="Fetch Insurance Plan"
+                        >
+                            ➔ {/* Icono de flecha */}
+                        </button>
+                        </div>
                         
                         <p className="inputTitle">Plan de Obra Social</p>
                         <input
@@ -164,25 +183,23 @@ function Register() {
                             <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
                         </>
                     );
-                case 'insurance':
-                    return (
-                        <>
-                            <p className="inputTitle">Nombre</p>
-                            <input className="form-input" type="text" name="name" placeholder="Nombre" onChange={handleChange} />
-                            <p className="inputTitle">Apellido</p>
-                            <input className="form-input" type="text" name="surname" placeholder="Apellido" onChange={handleChange} />
-                            <p className="inputTitle">DNI</p>
-                            <input className="form-input" type="text" name="nid" placeholder="DNI" onChange={handleChange} />
-                            <p className="inputTitle">Razón Social</p>
-                            <input className="form-input" type="text" name="razon_social" placeholder="Razón Social" onChange={handleChange} />
-                            <p className="inputTitle">CUIT Obra Social</p>
-                            <input className="form-input" type="text" name="cuit_os" placeholder="CUIT Obra Social" onChange={handleChange} />
-                            <p className="inputTitle">Correo Electrónico</p>
-                            <input className="form-input" type="email" name="mail" placeholder="Email" onChange={handleChange} />
-                            <p className="inputTitle">Contraseña</p>
-                            <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
+                    case 'insurance':
+                        return (
+                            <>
+                                <p className="inputTitle">Nombre de la Obra Social</p>
+                                <input className="form-input" type="text" name="insurance_name" placeholder="Nombre de la Obra Social" onChange={handleChange} />
+                                
+                                <p className="inputTitle">CUIT de la Obra Social</p>
+                                <input className="form-input" type="text" name="insurance_nid" placeholder="CUIT" onChange={handleChange} />
+                                
+                                <p className="inputTitle">Correo Electrónico</p>
+                                <input className="form-input" type="email" name="mail" placeholder="Email" onChange={handleChange} />
+                                
+                                <p className="inputTitle">Contraseña</p>
+                                <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
                             </>
-                            );
+                        );
+                    
             default:
                 return <p>Por favor, selecciona un tipo de usuario.</p>;
         }
@@ -202,6 +219,17 @@ function Register() {
                 </p>
             </div>
         </div>
+
+        {showSuccess && (
+    <div className="login-success">
+        <div className="checkmark-circle">
+            <span className="checkmark">✓</span>
+        </div>
+        <h2>Registro exitoso</h2>
+        <p>Serás redirigido al login...</p>
+    </div>
+)}
+
         </div>
     );
 }

@@ -6,8 +6,13 @@ function MainMenu() {
     const navigate = useNavigate();
 
     const handleSelection = (userType) => {
-        document.cookie = `userType=${userType}; path=/`; 
-        navigate('/login'); 
+        if (userType === 'pharmacySelection') {
+            navigate('/pharmacy/type');
+            
+        } else {
+            document.cookie = `userType=${userType}`;
+            navigate('/login');
+        }
     };
 
     return (
@@ -16,7 +21,7 @@ function MainMenu() {
             <div className="buttons">
                 <button className="patientButton" onClick={() => handleSelection('patient')}>Paciente</button>
                 <button className="doctorsButton" onClick={() => handleSelection('doctor')}>Médico</button>
-                <button className="pharmacistButton" onClick={() => handleSelection('pharmacy')}>Farmacéutico</button>
+                <button className="pharmacistButton" onClick={() => handleSelection('pharmacySelection')}>Farmacia</button>
                 <button className="osButton" onClick={() => handleSelection('insurance')}>Obra Social</button>
             </div>
         </div>

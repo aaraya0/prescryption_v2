@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './styles.css';
-import { FaUser, FaEnvelope, FaIdCard, FaBirthdayCake, FaVenusMars, FaBriefcaseMedical, FaStethoscope, FaClinicMedical, FaBuilding } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaIdCard, FaBirthdayCake, FaVenusMars, FaBriefcaseMedical, FaStethoscope, FaClinicMedical } from 'react-icons/fa';
 
 function Perfil() {
     const [profile, setProfile] = useState(null);
@@ -50,8 +50,8 @@ function Perfil() {
                         <Field icon={<FaUser />} label="Nombre" value={profile.name} />
                         <Field icon={<FaUser />} label="Apellido" value={profile.surname} />
                         <Field icon={<FaIdCard />} label="DNI" value={profile.nid} />
-                        <Field icon={<FaBirthdayCake />} label="Fecha de nacimiento" value={profile.birth_date} />
-                        <Field icon={<FaVenusMars />} label="Sexo" value={profile.sex} />
+                        <Field icon={<FaBirthdayCake />} label="Fecha de nacimiento" value={new Date(profile.birth_date).toLocaleDateString('es-AR')} />
+                        <Field icon={<FaVenusMars />} label="Sexo"   value={profile.sex === 'M' ? 'Masculino' : profile.sex === 'F' ? 'Femenino' : profile.sex === 'X' ? 'No binario' : 'No especificado'} />
                         <Field icon={<FaBriefcaseMedical />} label="Obra Social" value={profile.insurance_name} />
                         <Field icon={<FaIdCard />} label="Plan" value={profile.insurance_plan} />
                         <Field icon={<FaIdCard />} label="N° de Afiliado" value={profile.affiliate_num} />
@@ -83,10 +83,8 @@ function Perfil() {
             case 'insurance':
                 return (
                     <>
-                        <Field icon={<FaUser />} label="Nombre" value={profile.name} />
-                        <Field icon={<FaUser />} label="Apellido" value={profile.surname} />
-                        <Field icon={<FaIdCard />} label="CUIT Obra Social" value={profile.cuit_os} />
-                        <Field icon={<FaBuilding />} label="Razón Social" value={profile.razon_social} />
+                        <Field icon={<FaUser />} label="Nombre" value={profile.insurance_name} />
+                        <Field icon={<FaIdCard />} label="CUIT Obra Social" value={profile.insurance_nid} />
                         <Field icon={<FaEnvelope />} label="Correo" value={profile.mail} />
                     </>
                 );

@@ -29,6 +29,7 @@ function Login() {
         patient: 'Iniciar Sesión como Paciente',
         doctor: 'Iniciar Sesión como Médico',
         pharmacist: 'Iniciar Sesión como Farmacéutico',
+        pharmacyAdmin: 'Iniciar Sesión como Farmacia (Administrador)',
         insurance: 'Iniciar Sesión como Obra Social'
     };
 
@@ -44,6 +45,8 @@ function Login() {
 
             const token = response.data.token;
             localStorage.setItem('token', token);
+            document.cookie = `userType=${userType}; path=/`;
+
 
             setMessage({ text: 'Login exitoso', type: 'success' });
 
