@@ -8,6 +8,7 @@ import EmitirReceta from './components/Prescription';
 import PrescriptionValidation from './components/PrescriptionValidation';
 import Header from './components/Header';
 import Perfil from './components/Perfil';
+import PharmacyType from './components/PharmacyType';
 
 function App() {
     const noHeaderRoutes = ["/", "/dashboard/patient", "/dashboard/doctor", "/dashboard/pharmacy", "/dashboard/insurance"];
@@ -20,6 +21,7 @@ function App() {
             <div className="App">
                 <Routes>
                     <Route path="/" element={<MainMenu />} />
+                    <Route path="/pharmacy/type" element={<PharmacyType />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/dashboard/patient" element={<Dashboard userType="patient" />} />
