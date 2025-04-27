@@ -2,14 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './styles.css';
 import { Accordion } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
 
 const Doctor = () => {
     const [recetas, setRecetas] = useState([]);
     const [searchPaciente, setSearchPaciente] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
     const token = localStorage.getItem('token');
-    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get('http://localhost:3001/api/doctors/prescriptions', {
@@ -74,16 +72,22 @@ const Doctor = () => {
                         {filteredRecetas.map((receta, index) => (
                             <Accordion.Item eventKey={index.toString()} key={index} className="receta-item">
                                 <Accordion.Header>
+                                {/*console.log("Receta:", receta)*/}
                                     <div className="receta-header-info">
                                         <strong>Paciente:</strong> {receta.patientName} {receta.patientSurname}  
                                         <strong> DNI:</strong> {receta.patientNid}  
+                                        <strong> Obra Social:</strong> {receta.insurance?.[1] || 'N/A'}
                                         <strong> Fecha de Emisión:</strong> {formatDate(receta.issueDate)}
                                     </div>
                                 </Accordion.Header>
                                 <Accordion.Body className="receta-details">
-                                    <p><strong>Medicamento 1:</strong> {receta.meds.med1}, Cantidad: {receta.meds.quantity1}</p>
-                                    {(receta.meds.med2 !== 'N/A' && receta.meds.quantity2 > 0) && (
-                                        <p><strong>Medicamento 2:</strong> {receta.meds.med2}, Cantidad: {receta.meds.quantity2}</p>
+                                <p><strong>Medicamento:</strong> {receta.meds.med1}</p>
+                            <p><strong>Cantidad: </strong> {receta.meds.quantity1}</p>
+                            {receta.meds.med2 !== 'N/A' && receta.meds.quantity2 > 0 && (
+                                <>
+                                    <p><strong>Medicamento:</strong> {receta.meds.med2}</p>
+                                    <p><strong>Cantidad: </strong> {receta.meds.quantity2}</p>
+                                </>
                                     )}
                                     <p><strong>Diagnóstico:</strong> {receta.meds.diagnosis}</p>
                                     {receta.meds.observations && receta.meds.observations.trim() !== '' && (
