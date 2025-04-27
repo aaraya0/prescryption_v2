@@ -3,11 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import './styles.css';
 
 
-function PharmacyType() {
+const PharmacyType = () => {
     const navigate = useNavigate();
 
-    const handleSelection = (tipo) => {
-        document.cookie = `userType=${tipo}`;
+    const handleSelect = (type) => {
+        if (type === 'user') {
+            document.cookie = `userType=pharmacyUser; path=/;`;
+        } else if (type === 'admin') {
+            document.cookie = `userType=pharmacy; path=/;`;
+        }
         navigate('/login');
     };
 
@@ -15,11 +19,18 @@ function PharmacyType() {
         <div className="formUserOptions">
             <h2 className="title">Elegí el tipo de usuario</h2>
             <div className="buttons">
-                <button className="patientButton" onClick={() => handleSelection('pharmacist')}>Usuario de Farmacia</button>
-                <button className="doctorsButton" onClick={() => handleSelection('pharmacyAdmin')}>Farmacia (Administrador)</button>
+            <button className="patientButton" onClick={() => handleSelect('user')}>
+                    Usuario de Farmacia
+                </button>
+                <button className="osButton" onClick={() => handleSelect('admin')}>
+                    Farmacia (Administrador)
+                </button>
             </div>
         </div>
     );
 }
 
 export default PharmacyType;
+
+
+

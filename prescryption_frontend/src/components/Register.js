@@ -52,9 +52,9 @@ function Register() {
     const handleRegister = async () => {
         try {
             let payload = formData;
+            let endpoint = `http://localhost:3001/api/public/${userType}s/register`; // por default
     
             if (userType === 'insurance') {
-                // ✨ Limpiar el payload SOLO con los campos que necesita el backend
                 payload = {
                     insurance_name: formData.insurance_name,
                     insurance_nid: formData.insurance_nid,
@@ -63,20 +63,25 @@ function Register() {
                 };
             }
     
-            console.log("Payload enviado:", payload); // 👀 Verificación
+            if (userType === 'pharmacyUser') {
+                endpoint = `http://localhost:3001/api/public/pharmacies/users/register`;
+            }
     
-            await axios.post(`http://localhost:3001/api/public/${userType}s/register`, payload);
-            setShowSuccess(true); // activa animación
+            console.log("Payload enviado:", payload);
+    
+            await axios.post(endpoint, payload);
+            setShowSuccess(true);
             setTimeout(() => {
                 setShowSuccess(false);
-                navigate('/login'); // redirige a login
-            }, 3000); // espera 3 segundos antes de redirigir
-            
+                navigate('/login');
+            }, 3000);
+    
         } catch (error) {
             console.error("❌ Error al registrar:", error.response?.data || error);
             alert('Error en el registro');
         }
     };
+    
     
 
     const handleLogin = () => {
@@ -160,29 +165,6 @@ function Register() {
                             <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
                         </>
                     );
-                case 'pharmacy':
-                    return (
-                        <>
-                            <p className="inputTitle">Nombre</p>
-                            <input className="form-input" type="text" name="name" placeholder="Nombre" onChange={handleChange} />
-                            <p className="inputTitle">Apellido</p>
-                            <input className="form-input" type="text" name="surname" placeholder="Apellido" onChange={handleChange} />
-                            <p className="inputTitle">DNI</p>
-                            <input className="form-input" type="text" name="nid" placeholder="DNI" onChange={handleChange} />
-                            <p className="inputTitle">Matrícula</p>
-                            <input className="form-input" type="text" name="license" placeholder="Matrícula" onChange={handleChange} />
-                            <p className="inputTitle">Nombre de la Farmacia</p>
-                            <input className="form-input" type="text" name="pharmacy_name" placeholder="Nombre de Farmacia" onChange={handleChange} />
-                            <p className="inputTitle">Alias de Farmacia</p>
-                            <input className="form-input" type="text" name="alias" placeholder="Alias de Farmacia" onChange={handleChange} />
-                            <p className="inputTitle">CUIT Farmacia</p>
-                            <input className="form-input" type="text" name="pharmacy_nid" placeholder="CUIT Farmacia" onChange={handleChange} />
-                            <p className="inputTitle">Correo Electrónico</p>
-                            <input className="form-input" type="email" name="mail" placeholder="Email" onChange={handleChange} />
-                            <p className="inputTitle">Contraseña</p>
-                            <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
-                        </>
-                    );
                     case 'insurance':
                         return (
                             <>
@@ -199,6 +181,28 @@ function Register() {
                                 <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
                             </>
                         );
+                        case 'pharmacyUser':
+                            return (
+                                <>
+                                    <p className="inputTitle">Nombre</p>
+                                    <input className="form-input" type="text" name="name" placeholder="Nombre" onChange={handleChange} />
+                                    <p className="inputTitle">Apellido</p>
+                                    <input className="form-input" type="text" name="surname" placeholder="Apellido" onChange={handleChange} />
+                                    <p className="inputTitle">DNI</p>
+                                    <input className="form-input" type="text" name="nid" placeholder="DNI" onChange={handleChange} />
+                                    <p className="inputTitle">Matrícula</p>
+                                    <input className="form-input" type="text" name="license" placeholder="Matrícula" onChange={handleChange} />
+                                    <p className="inputTitle">Email</p>
+                                    <input className="form-input" type="email" name="email" placeholder="Email" onChange={handleChange} />
+                                    <p className="inputTitle">Contraseña</p>
+                                    <input className="form-input" type="password" name="password" placeholder="Contraseña" onChange={handleChange} />
+                                    <p className="inputTitle">CUIT de la Farmacia</p>
+                                    <input className="form-input" type="text" name="pharmacyNid" placeholder="CUIT de la Farmacia" onChange={handleChange} />
+                                    <p className="inputTitle">Código de Verificación</p>
+                                    <input className="form-input" type="text" name="verificationCode" placeholder="Código de verificación" onChange={handleChange} />
+                                </>
+    );
+
                     
             default:
                 return <p>Por favor, selecciona un tipo de usuario.</p>;

@@ -11,7 +11,7 @@ import Perfil from './components/Perfil';
 import PharmacyType from './components/PharmacyType';
 
 function App() {
-    const noHeaderRoutes = ["/", "/dashboard/patient", "/dashboard/doctor", "/dashboard/pharmacy", "/dashboard/insurance"];
+    const noHeaderRoutes = ["/", "/dashboard/patient", "/dashboard/doctor", "/dashboard/pharmacy", "/dashboard/pharmacyUser", "/dashboard/insurance"];
 
     return (
         <Router>
@@ -26,7 +26,8 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/dashboard/patient" element={<Dashboard userType="patient" />} />
                     <Route path="/dashboard/doctor" element={<Dashboard userType="doctor" />} />
-                    <Route path="/dashboard/pharmacy" element={<Dashboard userType="pharmacy" />} />
+                    <Route path="/dashboard/pharmacy" element={<Dashboard userType="pharmacy" />} /> {/* farmacia administrador */}
+                    <Route path="/dashboard/pharmacyUser" element={<Dashboard userType="pharmacyUser" />} /> {/* usuario farmacéutico */}
                     <Route path="/dashboard/insurance" element={<Dashboard userType="insurance" />} />
                     <Route path="/perfil" element={<Perfil />} />
                     <Route path="/issue-prescription" element={<EmitirReceta />} />
@@ -39,10 +40,7 @@ function App() {
 
 function ConditionalHeader({ noHeaderRoutes }) {
     const location = useLocation();
-
-    // Verifica si la ruta actual está en el arreglo noHeaderRoutes
     const shouldShowHeader = !noHeaderRoutes.includes(location.pathname);
-
     return shouldShowHeader ? <Header /> : null;
 }
 

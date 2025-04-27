@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch } from 'react-icons/fa';
 import './styles.css';
 
 function EmitirReceta() {
@@ -47,7 +46,7 @@ function EmitirReceta() {
       );
 
       const patientData = response.data.profile;
-      console.log("Datos del paciente encontrados:", patientData);
+      //console.log("Datos del paciente encontrados:", patientData);
 
       setFormData((prev) => ({
         ...prev,

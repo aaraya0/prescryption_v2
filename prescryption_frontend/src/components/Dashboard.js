@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import Doctor from './Doctor';
 import Patient from './Patient';
 import Pharmacy from './Pharmacy';
+import PharmacyUser from './PharmacyUser'; // 🛠️ Asegurate de crear este componente (te lo paso también si querés)
 
 function Dashboard({ userType }) {
     const navigate = useNavigate();
 
-    // Verificar si hay un token en localStorage al cargar el componente
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -17,9 +17,8 @@ function Dashboard({ userType }) {
     }, [navigate]);
 
     const handleLogout = () => {
-        // Eliminar el token de localStorage y cookies
         localStorage.removeItem('token');
-        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; // Elimina cookie de token
+        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         navigate('/');
     };
 
@@ -35,7 +34,6 @@ function Dashboard({ userType }) {
                 return (
                     <div className="doctor-menu">
                         <Doctor userType={userType} />
-                        {/* Botón para emitir receta solo para el médico */}
                         <button className="emitir-receta-btn" onClick={() => navigate('/issue-prescription')}>
                             Emitir Receta
                         </button>
@@ -47,6 +45,12 @@ function Dashboard({ userType }) {
                         <Pharmacy />
                     </div>
                 );
+            case 'pharmacyUser':
+                return (
+                    <div>
+                        <PharmacyUser />
+                    </div>
+                );
             case 'insurance':
                 return <p>Bienvenido al menú de la obra social.</p>;
             default:
@@ -56,7 +60,6 @@ function Dashboard({ userType }) {
 
     return (
         <div>
-            {/* Encabezado fijo con título, mensaje de bienvenida y botones */}
             <div className="fixed-header">
                 <div className="header-text">
                     <h2>Menú de {userType}</h2>
@@ -69,7 +72,6 @@ function Dashboard({ userType }) {
                 </div>
             </div>
             
-            {/* Contenido desplazable debajo del encabezado fijo */}
             <div className="content" style={{ paddingTop: '100px' }}>
                 {renderMenu()}
             </div>

@@ -9,6 +9,8 @@ const Patient = () => {
     const [recetas, setRecetas] = useState([]);
     const [pharmacyNid, setPharmacyNid] = useState('');
     const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -70,27 +72,44 @@ const Patient = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedPrescriptionId || !pharmacyNid) return;
+        console.log("✅ handleSubmit llamado");
 
+        console.log("selectedPrescriptionId:", selectedPrescriptionId);
+        console.log("pharmacyNid:", pharmacyNid);
+    
+        if (!selectedPrescriptionId || !pharmacyNid) return;
+    
         try {
-            await axios.post('http://localhost:3001/api/patients/send_prescription', {
+            console.log("Enviando receta:", { pharmacyNid, prescriptionId: selectedPrescriptionId });
+        
+            const response = await axios.post('http://localhost:3001/api/patients/send_prescription', {
                 pharmacyNid,
                 prescriptionId: selectedPrescriptionId
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-
+        
+            console.log("Respuesta de transferencia:", response.data);
+        
+            setSuccessMessage('✅ Receta enviada exitosamente.');
+            setErrorMessage('');
             setShowModal(false);
             setPharmacyNid('');
             setSelectedPrescriptionId(null);
-
             Cookies.set(`pendingPrescription_${selectedPrescriptionId}`, 'true', { expires: 1 / 720 });
-            navigate('/dashboard/patient');
+        
+            setTimeout(() => {
+                setSuccessMessage('');
+                navigate('/dashboard/patient');
+            }, 2000);
+        
         } catch (error) {
             console.error('Error al transferir la receta:', error);
-            alert('Error al transferir la receta.');
+            setErrorMessage('❌ Error al transferir la receta. Ya podría estar transferida.');
+            setSuccessMessage('');
         }
-    };
+    }; 
+    
 
     useEffect(() => {
         const checkPendingPrescriptions = () => {
@@ -161,6 +180,16 @@ const Patient = () => {
         
         <div className="receta-list-container">
             <h3>Mis Recetas</h3>
+            {successMessage && (
+    <div className="success-alert">
+        {successMessage}
+    </div>
+)}
+{errorMessage && (
+    <div className="error-alert">
+        {errorMessage}
+    </div>
+)}
 
             <div className="filtros-container">
                 <label>
@@ -222,7 +251,7 @@ const Patient = () => {
                             <p><strong>Fecha de Expiración:</strong> {formatDate(receta.expirationDate)}</p>
 
                             {!receta.isPending && (receta.status === "Valid" || receta.status === "Válida") && (
-                                <button className="button_t" onClick={() => handleTransfer(receta.prescriptionId)}>
+                                <button className="button_t" onClick={() => handleTransfer(receta.id)}>
                                     Transferir Receta
                                 </button>
                             )}
