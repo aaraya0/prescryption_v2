@@ -16,7 +16,7 @@ const PharmacyUser = () => {
     const navigate = useNavigate();
 
     const decoded = token ? jwtDecode(token) : {};
-    const isAdmin = decoded.userType === 'pharmacyAdmin';
+    const isAdmin = decoded.role === 'admin';
 
     const fetchPrescriptions = async () => {
         try {

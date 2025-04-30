@@ -108,10 +108,34 @@ function Login() {
 
             <button className="loginButton" onClick={handleLogin}>Ingresar</button>
             <button className="RecordarButton">Recordar Contraseña</button>
-            <p>
-                ¿No tenés una cuenta?{' '}
-                <button className="RegistrateButton" onClick={handleRegister}>Registrate</button>
-            </p>
+            {userType !== 'pharmacyUser' ? (
+    <p>
+        ¿No tenés una cuenta?{' '}
+        <button className="RegistrateButton" onClick={handleRegister}>Registrate</button>
+    </p>
+) : (
+    <>
+<p>¿Querés registrar una farmacia?</p>
+<button
+  className="RegistrateButton"
+  onClick={() => {
+    document.cookie = 'userType=pharmacy; path=/';
+    navigate('/register');
+  }}
+>
+  Registrá una farmacia
+</button>
+
+        <p>¿Sos farmacéutico?</p>
+        <button
+            className="RegistrateButton"
+            onClick={() => navigate('/register')}
+        >
+            Registrate como usuario
+        </button>
+    </>
+)}
+
 
             {message.text && (
                 <>
