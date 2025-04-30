@@ -2,8 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Doctor from './Doctor';
 import Patient from './Patient';
-import Pharmacy from './Pharmacy';
-import PharmacyUser from './PharmacyUser'; // 🛠️ Asegurate de crear este componente (te lo paso también si querés)
+import PharmacyUser from './PharmacyUser';
 
 function Dashboard({ userType }) {
     const navigate = useNavigate();
@@ -37,12 +36,6 @@ function Dashboard({ userType }) {
                         <button className="emitir-receta-btn" onClick={() => navigate('/issue-prescription')}>
                             Emitir Receta
                         </button>
-                    </div>
-                );
-            case 'pharmacy':
-                return (
-                    <div>
-                        <Pharmacy />
                     </div>
                 );
             case 'pharmacyUser':

@@ -1,9 +1,11 @@
-// PharmacyUser.js mejorado para usar el mismo formato que Doctor.js
+// PharmacyUser.js mejorado con opción de gestionar usuarios para admin
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Accordion } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import './styles.css';
+import { jwtDecode } from 'jwt-decode';
 
 const PharmacyUser = () => {
     const [prescriptions, setPrescriptions] = useState([]);
@@ -11,6 +13,10 @@ const PharmacyUser = () => {
     const [searchType, setSearchType] = useState('nid');
     const [sortOrder, setSortOrder] = useState('asc');
     const token = localStorage.getItem('token');
+    const navigate = useNavigate();
+
+    const decoded = token ? jwtDecode(token) : {};
+    const isAdmin = decoded.userType === 'pharmacyAdmin';
 
     const fetchPrescriptions = async () => {
         try {
@@ -78,6 +84,12 @@ const PharmacyUser = () => {
                         <option value="desc">Descendente</option>
                     </select>
                 </label>
+
+                {isAdmin && (
+                    <button className="dashboard-button" onClick={() => navigate('/pharmacy/manage-users')}>
+                        Gestionar Usuarios
+                    </button>
+                )}
             </div>
 
             <div className="receta-scroll">

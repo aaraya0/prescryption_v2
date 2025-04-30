@@ -21,7 +21,7 @@ function MainMenu() {
             <div className="buttons">
                 <button className="patientButton" onClick={() => handleSelection('patient')}>Paciente</button>
                 <button className="doctorsButton" onClick={() => handleSelection('doctor')}>Médico</button>
-                <button className="pharmacistButton" onClick={() => handleSelection('pharmacySelection')}>Farmacia</button>
+                <button className="pharmacistButton" onClick={() => handleSelection('pharmacyUser')}>Farmacia</button>
                 <button className="osButton" onClick={() => handleSelection('insurance')}>Obra Social</button>
             </div>
         </div>
