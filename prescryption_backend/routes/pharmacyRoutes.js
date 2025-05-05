@@ -1,5 +1,5 @@
 const express = require('express');
-const { resetPharmacyAddress, validatePrescription, processPurchase, deactivatePharmacyUser, activatePharmacyUser, getAvailablePharmacies, getPresbyPharmacyAddress, getMedicationOptions, cancelPrescriptionValidation} = require('../controllers/pharmacyController');
+const { resetPharmacyAddress, validatePrescription, processPurchase, deactivatePharmacyUser, activatePharmacyUser, getAvailablePharmacies, getPresbyPharmacyAddress, getMedicationOptions, cancelPrescriptionValidation, getPharmacyUserProfile} = require('../controllers/pharmacyController');
 const router = express.Router();
 
 
@@ -12,10 +12,10 @@ router.post('/reset_address', resetPharmacyAddress);
 router.post('/validate_prescription', validatePrescription);
 router.post('/process_purchase', processPurchase);
 router.get('/available', getAvailablePharmacies);
-// router.get('/profile', getUserProfile);
 router.get("/medications/search/:prescriptionId", getMedicationOptions)
 router.get('/prescriptions', getPresbyPharmacyAddress);
 router.get('/cancel_validation', cancelPrescriptionValidation);
+router.get('/profile', getPharmacyUserProfile);
 
 
 module.exports = router;

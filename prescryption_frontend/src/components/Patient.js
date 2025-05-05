@@ -268,7 +268,7 @@ const Patient = () => {
                 <Modal.Body>
                     <Form onSubmit={handleSubmit}>
                         <Form.Group controlId="alias">
-                            <Form.Label>Alias de la Farmacia:</Form.Label>
+                            <Form.Label>CUIT de la Farmacia:</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={pharmacyNid}
@@ -276,9 +276,10 @@ const Patient = () => {
                                 required
                             />
                         </Form.Group>
-                        <Button variant="primary" type="submit" className="mt-3">
-                            Enviar
-                        </Button>
+                        <Button type="submit" className="button-enviar-modal mt-3">
+  Enviar
+</Button>
+
                     </Form>
                 </Modal.Body>
             </Modal>

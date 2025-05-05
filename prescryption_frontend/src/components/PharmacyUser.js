@@ -1,10 +1,10 @@
-// PharmacyUser.js mejorado con opción de gestionar usuarios para admin
+// PharmacyUser.js mejorado con opción de gestionar usuarios para admin y validar recetas
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Accordion } from 'react-bootstrap';
+import { Accordion, Modal, Button, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import './styles.css';
+import '../styles/Pharmacy.css';
 import { jwtDecode } from 'jwt-decode';
 
 const PharmacyUser = () => {
@@ -17,6 +17,11 @@ const PharmacyUser = () => {
 
     const decoded = token ? jwtDecode(token) : {};
     const isAdmin = decoded.role === 'admin';
+
+    const [showValidationModal, setShowValidationModal] = useState(false);
+    const [selectedPrescription, setSelectedPrescription] = useState(null);
+    const [medOptions, setMedOptions] = useState([]);
+    const [selectedMedicationIds, setSelectedMedicationIds] = useState([]);
 
     const fetchPrescriptions = async () => {
         try {
@@ -35,6 +40,42 @@ const PharmacyUser = () => {
 
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
+    };
+
+    const handleOpenValidationModal = async (prescription) => {
+        try {
+            const response = await axios.get(`http://localhost:3001/api/pharmacies/medications/search/${prescription.id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setMedOptions(response.data.results);
+            setSelectedPrescription(prescription);
+            setShowValidationModal(true);
+        } catch (error) {
+            console.error("Error al obtener opciones de medicamento:", error);
+        }
+    };
+
+    const handleValidatePrescription = async (e) => {
+        e.preventDefault();
+        if (!selectedPrescription || selectedMedicationIds.length === 0) return;
+
+        try {
+            const response = await axios.post('http://localhost:3001/api/pharmacies/validate_prescription', {
+                prescriptionId: selectedPrescription.id,
+                selectedMedicationIds
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            alert('✅ Receta validada exitosamente.');
+            setShowValidationModal(false);
+            setSelectedPrescription(null);
+            setSelectedMedicationIds([]);
+            fetchPrescriptions();
+        } catch (error) {
+            console.error("❌ Error validando receta:", error);
+            alert('❌ Error al validar la receta.');
+        }
     };
 
     const filteredPrescriptions = prescriptions.filter(prescription => {
@@ -126,12 +167,47 @@ const PharmacyUser = () => {
                                         <span className="status-valid">Válida</span>
                                     )}</p>
                                     <p><strong>Fecha de Expiración:</strong> {formatDate(prescription.expirationDate)}</p>
+
+                                    {!prescription.used && (
+                                        <button
+                                            className="validate-button"
+                                            onClick={() => handleOpenValidationModal(prescription)}
+                                        >
+                                            Validar Receta
+                                        </button>
+                                    )}
                                 </Accordion.Body>
                             </Accordion.Item>
                         ))}
                     </Accordion>
                 )}
             </div>
+
+            <Modal show={showValidationModal} onHide={() => setShowValidationModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Validar Receta ID: {selectedPrescription?.id}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleValidatePrescription}>
+                        {medOptions.map((med) => (
+                            <Form.Check 
+                                key={med._id}
+                                type="checkbox"
+                                label={`${med.genericName} - $${med.price}`}
+                                value={med._id}
+                                onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    const id = e.target.value;
+                                    setSelectedMedicationIds((prev) =>
+                                        checked ? [...prev, id] : prev.filter((m) => m !== id)
+                                    );
+                                }}
+                            />
+                        ))}
+                        <Button type="submit" className="mt-3">Confirmar Validación</Button>
+                    </Form>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 };

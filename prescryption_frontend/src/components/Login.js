@@ -115,7 +115,8 @@ function Login() {
     </p>
 ) : (
     <>
-<p>¿Querés registrar una farmacia?</p>
+<p   className="TextoRegistrateButton"
+>¿Tu farmacia aún no está registrada?</p>
 <button
   className="RegistrateButton"
   onClick={() => {
@@ -123,10 +124,10 @@ function Login() {
     navigate('/register');
   }}
 >
-  Registrá una farmacia
+  Registrar farmacia
 </button>
 
-        <p>¿Sos farmacéutico?</p>
+        <p className="TextoRegistrateButton">¿Sos farmacéutico?</p>
         <button
             className="RegistrateButton"
             onClick={() => navigate('/register')}

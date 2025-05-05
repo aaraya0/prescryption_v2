@@ -590,3 +590,21 @@ exports.processPurchase = async (req, res) => {
         return res.status(500).json({ message: "Error processing purchase." });
     }
 };
+
+ // 📌 Obtener el perfil del farmaceutico autenticado
+ exports.getPharmacyUserProfile = async (req, res) => {
+    try {
+        const nid = req.user.nid;
+
+        const pharmacyuser = await PharmacyUser.findOne({ nid }).select('-password');
+        if (!pharmacyuser) {
+            return res.status(404).json({ message: '❌ Pharmacy user not found' });
+        }
+
+        res.json(pharmacyuser);
+    } catch (error) {
+        console.error('❌ Error al obtener perfil del usuario de farmacia:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+

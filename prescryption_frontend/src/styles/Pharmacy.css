@@ -46,3 +46,23 @@
     font-weight: bold;
     text-align: center;
 }
+
+/* Botón de transferencia mejorado */
+.validate-button {
+    background-color: #D8B7AF;
+    color: black;
+    border: none;
+    border-radius: 8px; /* Más redondeado */
+    padding: 10px 14px; /* Botón más grande */
+    width: 100%; /* Que ocupe todo el ancho del accordion */
+    cursor: pointer;
+    margin-top: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.validate-button:hover {
+    background-color: #e3a38f; /* tu color de hover */
+    transform: scale(1.02); /* crece levemente */
+}

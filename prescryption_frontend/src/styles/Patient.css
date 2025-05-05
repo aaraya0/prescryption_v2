@@ -14,9 +14,25 @@
 }
 
 .button_t:hover {
-    background-color: #c88270; /* tu color de hover */
+    background-color: #e3a38f; /* tu color de hover */
     transform: scale(1.02); /* crece levemente */
 }
+
+.button-enviar-modal {
+    background-color: #A6C4CA !important;
+    color: black !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    border-radius: 5px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+  }
+  
+  .button-enviar-modal:hover {
+    background-color: #90b0b6 !important;
+    text-decoration: underline;
+  }
+  
 
 
 .status-valid {

@@ -13,24 +13,26 @@ function Perfil() {
         .find(row => row.startsWith('userType='))
         ?.split('=')[1];
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await axios.get(`http://localhost:3001/api/${userType}s/profile`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setProfile(response.data);
-            } catch (err) {
-                console.error('Error fetching profile:', err);
-                setError('No se pudo cargar el perfil.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (userType) fetchProfile();
-    }, [userType]);
+        useEffect(() => {
+            const fetchProfile = async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    const mappedType = userType === "pharmacyUser" ? "pharmacies" : `${userType}s`;
+                    const response = await axios.get(`http://localhost:3001/api/${mappedType}/profile`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setProfile(response.data);
+                } catch (err) {
+                    console.error('Error fetching profile:', err);
+                    setError('No se pudo cargar el perfil.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+        
+            if (userType) fetchProfile();
+        }, [userType]);
+        
 
     if (loading) return <p className="perfil-loading">Cargando perfil...</p>;
     if (error) return <p className="perfil-error">{error}</p>;
@@ -80,6 +82,20 @@ function Perfil() {
                         <Field icon={<FaEnvelope />} label="Correo" value={profile.mail} />
                     </>
                 );
+                case 'pharmacyUser':
+                    return (
+                        <>
+                            <Field icon={<FaUser />} label="Nombre" value={profile.name} />
+                            <Field icon={<FaUser />} label="Apellido" value={profile.surname} />
+                            <Field icon={<FaIdCard />} label="DNI" value={profile.nid} />
+                            <Field icon={<FaIdCard />} label="Licencia" value={profile.license} />
+                            <Field icon={<FaEnvelope />} label="Correo" value={profile.email} />
+                            <Field icon={<FaClinicMedical />} label="CUIT Farmacia" value={profile.pharmacyNid} />
+                            {profile.pharmacy_name && (
+                                <Field icon={<FaClinicMedical />} label="Nombre Farmacia" value={profile.pharmacy_name} />
+                            )}
+                        </>
+                    );                
             case 'insurance':
                 return (
                     <>
