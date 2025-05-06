@@ -13,7 +13,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 
 
 
-
+// 📌 Registrar Paciente
 exports.registerPatient = async (req, res) => {
     const { name, surname, nid, birth_date, sex, insurance_name, password, mail } = req.body;
 
@@ -153,7 +153,7 @@ exports.sendPrescriptionToPharmacy = async (req, res) => {
     }
 };
 
-
+// 📌 Visualizar los datos del perfil del Paciente
 exports.getPatientProfile = async (req, res) => {
     try {
       const nid = req.user.nid;
@@ -166,4 +166,16 @@ exports.getPatientProfile = async (req, res) => {
       res.status(500).json({ message: "Server error" });
     }
   };
-  
+
+
+
+// 📌 Obtener las Farmacias disponibles
+exports.getAvailablePharmacies = async (req, res) => {
+    try {
+        const pharmacies = await Pharmacy.find({ isActive: true }).select('pharmacy_name physicalAddress contactInfo nid');
+        res.status(200).json(pharmacies);
+    } catch (err) {
+        console.error('❌ Error retrieving pharmacies:', err.message);
+        res.status(500).json({ message: 'Error retrieving pharmacies' });
+    }
+};
