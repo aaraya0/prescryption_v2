@@ -154,7 +154,6 @@ body, html {
     cursor: pointer;
     padding-bottom: 10px;
     font-weight: 500;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 .formLogin .RegistrateButton:hover {
     text-decoration: underline;
