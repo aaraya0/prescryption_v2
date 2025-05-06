@@ -19,9 +19,16 @@ const Patient = () => {
     const [specialtyFilter, setSpecialtyFilter] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
     const [availableSpecialties, setAvailableSpecialties] = useState([]);
+    const [availablePharmacies, setAvailablePharmacies] = useState([]);
+    const [selectedPharmacyName, setSelectedPharmacyName] = useState('');
+    const [matchedPharmacies, setMatchedPharmacies] = useState([]);
+
+    
+
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (!token) return;
         const fetchPrescriptions = async () => {
             try {
                 setLoading(true);
@@ -64,6 +71,24 @@ const Patient = () => {
 
         fetchPrescriptions();
     }, [token, specialtyFilter, statusFilter, sortOrder]);
+
+    useEffect(() => {
+        if (showModal) {
+            const fetchPharmacies = async () => {
+                try {
+                    const response = await axios.get('http://localhost:3001/api/patients/available', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setAvailablePharmacies(response.data || []);
+                } catch (err) {
+                    console.error("Error al obtener farmacias:", err.message);
+                }
+            };
+    
+            fetchPharmacies();
+        }
+    }, [showModal, token]);
+    
 
     const handleTransfer = (prescriptionId) => {
         setSelectedPrescriptionId(prescriptionId);
@@ -224,7 +249,7 @@ const Patient = () => {
             <Accordion defaultActiveKey="">
                 {recetas.map((receta, index) => (
                     <React.Fragment key={index}>
-                    {console.log("Receta:", receta)}
+                    {/*console.log("Receta:", receta)*/}
                     <Accordion.Item
                         eventKey={index.toString()}
                         className={`receta-item ${getStatusBackground(receta.status)}`}
@@ -261,29 +286,69 @@ const Patient = () => {
                 ))}
             </Accordion>
 
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
-                <Modal.Header closeButton>
+            <Modal
+  show={showModal}
+  onHide={() => {
+    setShowModal(false);
+    setPharmacyNid('');
+    setSelectedPharmacyName('');
+    setMatchedPharmacies([]);
+  }}
+>                <Modal.Header closeButton>
                     <Modal.Title>Transferir Receta ID: {selectedPrescriptionId}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleSubmit}>
-                        <Form.Group controlId="alias">
-                            <Form.Label>CUIT de la Farmacia:</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={pharmacyNid}
-                                onChange={(e) => setPharmacyNid(e.target.value)}
-                                required
-                            />
-                        </Form.Group>
-                        <Button type="submit" className="button-enviar-modal mt-3">
-  Enviar
-</Button>
+                    <Form.Group controlId="pharmacyNid">
+  <Form.Label>Buscá la Farmacia:</Form.Label>
+  <div className="input-button-row">
+  <Form.Control
+    type="text"
+    value={pharmacyNid}
+    onChange={(e) => {
+      const input = e.target.value.toLowerCase();
+      setPharmacyNid(input);
+      const matches = availablePharmacies.filter(ph =>
+        ph.nid.toLowerCase().includes(input) ||
+        ph.pharmacy_name.toLowerCase().includes(input)
+      );
+      setMatchedPharmacies(matches);
+    }}
+    placeholder="Ingresá el CUIT/Nombre de la Farmacia"
+    required
+  />
+  <Button type="submit" className="button-enviar-modal">
+    Enviar
+  </Button>
+</div>
 
-                    </Form>
-                </Modal.Body>
-            </Modal>
-        </div>
+
+  {selectedPharmacyName && (
+    <Form.Text className="text-success">
+      Farmacia encontrada: <strong>{selectedPharmacyName}</strong>
+    </Form.Text>
+  )}
+
+  <ul className="text-success">
+    {matchedPharmacies.map((ph, i) => (
+      <li
+        key={i}
+        className="farmacia-sugerida"
+        onClick={() => {
+          setPharmacyNid(ph.nid);
+          setSelectedPharmacyName(ph.pharmacy_name);
+          setMatchedPharmacies([]);
+        }}
+      >
+        <strong>{ph.pharmacy_name}</strong> ({ph.nid})
+      </li>
+    ))}
+  </ul>
+</Form.Group>
+            </Form>
+         </Modal.Body>
+    </Modal>
+ </div>
     );
 };
 

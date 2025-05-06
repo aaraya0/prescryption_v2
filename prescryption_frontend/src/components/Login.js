@@ -53,7 +53,7 @@ function Login() {
             setTimeout(() => {
                 setMessage({ text: '', type: '' });
                 navigate(`/dashboard/${userType}`);
-            }, 3000);
+            }, 1000);
         } catch (error) {
             if (error.response && error.response.status === 429) {
                 setMessage({ text: 'Has excedido el número de intentos. Esperá 15 minutos.', type: 'error' });

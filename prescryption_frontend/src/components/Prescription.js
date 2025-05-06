@@ -1,4 +1,3 @@
-// EmitirReceta.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +18,8 @@ function EmitirReceta() {
     diagnosis: '',
     observations: ''
   });
+
+  const [message, setMessage] = useState({ text: '', type: '' });
 
   const navigate = useNavigate();
 
@@ -95,11 +96,20 @@ function EmitirReceta() {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-      alert('Receta emitida con éxito');
-      navigate('/dashboard/doctor');
+
+      setMessage({ text: 'Receta emitida con éxito', type: 'success' });
+
+      setTimeout(() => {
+        setMessage({ text: '', type: '' });
+        navigate('/dashboard/doctor');
+      }, 1500);
     } catch (error) {
       console.error('Error al emitir la receta:', error);
-      alert('Error al emitir la receta.');
+      setMessage({ text: 'Error al emitir la receta.', type: 'error' });
+
+      setTimeout(() => {
+        setMessage({ text: '', type: '' });
+      }, 4000);
     }
   };
 
@@ -119,11 +129,11 @@ function EmitirReceta() {
                   value={formData.patientNid}
                   required
                 />
-  <button onClick={handleSearchPatient} className="search-patient-button" title="Buscar paciente">
-    <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"/>
-    </svg>
-  </button>
+                <button onClick={handleSearchPatient} className="search-patient-button" title="Buscar paciente" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z" />
+                  </svg>
+                </button>
               </div>
             </div>
             <div className="form-group">
@@ -169,6 +179,33 @@ function EmitirReceta() {
           </div>
         </form>
       </div>
+
+      {message.text && (
+        <>
+          {message.type === 'success' && <div className="notification-backdrop"></div>}
+          <Notification message={message.text} type={message.type} />
+        </>
+      )}
+    </div>
+  );
+}
+
+function Notification({ message, type }) {
+  if (type === 'success') {
+    return (
+      <div className="login-success">
+        <div className="checkmark-circle">
+          <span className="checkmark">&#10003;</span>
+        </div>
+        <h2>¡Éxito!</h2>
+        <p>{message}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`notification ${type}`}>
+      {message}
     </div>
   );
 }
