@@ -38,6 +38,22 @@ const Patient = () => {
 
                 let filteredPrescriptions = Array.isArray(response.data) ? response.data : [];
 
+                filteredPrescriptions = filteredPrescriptions.map(pres => {
+                    let status = 'Válida';
+                    if (pres.used) {
+                        status = 'Dispensada';
+                    } else if (pres.pharmacyAddress != "0x0000000000000000000000000000000000000000"&& !pres.used) {
+                        status = 'Pendiente'; 
+                    } else if (new Date(pres.expirationDate) < new Date()) {
+                        status = 'Expirada';
+                    } else {
+                        status = 'Válida';
+                    }                    
+                    return { ...pres, status };
+                  });
+                  
+                
+
                 const specialties = [...new Set(filteredPrescriptions.map(receta => receta.doctorSpecialty))];
                 setAvailableSpecialties(specialties);
 
@@ -97,60 +113,42 @@ const Patient = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("✅ handleSubmit llamado");
-
-        console.log("selectedPrescriptionId:", selectedPrescriptionId);
-        console.log("pharmacyNid:", pharmacyNid);
     
         if (!selectedPrescriptionId || !pharmacyNid) return;
     
         try {
-            console.log("Enviando receta:", { pharmacyNid, prescriptionId: selectedPrescriptionId });
-        
             const response = await axios.post('http://localhost:3001/api/patients/send_prescription', {
                 pharmacyNid,
                 prescriptionId: selectedPrescriptionId
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-        
-            console.log("Respuesta de transferencia:", response.data);
-        
+    
             setSuccessMessage('✅ Receta enviada exitosamente.');
             setErrorMessage('');
             setShowModal(false);
             setPharmacyNid('');
             setSelectedPrescriptionId(null);
-            Cookies.set(`pendingPrescription_${selectedPrescriptionId}`, 'true', { expires: 1 / 720 });
-        
+    
+            // ✅ Reflejar cambio localmente: actualizar solo esa receta
+            setRecetas(prev =>
+                prev.map(r =>
+                    r.id === selectedPrescriptionId
+                        ? { ...r, status: 'Pendiente' }
+                        : r
+                )
+            );
+    
             setTimeout(() => {
                 setSuccessMessage('');
-                navigate('/dashboard/patient');
             }, 2000);
-        
+    
         } catch (error) {
             console.error('Error al transferir la receta:', error);
             setErrorMessage('❌ Error al transferir la receta. Ya podría estar transferida.');
             setSuccessMessage('');
         }
-    }; 
-    
-
-    useEffect(() => {
-        const checkPendingPrescriptions = () => {
-            setRecetas(prevRecetas =>
-                prevRecetas.map((receta) => {
-                    const isPending = Cookies.get(`pendingPrescription_${receta.prescriptionId}`);
-                    return {
-                        ...receta,
-                        isPending: Boolean(isPending)
-                    };
-                })
-            );
-        };
-
-        checkPendingPrescriptions();
-    }, []);
+    };
 
     const getStatusClass = (status) => {
         switch (status) {
@@ -163,6 +161,8 @@ const Patient = () => {
             case 'Dispensed':
             case 'Dispensada':
                 return 'status-dispensed';
+            case 'Pendiente':
+                return 'status-pending'; 
             default:
                 return '';
         }
@@ -180,6 +180,8 @@ const Patient = () => {
             case 'Dispensed':
             case 'Dispensada':
                 return 'accordion-dispensed';
+            case 'Pendiente':
+                return 'accordion-pending';
             default:
                 return '';
         }
@@ -256,7 +258,10 @@ const Patient = () => {
                     >                        
                         <Accordion.Header>
                             <div style={{ width: '100%' }}>
-                                <strong>Médico: </strong> {receta.doctorName} {receta.doctorSurname} | <strong>Especialidad: </strong> {receta.doctorSpecialty} | <strong>Estado: </strong> <span className={getStatusClass(receta.status)}>{receta.status}</span> | <strong>Fecha de Emisión: </strong> {formatDate(receta.issueDate)}
+                                <strong>Médico: </strong> {receta.doctorName} {receta.doctorSurname} | <strong>Especialidad: </strong> {receta.doctorSpecialty} | <strong>Estado: </strong>
+<span className={getStatusClass(receta.status)}>
+  {receta.status}
+</span> | <strong>Fecha de Emisión: </strong> {formatDate(receta.issueDate)}
                             </div>
                         </Accordion.Header>
                         <Accordion.Body className="receta-details">
@@ -275,11 +280,12 @@ const Patient = () => {
                             )}
                             <p><strong>Fecha de Expiración:</strong> {formatDate(receta.expirationDate)}</p>
 
-                            {!receta.isPending && (receta.status === "Valid" || receta.status === "Válida") && (
-                                <button className="button_t" onClick={() => handleTransfer(receta.id)}>
-                                    Transferir Receta
-                                </button>
-                            )}
+                            {!receta.isPendingValidation && (receta.status === "Valid" || receta.status === "Válida") && (
+    <button className="button_t" onClick={() => handleTransfer(receta.id)}>
+        Transferir Receta
+    </button>
+)}
+
                         </Accordion.Body>
                     </Accordion.Item>
                     </React.Fragment>

@@ -29,6 +29,7 @@ body, html {
     display: flex; 
     flex-direction: column; 
     gap: 10px; 
+
 }
 
 .formUserOptions .title {
@@ -44,6 +45,7 @@ body, html {
     font-size: 16px; 
     cursor: pointer; 
     color: black;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .formUserOptions .doctorsButton {
@@ -80,6 +82,8 @@ body, html {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+
+
 .password-container {
     position: relative;
     width: 280px;
@@ -97,13 +101,13 @@ body, html {
     height: 40px;
 }
 
-.eye-icon {
+.eye-icon svg {
+    font-size: 15px;
+    color: #939292;
     position: absolute;
     right: 15px;
     bottom: 7px;
-    font-size: 16px;
     cursor: pointer;
-    color: #555;
     display: flex;
     align-items: center;
     height: 100%;
@@ -128,7 +132,9 @@ body, html {
     cursor: pointer;
     width: 280px;
     margin: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
+
 
 .formLogin .loginButton:hover {
     background-color: #706EC1;
@@ -148,11 +154,11 @@ body, html {
     cursor: pointer;
     padding-bottom: 10px;
     font-weight: 500;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 .formLogin .RegistrateButton:hover {
     text-decoration: underline;
     transform: translateX(-1px);
-
 }
 
 .TextoRegistrateButton{
@@ -412,7 +418,7 @@ body, html {
   .buttonGenerarReceta{
     display: flex;
     justify-content: flex-start; 
-    margin-top: -20px;
+    margin-top: -10px;
   }
   .button {
     background-color: #A6C4CA;
@@ -422,6 +428,7 @@ body, html {
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   }
  .button:hover {
     text-decoration: underline;
@@ -481,6 +488,17 @@ body, html {
     margin-bottom: 2rem;
 }
 
+.filtros-container input,
+.filtros-container select {
+    height: 38px;
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+
 .filtros-container label, .filter-container label {
     display: flex;
     flex-direction: column;
@@ -512,11 +530,13 @@ body, html {
     align-items: center;
     justify-content: center;
     transition: background-color 0.3s ease;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   }
   
   .search-patient-button:hover {
     background-color: #D8B7AF;
     transform: scale(1.05);
+    box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
   }
   
   .search-patient-button svg {
@@ -538,9 +558,6 @@ body, html {
     transition: background-color 0.3s ease;
 }
 
-.receta-item:hover {
-    background-color: #f1f1f1;
-}
 
 .receta-box {
     padding: 1rem 1.25rem;
@@ -557,7 +574,17 @@ body, html {
     line-height: 1;
 }
 
-/* Colores para el estado (si se llegara a usar) */
+.accordion-button:not(.collapsed) {
+    background-color: #ca948b2a !important;
+    box-shadow: none !important;
+}
+
+.accordion-button:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+
 .status-valid {
     color: green;
     font-weight: bold;
@@ -650,6 +677,7 @@ h3, h4 {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease;
+    box-shadow: 0px 4px 10px #0000001a;
 }
 
 .emitir-receta-btn:hover {

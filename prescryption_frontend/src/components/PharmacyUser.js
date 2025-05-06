@@ -99,39 +99,43 @@ const PharmacyUser = () => {
 
     return (
         <div className="receta-list-container pharmacyuser-menu">
-            <h3>Recetas Asignadas</h3>
+            <h3 className='Title'>Recetas Asignadas</h3>
 
             <div className="filtros-container">
-                <label>
-                    Buscar por:
-                    <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
-                        <option value="nid">NID del Paciente</option>
-                        <option value="insurance">Obra Social</option>
-                    </select>
-                </label>
+    <label>
+        Buscar por paciente:
+        <input
+            type="text"
+            value={searchTerm}
+            onChange={handleSearch}
+            placeholder={searchType === 'nid' ? 'Ingrese NID del paciente' : 'Ingrese nombre de la obra social'}
+        />
+    </label>
 
-                <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    placeholder={searchType === 'nid' ? 'Ingrese NID del paciente' : 'Ingrese nombre de la obra social'}
-                    className="search-input"
-                />
+    <label>
+        Buscar por:
+        <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+            <option value="nid">NID del Paciente</option>
+            <option value="insurance">Obra Social</option>
+        </select>
+    </label>
 
-                <label>
-                    Ordenar por Fecha de Emisión:
-                    <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-                        <option value="asc">Ascendente</option>
-                        <option value="desc">Descendente</option>
-                    </select>
-                </label>
+    <label>
+        Ordenar por Fecha de Emisión:
+        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+            <option value="asc">Ascendente</option>
+            <option value="desc">Descendente</option>
+        </select>
+    </label>
 
-                {isAdmin && (
-                    <button className="dashboard-button" onClick={() => navigate('/pharmacy/manage-users')}>
-                        Gestionar Usuarios
-                    </button>
-                )}
-            </div>
+    {isAdmin && (
+        <button className="dashboard-button" onClick={() => navigate('/pharmacy/manage-users')}>
+            Gestionar Usuarios
+        </button>
+    )}
+</div>
+
+
 
             <div className="receta-scroll">
                 {filteredPrescriptions.length === 0 ? (

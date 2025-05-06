@@ -112,4 +112,13 @@
     text-decoration: underline !important;
     transform: scale(1.03);
   }
+  .status-pending {
+    color: orange;
+    font-weight: bold;
+  }
+  
+  .accordion-pending {
+    border-left: 5px solid orange;
+  }
+  
   

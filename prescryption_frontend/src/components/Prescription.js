@@ -119,7 +119,7 @@ function EmitirReceta() {
         <form onSubmit={handleSubmit}>
           <div className="receipt_left">
             <div className="form-group">
-              <label>DNI</label>
+              <label>DNI del paciente</label>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <input
                   type="text"
@@ -137,11 +137,11 @@ function EmitirReceta() {
               </div>
             </div>
             <div className="form-group">
-              <label>Nombre del Paciente</label>
+              <label>Nombre(s)</label>
               <input type="text" name="patientName" value={formData.patientName} onChange={handleChange} required />
             </div>
             <div className="form-group">
-              <label>Apellido del Paciente</label>
+              <label>Apellido(s)</label>
               <input type="text" name="patientSurname" value={formData.patientSurname} onChange={handleChange} required />
             </div>
             <div className="form-group">

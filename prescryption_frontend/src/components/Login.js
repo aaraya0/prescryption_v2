@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import './styles.css';
 
 function Login() {
@@ -102,7 +103,7 @@ function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
-                    {showPassword ? '🙈' : '👁️'}
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
                 </span>
             </div>
 

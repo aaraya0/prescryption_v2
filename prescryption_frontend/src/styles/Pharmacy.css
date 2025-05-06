@@ -3,6 +3,10 @@
     margin: auto;
 }
 
+.Title {
+    padding-bottom: 50px;
+}
+
 .search-input {
     width: 100%;
     padding: 8px;
@@ -65,4 +69,11 @@
 .validate-button:hover {
     background-color: #e3a38f; /* tu color de hover */
     transform: scale(1.02); /* crece levemente */
+}
+
+.filtros-container label {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    gap: 5px;
 }
