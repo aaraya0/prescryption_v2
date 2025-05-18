@@ -8,7 +8,6 @@ const pharmacyUserSchema = new mongoose.Schema({
     license: { type: String, required: true }, // Matrícula profesional
     email: { type: String, required: true, unique: true }, // Email
     password: { type: String, required: true }, // Contraseña
-    role: { type: String, enum: ['admin', 'employee'], default: 'employee' }, // Rol en la farmacia
     isActive: { type: Boolean, default: true }, // Estado de activación
 }, {
     timestamps: true, // Automáticamente agrega `createdAt` y `updatedAt`

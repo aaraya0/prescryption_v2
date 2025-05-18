@@ -56,7 +56,7 @@ services:
       dockerfile: Dockerfile.patient
     container_name: patient_service
     ports:
-      - "5004:5004"
+      - "5003:5003"
     command: python verify_patient.py
   
   frontend:

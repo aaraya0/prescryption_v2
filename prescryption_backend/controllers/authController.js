@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 const PharmacyUser = require('../models/PharmacyUser');
+const Pharmacy = require('../models/Pharmacy');
 const Insurance = require('../models/Insurance');
 const AdminUser = require('../models/AdminUser'); 
 require('dotenv').config();
@@ -28,6 +29,9 @@ exports.login = async (req, res) => {
                 break;
             case 'pharmacyUser':
                 user = await PharmacyUser.findOne({ nid });
+                break;
+            case 'pharmacy':
+                user = await Pharmacy.findOne({ nid });
                 break;
             case 'insurance':
                 userIdentifier = "insurance_nid"; // 📌 Cambiar clave para buscar en `Insurance`

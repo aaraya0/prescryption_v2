@@ -20,6 +20,8 @@ const prescriptionRoutes = require('./routes/prescriptionRoutes');
 const pharmacyRoutes = require('./routes/pharmacyRoutes');
 const insuranceRoutes = require('./routes/insuranceRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const pharmacyAdminRoutes = require('./routes/pharmacyAdminRoutes');
+
 require('dotenv').config();
 
 const app = express();
@@ -43,7 +45,9 @@ app.use('/api/auth', authRoutes); // Ruta de autenticación
 app.use('/api/patients', authMiddleware("patient"), patientRoutes);
 app.use('/api/doctors', authMiddleware("doctor"), doctorRoutes);
 app.use('/api/prescriptions', authMiddleware("doctor"), prescriptionRoutes);
-app.use('/api/pharmacies', authMiddleware("pharmacyUser"), pharmacyRoutes);
 app.use('/api/insurances', authMiddleware("insurance"), insuranceRoutes);
 app.use('/api/admin', authMiddleware("admin"), adminRoutes);
+app.use('/api/pharmacy-users', authMiddleware("pharmacyUser"), pharmacyRoutes); // empleados
+app.use('/api/pharmacies', authMiddleware("pharmacy"), pharmacyAdminRoutes); // entidad farmacia
+
 app.listen(3001, () => console.log('✅ Server running on port 3001'));

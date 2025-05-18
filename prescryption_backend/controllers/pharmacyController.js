@@ -15,30 +15,23 @@ const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 const crypto = require('crypto');
 
 
+
 exports.deactivatePharmacyUser = async (req, res) => {
-    const { userId } = req.params; // Obtener el userId de los parámetros de la URL
+    const { userId } = req.params;
 
     try {
-        // Buscar al usuario logueado en la base de datos
-        const loggedInUser = await PharmacyUser.findOne({ nid: req.user.nid });
-        if (!loggedInUser) {
-            return res.status(401).json({ message: '❌ User not found or not authorized' });
+        const loggedInPharmacy = await Pharmacy.findOne({ nid: req.user.nid });
+        if (!loggedInPharmacy) {
+            return res.status(401).json({ message: '❌ Pharmacy not authorized' });
         }
 
-        // Verificar si el usuario logueado es "admin"
-        if (loggedInUser.role !== 'admin') {
-            return res.status(403).json({ message: '❌ Access denied. Admin role required.' });
-        }
-
-        // Buscar al usuario a desactivar
         const user = await PharmacyUser.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: '❌ User to deactivate not found' });
+        if (!user || user.pharmacyNid !== loggedInPharmacy.nid) {
+            return res.status(404).json({ message: '❌ User not found or not authorized' });
         }
 
-        user.isActive = false; // Desactivar el usuario
+        user.isActive = false;
         await user.save();
-
         res.status(200).json({ message: '✅ User deactivated successfully.' });
     } catch (err) {
         console.error('❌ Error deactivating user:', err.message);
@@ -46,39 +39,28 @@ exports.deactivatePharmacyUser = async (req, res) => {
     }
 };
 
-
 exports.activatePharmacyUser = async (req, res) => {
     const { userId } = req.params;
 
     try {
-        // Buscar al usuario logueado en la base de datos
-        const loggedInUser = await PharmacyUser.findOne({ nid: req.user.nid });
-        if (!loggedInUser) {
-            return res.status(401).json({ message: '❌ User not found or not authorized' });
+        const loggedInPharmacy = await Pharmacy.findOne({ nid: req.user.nid });
+        if (!loggedInPharmacy) {
+            return res.status(401).json({ message: '❌ Pharmacy not authorized' });
         }
 
-        // Verificar si el usuario logueado es "admin"
-        if (loggedInUser.role !== 'admin') {
-            return res.status(403).json({ message: '❌ Access denied. Admin role required.' });
-        }
-
-        // Buscar al usuario a reactivar
         const user = await PharmacyUser.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: '❌ User to activate not found' });
+        if (!user || user.pharmacyNid !== loggedInPharmacy.nid) {
+            return res.status(404).json({ message: '❌ User not found or not authorized' });
         }
 
-        user.isActive = true; // Reactivar el usuario
+        user.isActive = true;
         await user.save();
-
         res.status(200).json({ message: '✅ User activated successfully.' });
     } catch (err) {
         console.error('❌ Error activating user:', err.message);
         res.status(500).json({ message: 'Error activating user' });
     }
 };
-
-
 
 
 // 📌 Registrar Farmacia (Ruta Pública)
@@ -133,7 +115,7 @@ exports.registerPharmacy = async (req, res) => {
 };
 
 exports.registerPharmacyUser = async (req, res) => {
-    const { pharmacyNid, name, surname, nid, license, email, password, verificationCode, role } = req.body;
+    const { pharmacyNid, name, surname, nid, license, email, password, verificationCode } = req.body;
 
     try {
         // Validar campos requeridos
@@ -180,8 +162,7 @@ exports.registerPharmacyUser = async (req, res) => {
             nid,
             license,
             email,
-            password: hashedPassword,
-            role: role || 'employee' // Si no se pasa el rol, se asigna por defecto "employee"
+            password: hashedPassword
         });
 
         // Guardar el usuario en la base de datos
@@ -608,3 +589,31 @@ exports.processPurchase = async (req, res) => {
     }
 };
 
+exports.getPharmacyUsers = async (req, res) => {
+    try {
+        const pharmacy = await Pharmacy.findOne({ nid: req.user.nid });
+        if (!pharmacy) {
+            return res.status(401).json({ message: '❌ Unauthorized pharmacy' });
+        }
+
+        const users = await PharmacyUser.find({ pharmacyNid: pharmacy.nid }).select('-password');
+        res.status(200).json(users);
+    } catch (err) {
+        console.error('❌ Error fetching pharmacy users:', err.message);
+        res.status(500).json({ message: 'Error fetching pharmacy users' });
+    }
+};
+
+exports.getPharmacyProfile = async (req, res) => {
+    try {
+        const pharmacy = await Pharmacy.findOne({ nid: req.user.nid }).select('-password');
+        if (!pharmacy) {
+            return res.status(404).json({ message: '❌ Pharmacy not found' });
+        }
+
+        res.json(pharmacy);
+    } catch (err) {
+        console.error('❌ Error fetching pharmacy profile:', err.message);
+        res.status(500).json({ message: 'Error fetching pharmacy profile' });
+    }
+};

@@ -2,9 +2,13 @@ FROM node:18
 
 WORKDIR /app
 
+# ✅ Copiar package.json y package-lock.json primero
 COPY package*.json ./
+
+# ✅ Instalar dependencias (incluye mongoose)
 RUN npm install
 
+# ✅ Luego copiar el resto del código
 COPY . .
 
 EXPOSE 3001
