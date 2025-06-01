@@ -95,3 +95,53 @@
     align-items: center;
     z-index: 9999;
 }
+
+button.btn-success {
+    background-color: #4CAF50;
+    border: none;
+    font-weight: bold;
+    width: 100%;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+button.btn-success:hover {
+    background-color: #45a049;
+}
+
+.invoice-preview {
+  margin: 2rem auto;
+  padding: 1rem;
+  max-width: 600px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.invoice-content {
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.invoice-content h4 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.invoice-content hr {
+  margin: 1rem 0;
+}
+
+.invoice-content p {
+  margin: 0.5rem 0;
+}
+
+.invoice-content p strong {
+  display: inline-block;
+  width: 120px;
+}

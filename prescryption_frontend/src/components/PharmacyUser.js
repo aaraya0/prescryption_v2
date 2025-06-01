@@ -1,9 +1,10 @@
 // PharmacyUser.js mejorado con opción de gestionar usuarios para admin y validar recetas
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Accordion, Modal, Button, Form, Spinner} from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import html2pdf from 'html2pdf.js';
 import '../styles/Pharmacy.css';
 import { jwtDecode } from 'jwt-decode';
 
@@ -13,6 +14,10 @@ const PharmacyUser = () => {
     const [searchType, setSearchType] = useState('nid');
     const [sortOrder, setSortOrder] = useState('asc');
     const [loading, setLoading] = useState(false);
+    const [finalPrices, setFinalPrices] = useState(null); 
+    const [invoiceVisible, setInvoiceVisible] = useState(false);
+    const invoiceRef = useRef();
+
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
 
@@ -26,7 +31,7 @@ const PharmacyUser = () => {
 
     const fetchPrescriptions = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/api/pharmacies/prescriptions', {
+            const response = await axios.get('http://localhost:3001/api/pharmacy-users/prescriptions', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPrescriptions(response.data.prescriptions || []);
@@ -48,7 +53,7 @@ const PharmacyUser = () => {
             setLoading(true);
             console.log("Prescription data:", prescription);
 
-            const response = await axios.get(`http://localhost:3001/api/pharmacies/medications/search/${prescription.prescriptionId.toString()}`, {
+            const response = await axios.get(`http://localhost:3001/api/pharmacy-users/medications/search/${prescription.prescriptionId.toString()}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -78,22 +83,49 @@ const PharmacyUser = () => {
         if (!selectedPrescription || ! selectedMedicationId) return;
 
         try {
-            const response = await axios.post('http://localhost:3001/api/pharmacies/validate_prescription', {
+            const response = await axios.post('http://localhost:3001/api/pharmacy-users/validate_prescription', {
                 prescriptionId: selectedPrescription.prescriptionId,
                 selectedMedicationIds: [selectedMedicationId]
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-console.log("Enviando validación...", selectedMedicationId, selectedPrescription.prescriptionId);
 
             alert('✅ Receta validada exitosamente.');
-            setShowValidationModal(false);
-            setSelectedPrescription(null);
-            setSelectedMedicationId('');
-            fetchPrescriptions();
+            setFinalPrices(response.data.finalPrices); 
+
         } catch (error) {
             console.error("❌ Error validando receta:", error);
             alert('❌ Error al validar la receta.');
+        }
+    };
+
+    const handleProcessPurchase = async () => {
+        if (!selectedPrescription || !finalPrices) return;
+
+        try {
+            const response = await axios.post('http://localhost:3001/api/pharmacy-users/process_purchase', {
+                prescriptionId: selectedPrescription.prescriptionId,
+                selectedMedications: finalPrices.map(item => item.medication), // usamos los meds validados
+                totalAmount: finalPrices.reduce((acc, item) => acc + item.finalPrice, 0)
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            alert('🧾 Receta usada y factura emitida correctamente.');
+            setShowValidationModal(false);
+            setSelectedPrescription(null);
+            setSelectedMedicationId('');
+            setFinalPrices(null);
+            fetchPrescriptions(); // recargar lista
+        } catch (error) {
+            console.error("❌ Error procesando la compra:", error);
+            alert('❌ Error al usar y facturar la receta.');
+        }
+    };
+
+        const downloadInvoice = () => {
+        if (invoiceRef.current) {
+            html2pdf().set({ margin: 1, filename: 'factura.pdf' }).from(invoiceRef.current).save();
         }
     };
 
@@ -120,41 +152,41 @@ console.log("Enviando validación...", selectedMedicationId, selectedPrescriptio
         <>
         <div className={`pharmacyuser-menu ${loading ? 'loading' : ''}`}>
             
- <h3 className='Title'>Recetas Asignadas</h3>
+            <h3 className='Title'>Recetas Asignadas</h3>
 
-            <div className="filtros-container">
-    <label>
-        Buscar por paciente:
-        <input
-            type="text"
-            value={searchTerm}
-            onChange={handleSearch}
-            placeholder={searchType === 'nid' ? 'Ingrese NID del paciente' : 'Ingrese nombre de la obra social'}
-        />
-    </label>
+                        <div className="filtros-container">
+                <label>
+                    Buscar por paciente:
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={handleSearch}
+                        placeholder={searchType === 'nid' ? 'Ingrese NID del paciente' : 'Ingrese nombre de la obra social'}
+                    />
+                </label>
 
-    <label>
-        Buscar por:
-        <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
-            <option value="nid">NID del Paciente</option>
-            <option value="insurance">Obra Social</option>
-        </select>
-    </label>
+                <label>
+                    Buscar por:
+                    <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+                        <option value="nid">NID del Paciente</option>
+                        <option value="insurance">Obra Social</option>
+                    </select>
+                </label>
 
-    <label>
-        Ordenar por Fecha de Emisión:
-        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-            <option value="asc">Ascendente</option>
-            <option value="desc">Descendente</option>
-        </select>
-    </label>
+                <label>
+                    Ordenar por Fecha de Emisión:
+                    <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+                        <option value="asc">Ascendente</option>
+                        <option value="desc">Descendente</option>
+                    </select>
+                </label>
 
-    {isAdmin && (
-        <button className="dashboard-button" onClick={() => navigate('/pharmacy/manage-users')}>
-            Gestionar Usuarios
-        </button>
-    )}
-</div>
+                {isAdmin && (
+                    <button className="dashboard-button" onClick={() => navigate('/pharmacy/manage-users')}>
+                        Gestionar Usuarios
+                    </button>
+                )}
+            </div>
 
             <div className="receta-scroll">
                 {filteredPrescriptions.length === 0 ? (
@@ -215,23 +247,54 @@ console.log("Enviando validación...", selectedMedicationId, selectedPrescriptio
                         <p>No se encontraron medicamentos relacionados.</p>
                     ) : (
                         <Form onSubmit={handleValidatePrescription}>
-                            {medOptions.map((med, index) => (
-                                <Form.Check 
-                                    key={`${med._id}-${index}`}
-                                    type="radio"
-                                    label={`${med.genericName} - $${med.price}`}
-                                    name="medication"
-                                    value={med._id || med.id}
-                                    checked={selectedMedicationId === (med._id || med.id)}
-                                    onChange={(e) => handleMedicationSelection(e.target.value)}
-                                />
-                            ))}
+                            {medOptions.map((med, index) => {
+                                console.log('Renderizando medicamento:', med); // <-- NUEVO
+
+                                const medIdString = String(med._id || med.id); // aseguramos fallback
+                                console.log('ID procesado:', medIdString);
+
+                                return (
+                                    <Form.Check 
+                                        key={`${medIdString}-${index}`}
+                                        type="radio"
+                                        label={`${med.genericName} - $${med.price}`}
+                                        name="medication"
+                                        value={medIdString}
+                                        checked={selectedMedicationId === medIdString}
+                                        onChange={(e) => handleMedicationSelection(e.target.value)}
+                                    />
+                                );
+                            })}
                             <Button type="submit" className="mt-3">Validar con Obra Social</Button>
+                            {finalPrices && (
+                                <Button
+                                    className="mt-2"
+                                    variant="success"
+                                    onClick={handleProcessPurchase}
+                                >
+                                    Usar y Facturar receta
+                                </Button>
+                            )}
                         </Form>
                     )}
                 </Modal.Body>
-
             </Modal>
+                        {invoiceVisible && finalPrices && selectedPrescription && (
+                <div className="invoice-preview">
+                    <div ref={invoiceRef} className="invoice-content">
+                        <h4>Factura de Receta</h4>
+                        <p><strong>Paciente:</strong> {selectedPrescription.patientName} {selectedPrescription.patientSurname}</p>
+                        <p><strong>NID:</strong> {selectedPrescription.patientNid}</p>
+                        <p><strong>Fecha:</strong> {formatDate(new Date())}</p>
+                        <hr />
+                        {finalPrices.map((item, i) => (
+                            <p key={i}>{item.medication.genericName} - ${item.finalPrice}</p>
+                        ))}
+                        <p><strong>Total:</strong> ${finalPrices.reduce((acc, item) => acc + item.finalPrice, 0)}</p>
+                    </div>
+                    <Button onClick={downloadInvoice} className="mt-2">Descargar PDF</Button>
+                </div>
+            )}
         </div>
         {loading && (
             <div className="loading-container">

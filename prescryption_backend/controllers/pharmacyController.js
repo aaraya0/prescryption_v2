@@ -304,8 +304,19 @@ exports.getMedicationOptions = async (req, res) => {
         // 📌 Guardar en caché los nuevos datos
         await MedicationCache.deleteMany({ genericName: { $in: medications } }); // Limpiar caché previa
         await MedicationCache.insertMany(limitedResults);
+        
+        // Después de insertar medicamentos con insertMany, los objetos que tenemos (limitedResults)
+        // no tienen garantizado el campo _id generado por MongoDB. Para asegurarnos de devolver objetos con _id válido
+        // (necesario para que el frontend pueda usarlos), hacemos una nueva búsqueda desde la base de datos.
 
-        res.json({ fromCache: false, results: limitedResults });
+        const savedMeds = await MedicationCache.find({
+            genericName: { $in: medications }
+        });
+
+        return res.json({ fromCache: false, results: savedMeds });
+
+        
+        //res.json({ fromCache: false, results: limitedResults });
 
     } catch (error) {
         console.error("❌ Error fetching medication options:", error);
