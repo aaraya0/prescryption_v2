@@ -1,960 +1,951 @@
-body, html {
-    height: 100%;
-    margin: 0; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
+body,
+html {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
- 
 
-.error{
-    color: red;
-    text-align: center;
+.error {
+  color: red;
+  text-align: center;
 }
 
 /* Menu options styles*/
 .formUserOptions {
-    background-color: white; 
-    padding: 50px;
-    border-radius: 5px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 15px; 
-    width: 420px; 
-    margin: 0 auto;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);    
+  background-color: white;
+  padding: 50px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 420px;
+  margin: 0 auto;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .formUserOptions .buttons {
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .formUserOptions .title {
-    font-size: 18px;
-    font-weight: normal;
-    text-align: center;
+  font-size: 18px;
+  font-weight: normal;
+  text-align: center;
 }
 
 .formUserOptions button {
-    border: none; 
-    border-radius: 5px; 
-    padding: 10px 10px;
-    font-size: 16px; 
-    cursor: pointer; 
-    color: black;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 5px;
+  padding: 10px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  color: black;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .formUserOptions .doctorsButton {
-    background-color: #D8B7AF;
+  background-color: #d8b7af;
 }
 
 .formUserOptions .patientButton {
-    background-color: #F3DDDE;
+  background-color: #f3ddde;
 }
 
 .formUserOptions .pharmacistButton {
-    background-color: #A6C4CA;
+  background-color: #a6c4ca;
 }
 
 .formUserOptions .osButton {
-    background-color: #B0AFE2;
+  background-color: #b0afe2;
 }
 
 .formUserOptions button:hover {
-    font-weight: bolder; 
-    transform: translateX(-1px);
+  font-weight: bolder;
+  transform: translateX(-1px);
 }
 
 /*login styles*/
 .formLogin {
-    background-color: white; 
-    padding: 50px;
-    border-radius: 5px; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center;
-    gap: 1px; 
-    width: 400px; 
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  padding: 50px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  width: 400px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-
-
 .password-container {
-    position: relative;
-    width: 280px;
-    display: flex;
-    align-items: center;
+  position: relative;
+  width: 280px;
+  display: flex;
+  align-items: center;
 }
 
 .password-field {
-    flex: 1;
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #9f9f9f;
-    padding-right: 35px;
-    height: 40px;
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #9f9f9f;
+  padding-right: 35px;
+  height: 40px;
 }
 
 .eye-icon svg {
-    font-size: 15px;
-    color: #939292;
-    position: absolute;
-    right: 15px;
-    bottom: 7px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    height: 100%;
+  font-size: 15px;
+  color: #939292;
+  position: absolute;
+  right: 15px;
+  bottom: 7px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .formLogin input.loginInput {
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #9f9f9f;
-    width: 280px;
-    margin-bottom: 15px;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #9f9f9f;
+  width: 280px;
+  margin-bottom: 15px;
 }
 
 .formLogin .loginButton {
-    background-color: #8A88DB;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    width: 280px;
-    margin: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: #8a88db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  width: 280px;
+  margin: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-
 .formLogin .loginButton:hover {
-    background-color: #706EC1;
-    transform: translateX(-1px);
+  background-color: #706ec1;
+  transform: translateX(-1px);
 }
 
 .formLogin .loginTitle {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
 }
 .formLogin .RegistrateButton {
-    border: none;
-    background-color: white;
-    font-size: 14px;
-    cursor: pointer;
-    padding-bottom: 10px;
-    font-weight: 500;
+  border: none;
+  background-color: white;
+  font-size: 14px;
+  cursor: pointer;
+  padding-bottom: 10px;
+  font-weight: 500;
 }
 .formLogin .RegistrateButton:hover {
-    text-decoration: underline;
-    transform: translateX(-1px);
+  text-decoration: underline;
+  transform: translateX(-1px);
 }
 
-.TextoRegistrateButton{
-    font-size: 14px;
-    margin-bottom: 0%;
+.TextoRegistrateButton {
+  font-size: 14px;
+  margin-bottom: 0%;
 }
 
 .formLogin .RecordarButton {
-    border: none;
-    background-color: white;
-    font-size: 14px;
-    cursor: pointer;
-    padding-top: 20px;
-    padding-bottom: 10px;
-    font-weight: 500;
+  border: none;
+  background-color: white;
+  font-size: 14px;
+  cursor: pointer;
+  padding-top: 20px;
+  padding-bottom: 10px;
+  font-weight: 500;
 }
 
 .formLogin .RecordarButton:hover {
-    text-decoration: underline;
-    transform: translateX(-1px);
+  text-decoration: underline;
+  transform: translateX(-1px);
 }
 
 .formLogin .inputTitle {
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 5px;
-    color: #000;
-    text-align: left;
-    width: 92%;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: #000;
+  text-align: left;
+  width: 92%;
 }
 .login-link {
-    text-align: center;
-    margin-top: 10px;
-    font-size: 14px;
-    border: none;
-    background-color: #FFF;
-    cursor: pointer;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
+  border: none;
+  background-color: #fff;
+  cursor: pointer;
 }
 
 .login-link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .loginInput {
-    padding: 20px !important;
+  padding: 20px !important;
 }
 .loginInput::placeholder {
-    font-size: 14px; 
-    text-align: left;
+  font-size: 14px;
+  text-align: left;
 }
 /* Register styles*/
 
 .register-container {
-    width: 100%;
-    max-width: 400px;
-    background-color: #FFFFFF;
-    margin: 350px auto 20px auto; 
-    padding: 8px 30px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  background-color: #ffffff;
+  margin: 350px auto 20px auto;
+  padding: 8px 30px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 .form-header h2 {
-    text-align: center;
-    font-size: 24px;
-    margin-bottom: 20px;
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
 }
 .form-body {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 .form-input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #9f9f9f;
-    border-radius: 5px;
-    font-size: 14px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #9f9f9f;
+  border-radius: 5px;
+  font-size: 14px;
 }
 .form-radio {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 2px;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 2px;
 }
 .form-radio label {
-    display: flex;
-    align-items: center;
-    font-size: 16px;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
 }
 .register-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #ED83B1;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
+  width: 100%;
+  padding: 10px;
+  background-color: #ed83b1;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
 }
 .register-button:hover {
-    background-color: #c76d94;
-    transform: translateX(-1px);
+  background-color: #c76d94;
+  transform: translateX(-1px);
 }
 
 .register-container p {
-    text-align: center;
+  text-align: center;
 }
 
 .register-wrapper {
-    margin-top: 5px; /* espacio para que el header no tape nada */
+  margin-top: 5px; /* espacio para que el header no tape nada */
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  min-height: calc(100vh - 120px);
+}
+
+@media (max-width: 768px) {
+  .register-container {
+    width: 90%;
     padding: 20px;
-    display: flex;
-    justify-content: center;
-    min-height: calc(100vh - 120px);
   }
-  
-  @media (max-width: 768px) {
-    .register-container {
-      width: 90%;
-      padding: 20px;
-    }
-  
-    .form-body {
-      gap: 10px;
-    }
-  
-    .form-header h2 {
-      font-size: 20px;
-    }
-  }  
+
+  .form-body {
+    gap: 10px;
+  }
+
+  .form-header h2 {
+    font-size: 20px;
+  }
+}
 
 .form-body .inputTitle {
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: -10px;
-    margin-top: -5px;
-    color: #000;
-    text-align: left;
-    width: 92%;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: -10px;
+  margin-top: -5px;
+  color: #000;
+  text-align: left;
+  width: 92%;
 }
 .form-body .optionsTitle {
-    font-weight: 500;
-    color: #000;
-    text-align: left;
+  font-weight: 500;
+  color: #000;
+  text-align: left;
 }
 
 .affiliate-input-container {
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Space between input and button */
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between input and button */
 }
 
 .form-input {
-    flex: 1; /* Make input expand to take available space */
+  flex: 1; /* Make input expand to take available space */
 }
 
 .fetch-plan-button {
-    padding: 8px 12px;
-    background-color: #D8B7AF;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  padding: 8px 12px;
+  background-color: #d8b7af;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fetch-plan-button:hover {
-    background-color: #9f9f9f;
+  background-color: #9f9f9f;
 }
 
 /*Header styles*/
 
 .header {
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    background: transparent; 
-    padding: 20px; 
-    display: flex; 
-    justify-content: space-between;
-    align-items: center; 
-    z-index: 1000; 
-    height: 80px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: transparent;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  height: 80px;
 }
 
 /*hasta tener un logo en imagen*/
 .logo {
-    font-size: 24px; 
-    font-weight: bold; 
-    margin-right: 40px;
+  font-size: 24px;
+  font-weight: bold;
+  margin-right: 40px;
 }
 
 /*Prescription*/
 
 .receta-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  
-  .form-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background-color: #fff;
-    padding: 40px;
-    border-radius: 5px;
-    height: 500px;
-    width: auto;
-  }
-  
-  form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-  }
-  
-  .receipt_left, .receipt_right {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 10px;
-    gap: 6px;
-  }
-  label {
-    font-size: 13px;
-    font-weight: 500;
-    margin-top: 5px;
-    margin-bottom: -3px;
-  }
-
-  input, textarea {
-    padding: 4px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 12px;
-    width: 100%;
-    margin: 3px 0px;
-    height: 25px;
-  }
-  ::placeholder{
-    font-size: 12px;
-  }
-  .textarea {
-    height: 80px;
-    resize: none;
-  }
-  .buttonGenerarReceta{
-    display: flex;
-    justify-content: flex-start; 
-    margin-top: -10px;
-  }
-  .button {
-    background-color: #A6C4CA;
-    color: black;
-    padding: 5px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  }
- .button:hover {
-    text-decoration: underline;
-    transform: translateX(-1px);
-}
-  
-  .medical-info {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-  
-  .doctor-info, .prescription-info {
-    font-size: 12px;
-    color: #333;
-  }
-
-  .filtros-container {
-    margin-bottom: 2rem;
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
+.form-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 5px;
+  height: 500px;
+  width: auto;
+}
+
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.receipt_left,
+.receipt_right {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  gap: 6px;
+}
+label {
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 5px;
+  margin-bottom: -3px;
+}
+
+input,
+textarea {
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 12px;
+  width: 100%;
+  margin: 3px 0px;
+  height: 25px;
+}
+::placeholder {
+  font-size: 12px;
+}
+.textarea {
+  height: 80px;
+  resize: none;
+}
+.buttonGenerarReceta {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: -10px;
+}
+.button {
+  background-color: #a6c4ca;
+  color: black;
+  padding: 5px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+.button:hover {
+  text-decoration: underline;
+  transform: translateX(-1px);
+}
+
+.medical-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.doctor-info,
+.prescription-info {
+  font-size: 12px;
+  color: #333;
+}
+
+.filtros-container {
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
 
 /* Style for Dashboard buttons */
 .dashboard-button {
-    background-color: #D8B7AF; 
-    color: black;
-    border: none;
-    border-radius: 5px; 
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: text-decoration 0.2s ease-in-out;
+  background-color: #d8b7af;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: text-decoration 0.2s ease-in-out;
 }
 
 .dashboard-button:hover {
-    text-decoration: underline; 
+  text-decoration: underline;
 }
 
 .top-right-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-bottom: 15px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 15px;
 }
-
 
 /* Contenedor para los filtros */
 
-.filtros-container, .filter-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    justify-content: center;
-    margin-bottom: 2rem;
+.filtros-container,
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 2rem;
 }
 
 .filtros-container input,
 .filtros-container select {
-    height: 38px;
-    padding: 6px 10px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
+  height: 38px;
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
 }
 
-
-.filtros-container label, .filter-container label {
-    display: flex;
-    flex-direction: column;
-    font-size: 14px;
+.filtros-container label,
+.filter-container label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
 }
 
-.filtros-container select, .filter-container select,
+.filtros-container select,
+.filter-container select,
 .filter-container input.search-input {
-    padding: 5px;
-    font-size: 14px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+  padding: 5px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
 }
 
 .dni-search-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .search-patient-button {
-    background-color: #D8B7AF;
-    margin-left: 5px;
-    border: none;
-    padding: 3px;
-    border-radius: 5px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s ease;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .search-patient-button:hover {
-    background-color: #D8B7AF;
-    transform: scale(1.05);
-    box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .search-patient-button svg {
-    fill: white;
-  }
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-patient-button {
+  background-color: #d8b7af;
+  margin-left: 5px;
+  border: none;
+  padding: 3px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.search-patient-button:hover {
+  background-color: #d8b7af;
+  transform: scale(1.05);
+  box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-patient-button svg {
+  fill: white;
+}
 
 .receta-list {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
 .receta-item {
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    background-color: #ffffff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-
 .receta-box {
-    padding: 1rem 1.25rem;
+  padding: 1rem 1.25rem;
 }
 
 .receta-header {
-    font-size: 14px;
-    font-weight: 500;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .receta-details {
-    margin-top: 0.75rem;
-    font-size: 14px;
-    line-height: 1;
+  margin-top: 0.75rem;
+  font-size: 14px;
+  line-height: 1;
 }
 
 .accordion-button:not(.collapsed) {
-    background-color: #ca948b2a !important;
-    box-shadow: none !important;
+  background-color: #ca948b2a !important;
+  box-shadow: none !important;
 }
 
 .accordion-button:focus {
-    box-shadow: none !important;
-    outline: none !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
-
 .status-valid {
-    color: green;
-    font-weight: bold;
+  color: green;
+  font-weight: bold;
 }
 
 .status-expired {
-    color: red;
-    font-weight: bold;
+  color: red;
+  font-weight: bold;
 }
 
 .status-dispensed {
-    color: #555;
-    font-weight: bold;
+  color: #555;
+  font-weight: bold;
 }
 
 /* Botón de transferencia */
 .button_t {
-    background-color: #D8B7AF;
-    border: none;
-    border-radius: 5px;
-    padding: 8px 12px;
-    font-size: 14px;
-    cursor: pointer;
-    margin-top: 10px;
-    color: black;
+  background-color: #d8b7af;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 10px;
+  color: black;
 }
 
 .button_t:hover {
-    background-color: #c6a6a0;
-    text-decoration: underline;
-    transform: translateX(-1px);
+  background-color: #c6a6a0;
+  text-decoration: underline;
+  transform: translateX(-1px);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .filtros-container, .filter-container {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .receta-box {
-        font-size: 14px;
-    }
-    .receta-details {
-        font-size: 13px;
-    }
+  .filtros-container,
+  .filter-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .receta-box {
+    font-size: 14px;
+  }
+  .receta-details {
+    font-size: 13px;
+  }
 }
 
 .receta-list-container {
-    padding: 3rem 1.1rem;
-    width: 800px;
-    box-sizing: border-box;
+  padding: 3rem 1.1rem;
+  width: 800px;
+  box-sizing: border-box;
 }
 
-h3, h4 {
-    text-align: center;
+h3,
+h4 {
+  text-align: center;
 }
 
 /* Estilos para el menú del doctor */
 .doctor-menu {
-    position: relative;
-    padding-bottom: 60px; 
+  position: relative;
+  padding-bottom: 60px;
 }
 
 .receta-header-info {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    align-items: center;
-    font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 14px;
 }
 
 .receta-scroll {
-    max-height: 300px;
-    overflow-y: auto;
-    padding-right: 10px;
-    margin-bottom: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-bottom: 20px;
 }
-
 
 /* Estilos para el botón de Emitir Receta */
 .emitir-receta-btn {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: #D8B7AF;
-    color: black;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-    box-shadow: 0px 4px 10px #0000001a;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background-color: #d8b7af;
+  color: black;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0px 4px 10px #0000001a;
 }
 
 .emitir-receta-btn:hover {
-    background-color: #D8B7AF;
-    text-decoration: underline;
-    transform: translateX(-1px);
+  background-color: #d8b7af;
+  text-decoration: underline;
+  transform: translateX(-1px);
 }
 
-
 .description-doctor {
-    color: #333;
+  color: #333;
 }
 
 /* Estilos para el Perfil del usuario */
 
-    .perfil-card-aesthetic {
-        max-width: 600px;
-        margin: 100px auto;
-        padding: 40px;
-        background-color: white;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        animation: fadeIn 0.6s ease;
-    }
-    
-    .perfil-title {
-        font-size: 28px;
-        font-weight: bold;
-        text-align: center;
-        color: #444;
-        margin-bottom: 30px;
-    }
-    
-    .perfil-content {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .perfil-item {
-        display: flex;
-        align-items: center;
-        font-size: 16px;
-        color: #333;
-        gap: 10px;
-    }
-    
-    .perfil-icon {
-        color: #E3A38F;
-        font-size: 18px;
-    }
-    
-    .perfil-loading,
-    .perfil-error {
-        text-align: center;
-        margin-top: 100px;
-        font-size: 18px;
-        color: #555;
-    }
-    
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
+.perfil-card-aesthetic {
+  max-width: 600px;
+  margin: 100px auto;
+  padding: 40px;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.6s ease;
+}
+
+.perfil-title {
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+  color: #444;
+  margin-bottom: 30px;
+}
+
+.perfil-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.perfil-item {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: #333;
+  gap: 10px;
+}
+
+.perfil-icon {
+  color: #e3a38f;
+  font-size: 18px;
+}
+
+.perfil-loading,
+.perfil-error {
+  text-align: center;
+  margin-top: 100px;
+  font-size: 18px;
+  color: #555;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Botones en la esquina superior derecha, fijos */
 .top-right-buttons {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    gap: 10px;
-    z-index: 1000; /* Asegura que estén por encima de otros elementos */
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 1000; /* Asegura que estén por encima de otros elementos */
 }
 
 .dashboard-button {
-    background-color: #D8B7AF;
-    color: black;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: text-decoration 0.2s ease-in-out;
+  background-color: #d8b7af;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: text-decoration 0.2s ease-in-out;
 }
 
 .dashboard-button:hover {
-    text-decoration: underline;
-    transform: translateX(-1px);
+  text-decoration: underline;
+  transform: translateX(-1px);
 }
 /* Contenedor fijo para el encabezado y los botones */
 .fixed-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: #e0f7fa; /* Fondo celeste claro */
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 1000; /* Asegura que esté por encima de otros elementos */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #e0f7fa; /* Fondo celeste claro */
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Encabezado y mensaje de bienvenida */
 .header-text {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .header-text h2 {
-    margin: 0;
-    font-size: 24px;
-    color: #333;
+  margin: 0;
+  font-size: 24px;
+  color: #333;
 }
 
 .header-text p {
-    margin: 0;
-    font-size: 16px;
-    color: #666;
+  margin: 0;
+  font-size: 16px;
+  color: #666;
 }
 
 .back-button-aesthetic {
-    background-color: #f2ece912;
-    color: #333;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
-    font-size: 15px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s, transform 0.2s ease;
+  background-color: #f2ece912;
+  color: #333;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, transform 0.2s ease;
 }
 
 .back-button-aesthetic:hover {
-    background-color: #e0d1cad2;
-    transform: translateX(-1px);
+  background-color: #e0d1cad2;
+  transform: translateX(-1px);
 }
 
 .back-icon {
-    font-size: 16px;
-    color: #A6C4CA;
+  font-size: 16px;
+  color: #a6c4ca;
 }
-
-
-
 
 /* Botones en la esquina superior derecha */
 .top-right-buttons {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .dashboard-button {
-    background-color: #D8B7AF;
-    color: black;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: text-decoration 0.2s ease-in-out;
+  background-color: #d8b7af;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: text-decoration 0.2s ease-in-out;
 }
 
 .dashboard-button:hover {
-    text-decoration: underline;
-    transform: translateX(-1px);
+  text-decoration: underline;
+  transform: translateX(-1px);
 }
 
-
 .login-success {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #e6f9ec;
-    padding: 30px 40px;
-    border-radius: 16px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    z-index: 9999;
-    text-align: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #e6f9ec;
+  padding: 30px 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  text-align: center;
 }
 
 .checkmark-circle {
-    width: 70px;
-    height: 70px;
-    background-color: #4CAF50;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: auto;
-    margin-bottom: 15px;
+  width: 70px;
+  height: 70px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  margin-bottom: 15px;
 }
 
 .checkmark {
-    color: white;
-    font-size: 40px;
-    font-weight: bold;
+  color: white;
+  font-size: 40px;
+  font-weight: bold;
 }
 
 .login-success h2 {
-    margin: 0 0 5px;
-    color: #2e7d32;
-    font-size: 22px;
+  margin: 0 0 5px;
+  color: #2e7d32;
+  font-size: 22px;
 }
 
 .login-success p {
-    margin: 0;
-    color: #555;
-    font-size: 14px;
+  margin: 0;
+  color: #555;
+  font-size: 14px;
 }
 
 .notification-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    -webkit-backdrop-filter: blur(5px); 
-    backdrop-filter: blur(5px);
-    background-color: rgba(0, 0, 0, 0.1);
-    z-index: 999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  background-color: rgba(0, 0, 0, 0.1);
+  z-index: 999;
 }
 
 .login-success {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #e6f4ea;
-    color: #155724;
-    padding: 30px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.25);
-    z-index: 1000;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #e6f4ea;
+  color: #155724;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
 }
 
 .checkmark-circle {
-    background-color: #28a745;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: auto auto 10px;
+  background-color: #28a745;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto auto 10px;
 }
 
 .checkmark {
-    color: white;
-    font-size: 32px;
+  color: white;
+  font-size: 32px;
 }
 
-
-.ButtonEnviarReceta{
-    color: #9f9f9f;
+.ButtonEnviarReceta {
+  color: #9f9f9f;
 }
 .close-button {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 20px;
-    color: #333;
-    cursor: pointer;
-  }
-  
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #333;
+  cursor: pointer;
+}
