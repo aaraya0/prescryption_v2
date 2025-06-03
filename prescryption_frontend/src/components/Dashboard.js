@@ -4,6 +4,7 @@ import Doctor from "./Doctor";
 import Patient from "./Patient";
 import PharmacyUser from "./PharmacyUser";
 import Insurance from "./Insurance";
+import "./styles.css"; // Asegúrate de que tu CSS esté importado
 
 function Dashboard({ userType }) {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ function Dashboard({ userType }) {
     const token = localStorage.getItem("token");
     if (!token) {
       alert("No estás autenticado. Por favor, inicia sesión.");
-      navigate("/login");
+      navigate("/"); // o podrías redirigir a "/login"
     }
   }, [navigate]);
 
@@ -54,6 +55,44 @@ function Dashboard({ userType }) {
             <Insurance />
           </div>
         );
+
+      case "admin":
+        // ← Aquí agregamos el menú de ADMIN con 4 botones grandes.
+        return (
+          <div className="admin-menu-container">
+            <h3 className="admin-title">Panel de Administrador</h3>
+            <div className="admin-buttons-grid">
+              <button
+                className="admin-btn"
+                onClick={() => navigate("/dashboard/admin/prescriptions")}
+              >
+                Recetas
+              </button>
+
+              <button
+                className="admin-btn"
+                onClick={() => navigate("/dashboard/admin/verify-users")}
+              >
+                Usuarios y Verificaciones
+              </button>
+
+              <button
+                className="admin-btn"
+                onClick={() => navigate("/dashboard/admin/settings")}
+              >
+                Configuraciones
+              </button>
+
+              <button
+                className="admin-btn"
+                onClick={() => navigate("/dashboard/admin/other")}
+              >
+                Soporte y Logs
+              </button>
+            </div>
+          </div>
+        );
+
       default:
         return <p>No se encontró el rol del usuario.</p>;
     }
@@ -66,7 +105,17 @@ function Dashboard({ userType }) {
           <h2>Menú de {userType}</h2>
           <p>
             Bienvenido al menú del{" "}
-            {userType === "patient" ? "paciente" : userType}
+            {userType === "patient"
+              ? "paciente"
+              : userType === "doctor"
+              ? "médico"
+              : userType === "pharmacyUser"
+              ? "farmacéutico"
+              : userType === "insurance"
+              ? "obra social"
+              : userType === "admin"
+              ? "administrador"
+              : userType}
           </p>
         </div>
 

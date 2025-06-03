@@ -262,7 +262,7 @@ html {
 }
 
 .register-wrapper {
-  margin-top: 5px; /* espacio para que el header no tape nada */
+  margin-top: 5px;
   padding: 20px;
   display: flex;
   justify-content: center;
@@ -302,11 +302,11 @@ html {
 .affiliate-input-container {
   display: flex;
   align-items: center;
-  gap: 8px; /* Space between input and button */
+  gap: 8px;
 }
 
 .form-input {
-  flex: 1; /* Make input expand to take available space */
+  flex: 1;
 }
 
 .fetch-plan-button {
@@ -948,4 +948,85 @@ h4 {
   font-size: 20px;
   color: #333;
   cursor: pointer;
+}
+
+/* Dashboard admin */
+
+/* -------------------------------------------- */
+/* Estilos específicos para el menú del Admin   */
+/* -------------------------------------------- */
+
+.admin-menu-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.admin-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+/* Usamos un grid para que salgan 2 x 2 botones grandes, con gap */
+.admin-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+/* Cada botón ocupa todo su celda del grid */
+.admin-btn {
+  background-color: #a6c4ca;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-btn:hover {
+  background-color: #8a9fa3;
+  transform: translateY(-2px);
+}
+
+/* Para los botones grandes en el menú de admin */
+.admin-menu {
+  text-align: center;
+  margin-top: 60px;
+}
+
+.admin-menu h3 {
+  margin-bottom: 24px;
+  font-size: 24px;
+}
+
+.admin-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.dashboard-button-large {
+  width: 300px;
+  background-color: #a6c4ca;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dashboard-button-large:hover {
+  background-color: #94abaf;
 }
