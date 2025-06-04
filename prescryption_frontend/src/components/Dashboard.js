@@ -1,19 +1,20 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Doctor from "./Doctor";
 import Patient from "./Patient";
-import PharmacyUser from "./PharmacyUser";
+import Pharmacy from "./Pharmacy";
 import Insurance from "./Insurance";
-import "./styles.css"; // Asegúrate de que tu CSS esté importado
+import "./styles.css";
 
-function Dashboard({ userType }) {
+function Dashboard() {
+  const { userType } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       alert("No estás autenticado. Por favor, inicia sesión.");
-      navigate("/"); // o podrías redirigir a "/login"
+      navigate("/");
     }
   }, [navigate]);
 
@@ -44,9 +45,10 @@ function Dashboard({ userType }) {
           </div>
         );
       case "pharmacyUser":
+      case "pharmacy":
         return (
           <div>
-            <PharmacyUser />
+            <Pharmacy />
           </div>
         );
       case "insurance":
@@ -57,7 +59,6 @@ function Dashboard({ userType }) {
         );
 
       case "admin":
-        // ← Aquí agregamos el menú de ADMIN con 4 botones grandes.
         return (
           <div className="admin-menu-container">
             <h3 className="admin-title">Panel de Administrador</h3>
@@ -111,6 +112,8 @@ function Dashboard({ userType }) {
               ? "médico"
               : userType === "pharmacyUser"
               ? "farmacéutico"
+              : userType === "pharmacy"
+              ? "la farmacia"
               : userType === "insurance"
               ? "obra social"
               : userType === "admin"

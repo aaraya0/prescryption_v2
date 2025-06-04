@@ -8,6 +8,7 @@ import {
 import Register from "./components/Register";
 import Login from "./components/Login";
 import MainMenu from "./components/MainMenu";
+import PharmacyTypeSelection from "./components/PharmacyTypeSelection";
 import Dashboard from "./components/Dashboard";
 import EmitirReceta from "./components/Prescription";
 import PrescriptionValidation from "./components/PrescriptionValidation";
@@ -38,31 +39,14 @@ function App() {
         <Routes>
           {/* Home: elegir rol */}
           <Route path="/" element={<MainMenu />} />
+          {/* Pantalla de “¿Farmacia o Farmacéutico?” */}
+          <Route path="/pharmacy/type" element={<PharmacyTypeSelection />} />
           {/* Login y Register dinámico según rol */}
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/login/admin" element={<Login />} />
           {/* Dashboard dinámico según rol */}
-          <Route
-            path="/dashboard/patient"
-            element={<Dashboard userType="patient" />}
-          />
-          <Route
-            path="/dashboard/doctor"
-            element={<Dashboard userType="doctor" />}
-          />
-          <Route
-            path="/dashboard/pharmacyUser"
-            element={<Dashboard userType="pharmacyUser" />}
-          />
-          <Route
-            path="/dashboard/insurance"
-            element={<Dashboard userType="insurance" />}
-          />
-          <Route
-            path="/dashboard/admin"
-            element={<Dashboard userType="admin" />}
-          />{" "}
+          <Route path="/dashboard/:userType" element={<Dashboard />} />
           {/* Perfil genérico */}
           <Route path="/perfil" element={<Perfil />} />
           {/* Rutas extra */}
@@ -71,7 +55,7 @@ function App() {
             path="/validate-prescription"
             element={<PrescriptionValidation />}
           />
-          {/* A futuro sub‐rutas de admin aquí:  */}
+          {/* Sub‐rutas de admin aquí:  */}
           <Route
             path="/dashboard/admin/prescriptions"
             element={<AdminPrescriptions />}

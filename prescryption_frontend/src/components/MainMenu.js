@@ -1,3 +1,4 @@
+// src/components/MainMenu.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./styles.css";
@@ -6,10 +7,12 @@ function MainMenu() {
   const navigate = useNavigate();
 
   const handleSelection = (userType) => {
-    if (userType === "pharmacySelection") {
+    if (userType === "pharmacy") {
+      // En lugar de ir directamente a /login, vamos a una pantalla intermedia:
       navigate("/pharmacy/type");
     } else {
-      document.cookie = `userType=${userType}`;
+      // Para patient, doctor, pharmacyUser y insurance, seguimos igual:
+      document.cookie = `userType=${userType}; path=/`;
       navigate("/login");
     }
   };
@@ -32,7 +35,7 @@ function MainMenu() {
         </button>
         <button
           className="pharmacistButton"
-          onClick={() => handleSelection("pharmacyUser")}
+          onClick={() => handleSelection("pharmacy")}
         >
           Farmacia
         </button>

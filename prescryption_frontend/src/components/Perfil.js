@@ -45,7 +45,7 @@ function Perfil() {
           url = "http://localhost:3001/api/pharmacy-users/profile";
         } else if (userType === "pharmacyAdmin") {
           // ⇒ /api/pharmacy-admin/pharmacy_profile
-          url = "http://localhost:3001/api/pharmacy-admin/pharmacy_profile";
+          url = "http://localhost:3001/api/pharmacy/pharmacy_profile";
         } else if (userType === "insurance") {
           // (Asumo /api/insurance/profile o el router que tengas)
           url = "http://localhost:3001/api/insurances/profile";

@@ -40,7 +40,7 @@ function Login() {
     patient: "Iniciar Sesión como Paciente",
     doctor: "Iniciar Sesión como Médico",
     pharmacist: "Iniciar Sesión como Farmacéutico",
-    pharmacyAdmin: "Iniciar Sesión como Farmacia (Administrador)",
+    pharmacy: "Iniciar Sesión como Farmacia (Administrador)",
     insurance: "Iniciar Sesión como Obra Social",
     admin: "Iniciar Sesión como Administrador",
   };
@@ -50,7 +50,6 @@ function Login() {
   const handleLogin = async () => {
     try {
       if (userType === "admin") {
-        // Llamo al endpoint específico de ADMIN
         const response = await axios.post(
           "http://localhost:3001/api/public/admin/login",
           { nid, password },
@@ -62,8 +61,6 @@ function Login() {
         setTimeout(() => {
           navigate("/dashboard/admin");
         }, 800);
-
-        // No continuar con el else; retornamos aquí
         return;
       }
       const response = await axios.post(
@@ -159,7 +156,7 @@ function Login() {
           </button>
         </p>
       )}
-      {userType === "pharmacyUser" && (
+      {(userType === "pharmacyUser" || userType === "pharmacy") && (
         <>
           <p className="TextoRegistrateButton">
             ¿Tu farmacia aún no está registrada?
@@ -174,7 +171,9 @@ function Login() {
             Registrar farmacia
           </button>
 
-          <p className="TextoRegistrateButton">¿Sos farmacéutico?</p>
+          <p className="TextoRegistrateButton">
+            ¿Todavía no te registraste y sos farmacéutico?
+          </p>
           <button
             className="RegistrateButton"
             onClick={() => navigate("/register")}
