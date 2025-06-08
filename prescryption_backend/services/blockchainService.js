@@ -4,12 +4,14 @@ const path = require('path');
 const { format } = require('date-fns');
 const Doctor = require('../models/Doctor');
 const { decrypt } = require('../utils/encryption');
+const { web3, systemAccount } = require('../utils/systemSigner');
+const { getPharmacySigner } = require('../utils/pharmacySigner');
 
 
 // ✅ Configuración de Web3
 //const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 //const web3 = new Web3(`https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`);
-const web3 = new Web3(process.env.SEPOLIA_RPC_URL);
+//const web3 = new Web3(process.env.SEPOLIA_RPC_URL);
 
 
 
@@ -44,8 +46,8 @@ const prescriptionContract = new web3.eth.Contract(prescriptionContractJSON.abi,
 
 // ✅ Funciones del contrato
 exports.getPrescriptionsByPatient = async (patientAddress) => {
-    const accounts = await web3.eth.getAccounts();
-    const rawPrescriptions = await prescriptionContract.methods.getPresbyPatientAddress(patientAddress).call({ from: accounts[0] });
+
+    const rawPrescriptions = await prescriptionContract.methods.getPresbyPatientAddress(patientAddress).call();
 
     // Formatear los datos
     const formattedPrescriptions = convertBigIntToString(rawPrescriptions);
@@ -94,8 +96,7 @@ exports.getPrescriptionsByPatient = async (patientAddress) => {
 
 
 exports.getPrescriptionsByDoctor = async (nid) => {
-    const accounts = await web3.eth.getAccounts();
-    const rawPrescriptions = await prescriptionContract.methods.getPresbyDoctorNid(nid).call({ from: accounts[0] });
+    const rawPrescriptions = await prescriptionContract.methods.getPresbyDoctorNid(nid).call();
 
     const formattedPrescriptions = convertBigIntToString(rawPrescriptions);
 
@@ -188,8 +189,7 @@ BigInt.prototype.toJSON = function () {
 };
 
 exports.getAllPrescriptions = async () => {
-    const accounts = await web3.eth.getAccounts();
-    const rawPrescriptions = await prescriptionContract.methods.getPrescriptions().call({ from: accounts[0] });
+    const rawPrescriptions = await prescriptionContract.methods.getPrescriptions().call();
 
     // Limpiar y formatear los datos
     const formattedPrescriptions = rawPrescriptions.map(prescription => ({
@@ -222,37 +222,47 @@ exports.getAllPrescriptions = async () => {
     return formattedPrescriptions;
 };
 
+
 exports.updatePrescriptionPharmacyAddress = async (prescriptionId, pharmacyAddress) => {
     try {
-        const accounts = await web3.eth.getAccounts();
+        const tx = prescriptionContract.methods.updatePrescription(prescriptionId, pharmacyAddress);
 
-        console.log('🔍 Updating prescription:', prescriptionId, 'with pharmacy address:', pharmacyAddress);
+        const gas = await tx.estimateGas({ from: systemAccount.address });
+        const gasPrice = await web3.eth.getGasPrice();
 
-        const result = await prescriptionContract.methods
-            .updatePrescription(prescriptionId, pharmacyAddress)
-            .send({ from: accounts[0], gas: '2000000' });
+        const signedTx = await web3.eth.accounts.signTransaction(
+            {
+                from: systemAccount.address, // ✅ Agregado
+                to: prescriptionContract.options.address,
+                data: tx.encodeABI(),
+                gas,
+                gasPrice,
+            },
+            systemAccount.privateKey
+        );
 
-        console.log('✅ Prescription updated successfully:', result);
+        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+        console.log('✅ Prescription updated successfully:', receipt);
 
         return {
-            transactionHash: result.transactionHash,
-            blockNumber: result.blockNumber,
-            gasUsed: result.gasUsed
+            transactionHash: receipt.transactionHash,
+            blockNumber: receipt.blockNumber,
+            gasUsed: receipt.gasUsed
         };
     } catch (error) {
         console.error('❌ Error updating prescription pharmacy address:', error);
 
-        // Extraer la razón de la reversión desde Ganache
+        // Si querés mantener el extractor de errores:
         const revertReason = extractRevertReason(error);
         if (revertReason) {
             console.error('❌ Revert reason:', revertReason);
-            throw new Error(revertReason); // Devolver solo el mensaje relevante
+            throw new Error(revertReason);
         }
 
         throw new Error('An unexpected error occurred while updating the prescription pharmacy address.');
     }
 };
-
 // 📌 Función para extraer la razón de la reversión
 function extractRevertReason(error) {
     try {
@@ -283,13 +293,12 @@ function extractRevertReason(error) {
 
 exports.getPrescriptionsByPharmacy = async (pharmacyAddress) => {
     try {
-        const accounts = await web3.eth.getAccounts();
 
         console.log('🔍 Fetching prescriptions for pharmacy:', pharmacyAddress);
 
         const prescriptions = await prescriptionContract.methods
             .getPresbyPharmacyAddress(pharmacyAddress)
-            .call({ from: accounts[0] });
+            .call();
 
         console.log('✅ Prescriptions retrieved:', prescriptions);
 
@@ -326,13 +335,12 @@ exports.getPrescriptionsByPharmacy = async (pharmacyAddress) => {
 
 exports.getPrescriptionById = async (prescriptionId) => {
     try {
-        const accounts = await web3.eth.getAccounts();
         
         console.log(`🔍 Fetching prescription with ID: ${prescriptionId}`);
         
         const prescription = await prescriptionContract.methods
             .getPrescription(prescriptionId)
-            .call({ from: accounts[0] });
+            .call();
 
         if (!prescription) {
             throw new Error(`❌ Prescription with ID ${prescriptionId} not found.`);
@@ -375,18 +383,18 @@ exports.getPrescriptionById = async (prescriptionId) => {
     }
 };
 
-exports.validatePrescriptionOnBlockchain = async (prescriptionId, pharmacyAddress) => {
-    try {
-        const accounts = await web3.eth.getAccounts();
-        const validationTimestamp = Math.floor(Date.now() / 1000); // Timestamp actual
 
-        console.log(`🔄 Validating prescription ID ${prescriptionId} on blockchain...`);
+exports.validatePrescriptionOnBlockchain = async (prescriptionId, pharmacyNid, pharmacyAddress) => {
+    try {
+        const pharmacyAccount = await getPharmacySigner(pharmacyNid);
+        const validationTimestamp = Math.floor(Date.now() / 1000);
 
         const result = await prescriptionContract.methods
             .validatePrescription(prescriptionId, pharmacyAddress, validationTimestamp)
-            .send({ from: accounts[0], gas: "2000000" });
+            .send({ from: pharmacyAccount.address, gas: 2000000 });
 
-        console.log("✅ Prescription validated successfully on blockchain:", result);
+        web3.eth.accounts.wallet.remove(pharmacyAccount.address);
+
         return {
             transactionHash: result.transactionHash,
             blockNumber: result.blockNumber,
@@ -394,21 +402,21 @@ exports.validatePrescriptionOnBlockchain = async (prescriptionId, pharmacyAddres
             validationTimestamp
         };
     } catch (error) {
-        console.error("❌ Error validating prescription on blockchain:", error.message);
+        console.error("❌ Error validating prescription on blockchain:", error);
         throw new Error("Error validating prescription on blockchain.");
     }
 };
 
-exports.clearPendingValidation = async (prescriptionId) => {
+exports.clearPendingValidation = async (prescriptionId, pharmacyNid) => {
     try {
-        const accounts = await web3.eth.getAccounts();
-        console.log(`🔄 Clearing prescription ID ${prescriptionId}...`);
+        const pharmacyAccount = await getPharmacySigner(pharmacyNid);
 
         const result = await prescriptionContract.methods
             .clearPendingValidation(prescriptionId)
-            .send({ from: accounts[0], gas: "2000000" });
+            .send({ from: pharmacyAccount.address, gas: 2000000 });
 
-        console.log("✅ Prescription cleared successfully:", result);
+        web3.eth.accounts.wallet.remove(pharmacyAccount.address);
+
         return {
             transactionHash: result.transactionHash,
             blockNumber: result.blockNumber,
@@ -420,22 +428,26 @@ exports.clearPendingValidation = async (prescriptionId) => {
     }
 };
 
-exports.markPrescriptionAsUsed = async (prescriptionId, invoiceNumber, pharmacyAddress) => {
+exports.markPrescriptionAsUsed = async (prescriptionId, originalInvoiceNumber, pharmacyNid, pharmacistNid) => {
     try {
-        console.log(`🔗 Enviando transacción a la blockchain para marcar la receta ${prescriptionId} como usada.`);
-        
-        const accounts = await web3.eth.getAccounts();
-        const sender = accounts[0]; // Se usa la dirección de la farmacia o la cuenta 0
+        const pharmacyAccount = await getPharmacySigner(pharmacyNid);
+        const invoiceNumber = `${originalInvoiceNumber}|${pharmacistNid}`;
 
-        await prescriptionContract.methods.markPrescriptionAsUsed(prescriptionId, invoiceNumber).send({
-            from: sender,
-            gas: 3000000
-        });
+        await prescriptionContract.methods
+            .markPrescriptionAsUsed(prescriptionId, invoiceNumber)
+            .send({ from: pharmacyAccount.address, gas: 3000000 });
 
-        console.log(`✅ Receta ${prescriptionId} marcada como usada en la blockchain.`);
-        return { success: true, message: `Prescription ${prescriptionId} marked as used.` };
+        web3.eth.accounts.wallet.remove(pharmacyAccount.address);
+
+        return {
+            success: true,
+            message: `Prescription ${prescriptionId} marked as used.`
+        };
     } catch (error) {
         console.error("❌ Error al marcar la receta como usada:", error);
-        return { success: false, message: "Failed to mark prescription as used." };
+        return {
+            success: false,
+            message: "Failed to mark prescription as used."
+        };
     }
 };

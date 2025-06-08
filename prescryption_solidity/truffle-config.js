@@ -15,10 +15,17 @@ module.exports = {
       skipDryRun: true
     }
   },
-
   compilers: {
     solc: {
-      version: "0.8.20"
+      version: "0.8.20",
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200
+        },
+        viaIR: true // ✅ esta línea vuelve a ser necesaria
+      }
     }
   }
+
 };

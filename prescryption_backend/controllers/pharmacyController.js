@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const { encrypt } = require('../utils/encryption');
 const axios = require('axios');
 const PharmacyUser = require('../models/PharmacyUser');
 const Pharmacy = require('../models/Pharmacy');
@@ -7,6 +8,7 @@ const { Web3 } = require('web3');
 const blockchainService = require('../services/blockchainService');
 const medicationScraper = require("../services/medicationScraper"); // Importa el scraper
 const MedicationCache = require('../models/MedicationCache'); // Importamos el modelo de caché
+const fundAccount = require('../utils/fundAccount');
 
 // ✅ Configuración de Web3
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
@@ -82,12 +84,12 @@ exports.registerPharmacy = async (req, res) => {
 
         // Hashear la contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Generar dirección Ethereum
         const account = web3.eth.accounts.create();
+        const encryptedPrivateKey = encrypt(account.privateKey);
 
         // Generar código único para la farmacia
         const verificationCode = crypto.randomBytes(6).toString('hex');
+        await fundAccount(account.address); 
 
         // Crear la nueva farmacia
         const newPharmacy = new Pharmacy({
@@ -96,6 +98,7 @@ exports.registerPharmacy = async (req, res) => {
             mail,
             password: hashedPassword,
             address: account.address, // Asignar dirección generada
+            privateKey: encryptedPrivateKey,
             physicalAddress,
             contactInfo,
             verificationCode
@@ -183,7 +186,7 @@ exports.registerPharmacyUser = async (req, res) => {
 
 
 
-// 📌 Resetear dirección de farmacia en una receta específica
+// 📌 Resetear dirección de farmacia en una receta específica YA NO SE USA CREO
 exports.resetPharmacyAddress = async (req, res) => {
     try {
         const { prescriptionId } = req.body;
@@ -542,7 +545,7 @@ exports.processPurchase = async (req, res) => {
         const invoiceNumber = `FACT-${new Date().toISOString().replace(/[-T:.Z]/g, "").slice(0, 12)}-${Math.floor(Math.random() * 100000)}`;
 
         // 🔹 Marcar la receta como usada en la blockchain
-        const blockchainResponse = await blockchainService.markPrescriptionAsUsed(prescriptionId, invoiceNumber, pharmacy.nid);
+        const blockchainResponse = await blockchainService.markPrescriptionAsUsed(prescriptionId, invoiceNumber, pharmacy.nid, pharmacyUser.nid);
         if (!blockchainResponse.success) {
             return res.status(500).json({ message: "❌ Failed to mark prescription as used." });
         }
