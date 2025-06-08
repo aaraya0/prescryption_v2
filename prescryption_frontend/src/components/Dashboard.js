@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Doctor from "./Doctor";
 import Patient from "./Patient";
-import Pharmacy from "./Pharmacy";
+import PharmacyUser from "./PharmacyUser";
 import Insurance from "./Insurance";
 import "./styles.css";
 
@@ -48,7 +48,7 @@ function Dashboard() {
       case "pharmacy":
         return (
           <div>
-            <Pharmacy />
+            <PharmacyUser />
           </div>
         );
       case "insurance":
