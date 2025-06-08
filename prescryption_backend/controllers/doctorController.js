@@ -3,6 +3,8 @@ const axios = require('axios');
 const Doctor = require('../models/Doctor');
 const blockchainService = require('../services/blockchainService');
 const { Web3 } = require('web3');
+const { encrypt } = require('../utils/encryption');
+const fundNewAccount = require('../utils/fundAccount');
 
 // ✅ Configuración de Web3
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
@@ -19,8 +21,8 @@ exports.registerDoctor = async (req, res) => {
             return res.status(400).send('❌ Missing required fields');
         }
 
-        // ✅ Validar mediante el servicio de verificación
-        /*const verifyResponse = await axios.post('http://localhost:5000/verify', {
+        //✅ Validar mediante el servicio de verificación
+        const verifyResponse = await axios.post('http://localhost:5000/verify', {
             nid,
             license,
             user_type: "doctor"
@@ -30,11 +32,13 @@ exports.registerDoctor = async (req, res) => {
 
         if (!verifyResponse.data.valid) {
             return res.status(400).send('❌ Invalid license or NID');
-        }*/
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const account = web3.eth.accounts.create();
+        const encryptedPrivateKey = encrypt(account.privateKey);
 
+        await fundNewAccount(account.address);
         const newDoctor = new Doctor({
             nid,
             license,
@@ -44,7 +48,7 @@ exports.registerDoctor = async (req, res) => {
             password: hashedPassword,
             mail,
             address: account.address,
-            privateKey: account.privateKey
+            privateKey: encryptedPrivateKey
         });
 
         await newDoctor.save();

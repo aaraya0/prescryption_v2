@@ -3,10 +3,15 @@ const fs = require('fs');
 const path = require('path');
 const { format } = require('date-fns');
 const Doctor = require('../models/Doctor');
+const { decrypt } = require('../utils/encryption');
 
 
 // ✅ Configuración de Web3
-const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
+//const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
+//const web3 = new Web3(`https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`);
+const web3 = new Web3(process.env.SEPOLIA_RPC_URL);
+
+
 
 // ✅ Leer la dirección del contrato
 const contractsDataPath = path.join(__dirname, '..', '..', 'prescryption_solidity', 'contracts_data.json');                                           //para Belu
@@ -133,12 +138,11 @@ exports.issuePrescription = async (prescriptionData, doctorNid) => {
             throw new Error('Doctor not found');
         }
 
-        const doctorPrivateKey = doctor.privateKey;
-        const doctorAccount = web3.eth.accounts.privateKeyToAccount(doctorPrivateKey);
+
+        const decryptedKey = decrypt(doctor.privateKey);
+        const doctorAccount = web3.eth.accounts.privateKeyToAccount(decryptedKey);
         web3.eth.accounts.wallet.add(doctorAccount);
 
-        const accounts = await web3.eth.getAccounts();
-        const adminAccount = accounts[0];
 
         const patientStruct = {
             name: prescriptionData.patientName,
@@ -156,12 +160,12 @@ exports.issuePrescription = async (prescriptionData, doctorNid) => {
                 Math.floor(Date.now() / 1000)
             )
             .send({
-                from: adminAccount,
-                gas: '2000000',
-                signTransaction: doctorAccount.signTransaction
+                from: doctorAccount.address,
+                gas: '2000000'
             });
 
         web3.eth.accounts.wallet.remove(doctorAccount.address);
+
 
         return convertBigIntToString({
             message: 'Prescription issued and saved in blockchain',
