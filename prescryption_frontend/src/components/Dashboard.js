@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Doctor from "./Doctor";
 import Patient from "./Patient";
 import PharmacyUser from "./PharmacyUser";
+import PharmacyAdmin from "./PharmacyAdmin";
 import Insurance from "./Insurance";
 import "./styles.css";
 
@@ -45,10 +46,15 @@ function Dashboard() {
           </div>
         );
       case "pharmacyUser":
-      case "pharmacy":
         return (
           <div>
             <PharmacyUser />
+          </div>
+        );
+      case "pharmacy":
+        return (
+          <div>
+            <PharmacyAdmin />
           </div>
         );
       case "insurance":

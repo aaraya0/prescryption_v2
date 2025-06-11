@@ -431,17 +431,6 @@ function Register() {
               value={formData.verificationCode || ""}
               onChange={handleChange}
             />
-            <p className="inputTitle">Rol</p>
-            <select
-              className="form-input"
-              name="role"
-              value={formData.role || ""}
-              onChange={handleChange}
-            >
-              <option value="">Seleccionar rol</option>
-              <option value="admin">Administrador</option>
-              <option value="employee">Usuario</option>
-            </select>
           </>
         );
       default:

@@ -43,9 +43,9 @@ function Perfil() {
         } else if (userType === "pharmacyUser") {
           // ⇒ /api/pharmacy-users/profile
           url = "http://localhost:3001/api/pharmacy-users/profile";
-        } else if (userType === "pharmacyAdmin") {
+        } else if (userType === "pharmacy") {
           // ⇒ /api/pharmacy-admin/pharmacy_profile
-          url = "http://localhost:3001/api/pharmacy/pharmacy_profile";
+          url = "http://localhost:3001/api/pharmacies/pharmacy_profile";
         } else if (userType === "insurance") {
           // (Asumo /api/insurance/profile o el router que tengas)
           url = "http://localhost:3001/api/insurances/profile";
@@ -159,19 +159,16 @@ function Perfil() {
       case "pharmacy":
         return (
           <>
-            <Field icon={<FaUser />} label="Nombre" value={profile.name} />
-            <Field icon={<FaUser />} label="Apellido" value={profile.surname} />
             <Field
               icon={<FaIdCard />}
               label="CUIT Farmacia"
-              value={profile.pharmacy_nid}
+              value={profile.nid}
             />
             <Field
               icon={<FaClinicMedical />}
               label="Nombre Farmacia"
               value={profile.pharmacy_name}
             />
-            <Field icon={<FaIdCard />} label="Alias" value={profile.alias} />
             <Field icon={<FaEnvelope />} label="Correo" value={profile.mail} />
           </>
         );
