@@ -218,7 +218,7 @@ function validatePrescription(uint _prescriptionId, address _pharmacyAddress, ui
     require(prescription.isPendingValidation, "Prescription is not pending validation.");
 
     // 📌 Marcar la receta como validada y lista para facturación
-    prescription.used = true;
+   // prescription.used = true;
     prescription.isPendingValidation = false;
 
     // 📌 Agregar un timestamp de validación

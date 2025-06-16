@@ -42,7 +42,7 @@ try {
 }
 
 // ✅ Instanciar el contrato
-const prescriptionContract = new web3.eth.Contract(prescriptionContractJSON.abi, contractsData.PrescriptionContract);
+let prescriptionContract = new web3.eth.Contract(prescriptionContractJSON.abi, contractsData.PrescriptionContract);
 
 // ✅ Funciones del contrato
 exports.getPrescriptionsByPatient = async (patientAddress) => {

@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+console.log('[MODEL] Importando modelo Doctor');
+
 const doctorSchema = new mongoose.Schema({
     nid: { type: String, required: true, unique: true },
     license: { type: String, required: true },
