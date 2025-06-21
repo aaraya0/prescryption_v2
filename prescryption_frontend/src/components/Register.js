@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import axios from "axios";
 
 function Register() {
@@ -9,6 +10,8 @@ function Register() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const [showError, setShowError] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const userType = document.cookie
     .split("; ")
     .find((row) => row.startsWith("userType="))
@@ -207,13 +210,24 @@ function Register() {
               onChange={handleChange}
             />
             <p className="inputTitle">Contraseña</p>
-            <input
-              className="form-input"
-              type="password"
-              name="password"
-              placeholder="Contraseña"
-              onChange={handleChange}
-            />
+            <div className="password-container-register">
+              <input
+                className="form-input-password-field"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Contraseña"
+                onChange={handleChange}
+              />
+              <span
+                className="eye-icon-register"
+                onClick={() => setShowPassword(!showPassword)}
+                title={
+                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </span>
+            </div>
           </>
         );
       case "doctor":
@@ -268,13 +282,24 @@ function Register() {
               onChange={handleChange}
             />
             <p className="inputTitle">Contraseña</p>
-            <input
-              className="form-input"
-              type="password"
-              name="password"
-              placeholder="Contraseña"
-              onChange={handleChange}
-            />
+            <div className="password-container-register">
+              <input
+                className="form-input-password-field"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Contraseña"
+                onChange={handleChange}
+              />
+              <span
+                className="eye-icon-register"
+                onClick={() => setShowPassword(!showPassword)}
+                title={
+                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </span>
+            </div>
           </>
         );
       case "insurance":
@@ -308,13 +333,24 @@ function Register() {
             />
 
             <p className="inputTitle">Contraseña</p>
-            <input
-              className="form-input"
-              type="password"
-              name="password"
-              placeholder="Contraseña"
-              onChange={handleChange}
-            />
+            <div className="password-container-register">
+              <input
+                className="form-input-password-field"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Contraseña"
+                onChange={handleChange}
+              />
+              <span
+                className="eye-icon-register"
+                onClick={() => setShowPassword(!showPassword)}
+                title={
+                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </span>
+            </div>
           </>
         );
       case "pharmacy":
@@ -342,12 +378,23 @@ function Register() {
               onChange={handleChange}
             />
             <p className="inputTitle">Contraseña</p>
-            <input
-              className="form-input"
-              type="password"
-              name="password"
-              onChange={handleChange}
-            />
+            <div className="password-container-register">
+              <input
+                className="form-input-password-field"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                onChange={handleChange}
+              />
+              <span
+                className="eye-icon-register"
+                onClick={() => setShowPassword(!showPassword)}
+                title={
+                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </span>
+            </div>
             <p className="inputTitle">Dirección Física</p>
             <input
               className="form-input"
@@ -408,13 +455,24 @@ function Register() {
               onChange={handleChange}
             />
             <p className="inputTitle">Contraseña</p>
-            <input
-              className="form-input"
-              type="password"
-              name="password"
-              value={formData.password || ""}
-              onChange={handleChange}
-            />
+            <div className="password-container-register">
+              <input
+                className="form-input-password-field"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password || ""}
+                onChange={handleChange}
+              />
+              <span
+                className="eye-icon-register"
+                onClick={() => setShowPassword(!showPassword)}
+                title={
+                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </span>
+            </div>
             <p className="inputTitle">CUIT de la Farmacia</p>
             <input
               className="form-input"

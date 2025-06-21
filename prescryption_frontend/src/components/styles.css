@@ -83,26 +83,22 @@ html {
 
 .password-container {
   position: relative;
-  width: 280px;
+  width: 100%;
   display: flex;
+  padding: 10px;
   align-items: center;
 }
-
-.password-field {
-  flex: 1;
-  padding: 10px;
-  font-size: 14px;
-  border-radius: 5px;
-  border: 1px solid #9f9f9f;
-  padding-right: 35px;
-  height: 40px;
+.password-container input {
+  width: 100%;
+  padding-top: 40px;
+  align-items: center;
 }
 
 .eye-icon svg {
   font-size: 15px;
   color: #939292;
   position: absolute;
-  right: 15px;
+  right: 20px;
   bottom: 7px;
   cursor: pointer;
   display: flex;
@@ -133,8 +129,8 @@ html {
 }
 
 .formLogin .loginButton:hover {
-  background-color: #706ec1;
-  transform: translateX(-1px);
+  transform: translateY(1px);
+  font-weight: 650;
 }
 
 .formLogin .loginTitle {
@@ -261,6 +257,31 @@ html {
   text-align: center;
 }
 
+.password-container-register {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.form-input-password-field {
+  width: 100%;
+  height: 42px;
+  padding: 10px 0px 10px 10px !important;
+  border: 1px solid #9f9f9f;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.eye-icon-register svg {
+  color: #939292;
+  position: absolute;
+  right: 15px;
+  top: 1%;
+  cursor: pointer;
+  display: inline-flex;
+  height: 100%;
+}
+
 .register-wrapper {
   margin-top: 5px;
   padding: 20px;
@@ -301,12 +322,15 @@ html {
 
 .affiliate-input-container {
   display: flex;
-  align-items: center;
   gap: 8px;
+  height: 40px;
 }
 
 .form-input {
   flex: 1;
+}
+.affiliate-input-container .form-input {
+  height: 100%;
 }
 
 .fetch-plan-button {

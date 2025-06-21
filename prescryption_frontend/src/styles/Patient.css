@@ -1,124 +1,136 @@
 /* Botón de transferencia mejorado */
 .button_t {
-    background-color: #D8B7AF;
-    color: black;
-    border: none;
-    border-radius: 8px; 
-    padding: 10px 14px; 
-    width: 100%; 
-    cursor: pointer;
-    margin-top: 15px;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+  background-color: #d8b7af;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .button_t:hover {
-    background-color: #e3a38f; 
-    transform: scale(1.02); 
+  background-color: #e3a38f;
+  transform: scale(1.02);
 }
 
 .status-valid {
-    color: green;
-    font-weight: bold;
+  color: green;
+  font-weight: bold;
 }
 
 .status-expired {
-    color: red;
-    font-weight: bold;
+  color: red;
+  font-weight: bold;
 }
 
 .status-dispensed {
-    color: blue;
-    font-weight: bold;
+  color: blue;
+  font-weight: bold;
 }
 
 .no-recetas-container {
-    text-align: center;
-    margin-top: 50px;
+  text-align: center;
+  margin-top: 50px;
 }
 
 .no-recetas-text {
-    font-size: 18px;
-    color: #555;
+  font-size: 18px;
+  color: #555;
 }
 
 .success-alert {
-    background-color: #d4edda;
-    color: #155724;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    text-align: center;
-    font-weight: bold;
+  background-color: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
 }
 
 .error-alert {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    text-align: center;
-    font-weight: bold;
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
 }
 .accordion-button {
-    font-size: 15px !important;
-  }
-  .farmacia-sugerida {
-    cursor: pointer;
-    padding: 2px 0;
-  }
-  
-  .farmacia-sugerida:hover {
-    text-decoration: underline;
-    background-color: #f1f1f1; /* opcional */
-  }
-  .input-button-row {
-    display: flex !important;
-    align-items: center !important;
-    gap: 15px !important;
-    width: 190% !important;
-    margin-bottom: 10px !important;
-    margin-top: 8px !important;
-  }
-  
-  .input-button-row input {
-    flex: 1 !important;
-    height: 44px !important;
-    font-size: 16px !important;
-    padding: 8px 12px !important;
-    border-radius: 6px !important;
-  }
-  
-  .button-enviar-modal {
-    background-color: #A6C4CA !important;
-    color: black !important;
-    border: none !important;
-    border-radius: 6px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    height: 44px !important;
-    padding: 0 20px !important;
-    font-size: 16px !important;
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out !important;
-    width: 30% !important;
-  }
-  
-  .button-enviar-modal:hover {
-    background-color: #90b0b6 !important;
-    text-decoration: underline !important;
-    transform: scale(1.03);
-  }
-  .status-pending {
-    color: orange;
-    font-weight: bold;
-  }
-  
-  .accordion-pending {
-    border-left: 5px solid orange;
-  }
-  
-  
+  font-size: 15px !important;
+}
+.farmacia-sugerida {
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.farmacia-sugerida:hover {
+  text-decoration: underline;
+  background-color: #f1f1f1; /* opcional */
+}
+.input-button-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 15px !important;
+  width: 190% !important;
+  margin-bottom: 10px !important;
+  margin-top: 8px !important;
+}
+
+.input-button-row input {
+  flex: 1 !important;
+  height: 44px !important;
+  font-size: 16px !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+}
+
+.button-enviar-modal {
+  background-color: #a6c4ca !important;
+  color: black !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  height: 44px !important;
+  padding: 0 20px !important;
+  font-size: 16px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out !important;
+  width: 30% !important;
+}
+
+.button-enviar-modal:hover {
+  background-color: #90b0b6 !important;
+  text-decoration: underline !important;
+  transform: scale(1.03);
+}
+.status-pending {
+  color: orange;
+  font-weight: bold;
+}
+
+.accordion-pending {
+  border-left: 5px solid orange;
+}
+
+/* Quitar flechitas en inputs tipo number */
+
+/* Chrome, Safari, Edge */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  appearance: textfield; /* estándar */
+}
