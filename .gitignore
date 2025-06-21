@@ -1,5 +1,5 @@
 .venv
 prescryption_solidity/build/contracts/PrescriptionContract.json
 prescryption_solidity/PrescriptionContract.json
-node_modules
+node_modules/
 

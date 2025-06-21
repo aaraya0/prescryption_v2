@@ -18,6 +18,7 @@ import VerifyUsers from "./components/VerifyUsers";
 import AdminPrescriptions from "./components/AdminPrescriptions";
 import AdminSettings from "./components/AdminSettings";
 import AdminLogs from "./components/AdminLogs";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   const noHeaderRoutes = [

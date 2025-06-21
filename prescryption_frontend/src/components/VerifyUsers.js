@@ -1,6 +1,6 @@
 // src/components/VerifyUsers.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../AxiosConfig";
 import "./styles.css"; // Reutiliza tus estilos o agrega estilos específicos si quieres
 
 function VerifyUsers() {
@@ -18,7 +18,7 @@ function VerifyUsers() {
           setLoading(false);
           return;
         }
-        const response = await axios.get(
+        const response = await api.get(
           "http://localhost:3001/api/admin/insurances/pending",
           {
             headers: {
@@ -46,7 +46,7 @@ function VerifyUsers() {
   const handleVerify = async (insuranceNid) => {
     try {
       // Llamada PATCH a /api/admin/insurances/:insurance_nid/verify
-      await axios.patch(
+      await api.patch(
         `http://localhost:3001/api/admin/insurances/${insuranceNid}/verify`,
         {},
         {

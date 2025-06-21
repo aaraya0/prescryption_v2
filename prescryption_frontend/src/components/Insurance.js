@@ -1,7 +1,5 @@
-// src/components/Insurance.jsx
-
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../AxiosConfig";
 import "./styles.css";
 import { Accordion } from "react-bootstrap";
 
@@ -22,7 +20,7 @@ function Insurance() {
           return;
         }
 
-        const response = await axios.get(
+        const response = await api.get(
           "http://localhost:3001/api/insurances/prescriptions",
           {
             headers: {

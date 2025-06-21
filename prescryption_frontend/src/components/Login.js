@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import api from "../AxiosConfig";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import "./styles.css";
 
@@ -50,7 +50,7 @@ function Login() {
   const handleLogin = async () => {
     try {
       if (userType === "admin") {
-        const response = await axios.post(
+        const response = await api.post(
           "http://localhost:3001/api/public/admin/login",
           { nid, password },
           { headers: { "Content-Type": "application/json" } }
@@ -63,14 +63,11 @@ function Login() {
         }, 800);
         return;
       }
-      const response = await axios.post(
-        "http://localhost:3001/api/auth/login",
-        {
-          nid,
-          password,
-          userType,
-        }
-      );
+      const response = await api.post("http://localhost:3001/api/auth/login", {
+        nid,
+        password,
+        userType,
+      });
 
       const token = response.data.token;
       localStorage.setItem("token", token);

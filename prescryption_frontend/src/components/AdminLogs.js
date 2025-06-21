@@ -1,4 +1,3 @@
-// src/components/AdminPrescriptions.jsx
 import React from "react";
 
 const AdminLogs = () => {

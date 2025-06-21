@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import apii from "../AxiosConfig";
 import { FaUser, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import "../styles/Pharmacy.css";
 
@@ -8,7 +8,7 @@ const PharmacyAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const api = axios.create({
+  const api = apii.create({
     baseURL: "http://localhost:3001/api/pharmacies",
     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
   });

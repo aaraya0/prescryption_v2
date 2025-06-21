@@ -1,17 +1,24 @@
-// src/components/MainMenu.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Modal, Button } from "react-bootstrap";
 import "./styles.css";
 
 function MainMenu() {
   const navigate = useNavigate();
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
+
+  useEffect(() => {
+    const expired = localStorage.getItem("sessionExpired");
+    if (expired === "true") {
+      setShowExpiredModal(true);
+      localStorage.removeItem("sessionExpired");
+    }
+  }, []);
 
   const handleSelection = (userType) => {
     if (userType === "pharmacy") {
-      // En lugar de ir directamente a /login, vamos a una pantalla intermedia:
       navigate("/pharmacy/type");
     } else {
-      // Para patient, doctor, pharmacyUser y insurance, seguimos igual:
       document.cookie = `userType=${userType}; path=/`;
       navigate("/login");
     }
@@ -46,6 +53,24 @@ function MainMenu() {
           Obra Social
         </button>
       </div>
+      {/* Modal de sesión expirada */}
+      <Modal
+        show={showExpiredModal}
+        onHide={() => setShowExpiredModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Sesión expirada</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>⚠️ Tu sesión expiró. Por favor, volvé a iniciar sesión.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => setShowExpiredModal(false)}>
+            Entendido
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

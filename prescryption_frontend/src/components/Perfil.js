@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../AxiosConfig";
 import "./styles.css";
 import {
   FaUser,
@@ -57,7 +57,7 @@ function Perfil() {
         }
 
         // 3) Hacemos la petición al endpoint CORRECTO
-        const response = await axios.get(url, {
+        const response = await api.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProfile(response.data);

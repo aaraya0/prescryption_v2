@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import axios from "axios";
+import api from "../AxiosConfig";
 
 function Register() {
   const [formData, setFormData] = useState({});
@@ -31,13 +31,10 @@ function Register() {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:5003/get_affiliation",
-        {
-          nid,
-          insurance_name,
-        }
-      );
+      const response = await api.post("http://localhost:5003/get_affiliation", {
+        nid,
+        insurance_name,
+      });
 
       const plan = response.data.insurance_plan;
       const affiliateNum = response.data.affiliate_number;
@@ -73,7 +70,7 @@ function Register() {
 
       if (userType === "pharmacy") {
         endpoint = `http://localhost:3001/api/public/pharmacies/register`;
-        const res = await axios.post(endpoint, payload);
+        const res = await api.post(endpoint, payload);
         setVerificationCode(res.data.verificationCode || "");
         setShowSuccess(true);
         return;
@@ -83,7 +80,7 @@ function Register() {
         endpoint = `http://localhost:3001/api/public/pharmacies/users/register`;
       }
 
-      await axios.post(endpoint, payload);
+      await api.post(endpoint, payload);
       setShowSuccess(true);
     } catch (error) {
       console.error("❌ Error al registrar:", error.response?.data || error);

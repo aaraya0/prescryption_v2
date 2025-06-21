@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../AxiosConfig";
 import { useNavigate } from "react-router-dom";
 import "./styles.css";
 
@@ -39,7 +39,7 @@ function EmitirReceta() {
     }
 
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `http://localhost:3001/api/doctors/patients/${formData.patientNid}`,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -99,7 +99,7 @@ function EmitirReceta() {
     }
 
     try {
-      await axios.post(
+      await api.post(
         "http://localhost:3001/api/prescriptions/issue",
         formData,
         {
