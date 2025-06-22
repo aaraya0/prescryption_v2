@@ -57,19 +57,19 @@
   background-color: #d8b7af;
   color: black;
   border: none;
-  border-radius: 8px; /* Más redondeado */
-  padding: 10px 14px; /* Botón más grande */
-  width: 100%; /* Que ocupe todo el ancho del accordion */
+  border-radius: 5px;
+  padding: 10px 14px;
+  width: 100%;
   cursor: pointer;
   margin-top: 15px;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 500;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .validate-button:hover {
-  background-color: #e3a38f; /* tu color de hover */
-  transform: scale(1.02); /* crece levemente */
+  transform: scale(1.02);
+  font-weight: 600;
 }
 
 .filtros-container label {
@@ -77,6 +77,9 @@
   flex-direction: column;
   font-size: 14px;
   gap: 5px;
+}
+.input-nid {
+  min-width: 200px; /* o el tamaño que quieras */
 }
 
 .pharmacyuser-menu.loading {
@@ -254,4 +257,90 @@ button.btn-success:hover {
 
 .ph-admin__msg--error {
   color: #c53030;
+}
+
+.selectable-card {
+  cursor: pointer;
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.selectable-card:hover {
+  background-color: #e9ecef;
+}
+
+.selectable-card.selected {
+  border-color: #d8b7af;
+  box-shadow: 0 0 5px rgba(230, 144, 195, 0.804);
+}
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Asegura una sola columna de tarjetas en el modal */
+.modal-body .selectable-card {
+  width: 100%;
+  margin: 10px 0;
+  flex-direction: column;
+}
+.modal-body form {
+  display: flex;
+  flex-direction: column;
+}
+
+.med-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 1rem; /* Espacio antes del botón */
+}
+
+.validate-button-rosa {
+  background-color: #d8b7af !important;
+  color: black !important;
+  border: none !important;
+  border-radius: 5px !important;
+  padding: 10px 14px !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+}
+
+.validate-button-rosa:hover {
+  transform: scale(1.02) !important;
+  font-weight: 650 !important;
+}
+.brand-name {
+  margin-top: 5px;
+  font-weight: bold;
+  font-size: 16px;
+}
+.success-message,
+.error-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  z-index: 9999;
+}
+
+.success-message {
+  background-color: #d1e7dd;
+  color: #0f5132;
+  border: 1px solid #badbcc;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #842029;
+  border: 1px solid #f5c2c7;
 }

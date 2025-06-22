@@ -475,22 +475,6 @@ textarea {
   flex-wrap: wrap;
 }
 
-/* Style for Dashboard buttons */
-.dashboard-button {
-  background-color: #d8b7af;
-  color: black;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 15px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: text-decoration 0.2s ease-in-out;
-}
-
-.dashboard-button:hover {
-  text-decoration: underline;
-}
-
 .top-right-buttons {
   display: flex;
   justify-content: flex-end;
@@ -633,9 +617,8 @@ textarea {
 }
 
 .button_t:hover {
-  background-color: #c6a6a0;
-  text-decoration: underline;
   transform: translateX(-1px);
+  font-weight: bolder;
 }
 
 /* Responsive */
@@ -776,7 +759,7 @@ h4 {
   right: 20px;
   display: flex;
   gap: 10px;
-  z-index: 1000; /* Asegura que estén por encima de otros elementos */
+  z-index: 1000;
 }
 
 .dashboard-button {
@@ -791,10 +774,9 @@ h4 {
 }
 
 .dashboard-button:hover {
-  text-decoration: underline;
-  transform: translateX(-1px);
+  transform: scale(1.05);
 }
-/* Contenedor fijo para el encabezado y los botones */
+
 .fixed-header {
   position: fixed;
   top: 0;
@@ -871,8 +853,8 @@ h4 {
 }
 
 .dashboard-button:hover {
-  text-decoration: underline;
-  transform: translateX(-1px);
+  transform: scale(1.03);
+  font-weight: 600;
 }
 
 .login-success {
@@ -1053,4 +1035,55 @@ h4 {
 
 .dashboard-button-large:hover {
   background-color: #94abaf;
+}
+
+.custom-loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  /*-webkit-backdrop-filter: blur(5px);*/
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.custom-loader-content {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  color: white;
+}
+
+.custom-logo {
+  width: 100px;
+  margin-bottom: 20px;
+}
+
+.spinner {
+  margin: 0 auto 12px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #00aaff;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  animation: spin 1s linear infinite;
+}
+
+.custom-message {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

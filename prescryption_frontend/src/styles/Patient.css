@@ -9,13 +9,13 @@
   cursor: pointer;
   margin-top: 15px;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 600;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .button_t:hover {
-  background-color: #e3a38f;
   transform: scale(1.02);
+  font-weight: 700;
 }
 
 .status-valid {
@@ -44,13 +44,13 @@
 }
 
 .success-alert {
-  background-color: #d4edda;
   color: #155724;
   padding: 10px;
   border-radius: 5px;
   margin-bottom: 15px;
   text-align: center;
   font-weight: bold;
+  font-size: larger;
 }
 
 .error-alert {
@@ -72,7 +72,6 @@
 
 .farmacia-sugerida:hover {
   text-decoration: underline;
-  background-color: #f1f1f1; /* opcional */
 }
 .input-button-row {
   display: flex !important;
@@ -108,9 +107,8 @@
 }
 
 .button-enviar-modal:hover {
-  background-color: #90b0b6 !important;
-  text-decoration: underline !important;
   transform: scale(1.03);
+  font-weight: 700;
 }
 .status-pending {
   color: orange;
@@ -133,4 +131,19 @@ input[type="number"]::-webkit-outer-spin-button {
 /* Firefox */
 input[type="number"] {
   appearance: textfield; /* estándar */
+}
+
+.filtros-container select {
+  cursor: pointer;
+  padding-left: 10px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='gray' d='M0 0l2 2 2-2z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px;
+}
+
+.dashboard-button:hover {
+  transform: scale(1.03);
+  font-weight: 600;
 }

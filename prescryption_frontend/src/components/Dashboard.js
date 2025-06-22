@@ -1,23 +1,64 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Doctor from "./Doctor";
 import Patient from "./Patient";
 import PharmacyUser from "./PharmacyUser";
 import PharmacyAdmin from "./PharmacyAdmin";
 import Insurance from "./Insurance";
+import api from "../AxiosConfig";
 import "./styles.css";
 
 function Dashboard() {
   const { userType } = useParams();
   const navigate = useNavigate();
+  const [nombre, setNombre] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       alert("No estás autenticado. Por favor, inicia sesión.");
       navigate("/");
+      return;
     }
-  }, [navigate]);
+    const fetchNombre = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        let url;
+
+        if (userType === "pharmacy") {
+          url = "http://localhost:3001/api/pharmacies/pharmacy_profile";
+        } else {
+          const routeMap = {
+            patient: "patients",
+            doctor: "doctors",
+            pharmacyUser: "pharmacy-users",
+            insurance: "insurances",
+            admin: "admins",
+          };
+          const route = routeMap[userType];
+          url = `http://localhost:3001/api/${route}/profile`;
+        }
+
+        const response = await api.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const { name, pharmacy_name, insurance_name } = response.data;
+
+        if (userType === "pharmacy") {
+          setNombre(pharmacy_name);
+        } else if (userType === "insurance") {
+          setNombre(insurance_name);
+        } else {
+          setNombre(name);
+        }
+      } catch (err) {
+        console.error("Error al obtener perfil:", err);
+      }
+    };
+
+    fetchNombre();
+  }, [navigate, userType]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -109,23 +150,7 @@ function Dashboard() {
     <div>
       <div className="fixed-header">
         <div className="header-text">
-          <h2>Menú de {userType}</h2>
-          <p>
-            Bienvenido al menú del{" "}
-            {userType === "patient"
-              ? "paciente"
-              : userType === "doctor"
-              ? "médico"
-              : userType === "pharmacyUser"
-              ? "farmacéutico"
-              : userType === "pharmacy"
-              ? "la farmacia"
-              : userType === "insurance"
-              ? "obra social"
-              : userType === "admin"
-              ? "administrador"
-              : userType}
-          </p>
+          <h2>¡Hola, {nombre || userType}!</h2>
         </div>
 
         <div className="top-right-buttons">

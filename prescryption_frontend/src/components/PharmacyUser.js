@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import api from "../AxiosConfig";
+import Loader from "./Loader";
 import { Accordion, Modal, Button, Form, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import html2pdf from "html2pdf.js";
@@ -26,6 +27,8 @@ const PharmacyUser = () => {
   const [selectedPrescription, setSelectedPrescription] = useState(null);
   const [medOptions, setMedOptions] = useState([]);
   const [selectedMedicationId, setSelectedMedicationId] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const fetchPrescriptions = async () => {
     try {
@@ -79,10 +82,10 @@ const PharmacyUser = () => {
     }
   };
 
-  const handleMedicationSelection = (medId) => {
+  /*const handleMedicationSelection = (medId) => {
     console.log("Medicamento seleccionado (ID):", medId);
     setSelectedMedicationId(medId);
-  };
+  };*/
 
   const handleValidatePrescription = async (e) => {
     e.preventDefault();
@@ -106,8 +109,9 @@ const PharmacyUser = () => {
         }
       );
 
-      alert("✅ Receta validada exitosamente.");
       setFinalPrices(response.data.finalPrices);
+      setSuccessMessage("✅ Receta validada exitosamente.");
+      setTimeout(() => setSuccessMessage(""), 3000); // Se borra sola
     } catch (error) {
       console.error("❌ Error validando receta:", error);
       alert("❌ Error al validar la receta.");
@@ -118,15 +122,30 @@ const PharmacyUser = () => {
     if (!selectedPrescription || !finalPrices) return;
 
     try {
+      // Mostrar info completa en el frontend
+      const detailedMedications = finalPrices.map(
+        ({ medication, finalPrice }) => ({
+          name: medication.genericName,
+          lab: medication.labName,
+          presentation: medication.presentation,
+          price: medication.price,
+          finalPrice,
+        })
+      );
+
+      // Enviar solo lo necesario al backend
+      const medsToSend = finalPrices.map((item) => item.medication);
+      const totalAmount = finalPrices.reduce(
+        (acc, item) => acc + item.finalPrice,
+        0
+      );
+
       const response = await api.post(
         "http://localhost:3001/api/pharmacy-users/process_purchase",
         {
           prescriptionId: selectedPrescription.prescriptionId,
-          selectedMedications: finalPrices.map((item) => item.medication), // usamos los meds validados
-          totalAmount: finalPrices.reduce(
-            (acc, item) => acc + item.finalPrice,
-            0
-          ),
+          selectedMedications: medsToSend,
+          totalAmount,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -134,11 +153,13 @@ const PharmacyUser = () => {
       );
 
       alert("🧾 Receta usada y factura emitida correctamente.");
+      setInvoiceVisible(true); // ✅ muestra la factura
       setShowValidationModal(false);
       setSelectedPrescription(null);
       setSelectedMedicationId("");
-      setFinalPrices(null);
-      fetchPrescriptions(); // recargar lista
+      // Guardar los meds detallados para mostrar en PDF
+      setFinalPrices(detailedMedications);
+      fetchPrescriptions();
     } catch (error) {
       console.error("❌ Error procesando la compra:", error);
       alert("❌ Error al usar y facturar la receta.");
@@ -180,11 +201,16 @@ const PharmacyUser = () => {
   return (
     <>
       <div className={`pharmacyuser-menu ${loading ? "loading" : ""}`}>
+        {successMessage && (
+          <div className="success-message">{successMessage}</div>
+        )}
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
+
         <h3 className="Title">Recetas Asignadas</h3>
 
         <div className="filtros-container">
           <label>
-            Buscar por paciente:
+            Buscar:
             <input
               type="text"
               value={searchTerm}
@@ -194,6 +220,7 @@ const PharmacyUser = () => {
                   ? "Ingrese NID del paciente"
                   : "Ingrese nombre de la obra social"
               }
+              className="input-nid"
             />
           </label>
 
@@ -202,6 +229,7 @@ const PharmacyUser = () => {
             <select
               value={searchType}
               onChange={(e) => setSearchType(e.target.value)}
+              className="input-nid"
             >
               <option value="nid">NID del Paciente</option>
               <option value="insurance">Obra Social</option>
@@ -313,6 +341,7 @@ const PharmacyUser = () => {
         <Modal
           show={showValidationModal}
           onHide={() => setShowValidationModal(false)}
+          centered
         >
           <Modal.Header closeButton>
             <Modal.Title>Seleccionar Medicamento</Modal.Title>
@@ -322,29 +351,56 @@ const PharmacyUser = () => {
               <p>No se encontraron medicamentos relacionados.</p>
             ) : (
               <Form onSubmit={handleValidatePrescription}>
-                {medOptions.map((med, index) => {
-                  console.log("Renderizando medicamento:", med); // <-- NUEVO
+                <div className="med-card-container">
+                  {medOptions.map((med, index) => {
+                    const medIdString = String(med._id || med.id);
+                    const isSelected = selectedMedicationId === medIdString;
 
-                  const medIdString = String(med._id || med.id); // aseguramos fallback
-                  console.log("ID procesado:", medIdString);
+                    return (
+                      <div
+                        key={`${medIdString}-${index}`}
+                        className={`med-card selectable-card ${
+                          isSelected ? "selected" : ""
+                        }`}
+                        onClick={() => {
+                          setSelectedMedicationId(medIdString);
+                        }}
+                      >
+                        <Form.Check
+                          type="radio"
+                          name="medication"
+                          value={medIdString}
+                          checked={isSelected}
+                          readOnly
+                          style={{ display: "none" }}
+                        />
+                        <p className="brand-name">{med.brandName}</p>
+                        <p>
+                          <strong>Genérico:</strong> {med.genericName}
+                        </p>
+                        <p>
+                          <strong>Componentes:</strong>{" "}
+                          {med.activeComponentsList?.join(", ") ||
+                            "No especificados"}
+                        </p>
+                        <p>
+                          <strong>Precio:</strong> ${med.price}
+                        </p>
+                        <p>
+                          <strong>Precio PAMI:</strong>{" "}
+                          {med.pamiPrice > 0
+                            ? `$${med.pamiPrice}`
+                            : "No especificado"}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
 
-                  return (
-                    <Form.Check
-                      key={`${medIdString}-${index}`}
-                      type="radio"
-                      label={`${med.genericName} - $${med.price}`}
-                      name="medication"
-                      value={medIdString}
-                      checked={selectedMedicationId === medIdString}
-                      onChange={(e) =>
-                        handleMedicationSelection(e.target.value)
-                      }
-                    />
-                  );
-                })}
-                <Button type="submit" className="mt-3">
+                <Button type="submit" className="validate-button-rosa">
                   Validar con Obra Social
                 </Button>
+
                 {finalPrices && (
                   <Button
                     className="mt-2"
@@ -389,12 +445,7 @@ const PharmacyUser = () => {
           </div>
         )}
       </div>
-      {loading && (
-        <div className="loading-container">
-          <Spinner animation="border" />
-          <p>Cargando opciones de medicamentos...</p>
-        </div>
-      )}
+      {loading && <Loader mensaje="Buscando opciones disponibles..." />}
     </>
   );
 };

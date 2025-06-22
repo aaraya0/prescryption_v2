@@ -342,12 +342,11 @@ const Patient = () => {
           setSelectedPharmacyName("");
           setMatchedPharmacies([]);
         }}
+        centered
       >
         {" "}
         <Modal.Header closeButton>
-          <Modal.Title>
-            Transferir Receta ID: {selectedPrescriptionId}
-          </Modal.Title>
+          <Modal.Title>Transferir Receta</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
@@ -360,6 +359,13 @@ const Patient = () => {
                   onChange={(e) => {
                     const input = e.target.value.toLowerCase();
                     setPharmacyNid(input);
+
+                    if (input.trim() === "") {
+                      setSelectedPharmacyName("");
+                      setMatchedPharmacies([]);
+                      return;
+                    }
+
                     const matches = availablePharmacies.filter(
                       (ph) =>
                         ph.nid.toLowerCase().includes(input) ||
@@ -380,22 +386,23 @@ const Patient = () => {
                   Farmacia encontrada: <strong>{selectedPharmacyName}</strong>
                 </Form.Text>
               )}
-
-              <ul className="text-success">
-                {matchedPharmacies.map((ph, i) => (
-                  <li
-                    key={i}
-                    className="farmacia-sugerida"
-                    onClick={() => {
-                      setPharmacyNid(ph.nid);
-                      setSelectedPharmacyName(ph.pharmacy_name);
-                      setMatchedPharmacies([]);
-                    }}
-                  >
-                    <strong>{ph.pharmacy_name}</strong> ({ph.nid})
-                  </li>
-                ))}
-              </ul>
+              {pharmacyNid.trim() !== "" && matchedPharmacies.length > 0 && (
+                <ul className="text-success">
+                  {matchedPharmacies.map((ph, i) => (
+                    <li
+                      key={i}
+                      className="farmacia-sugerida"
+                      onClick={() => {
+                        setPharmacyNid(ph.nid);
+                        setSelectedPharmacyName(ph.pharmacy_name);
+                        setMatchedPharmacies([]);
+                      }}
+                    >
+                      <strong>{ph.pharmacy_name}</strong> ({ph.nid})
+                    </li>
+                  ))}
+                </ul>
+              )}
             </Form.Group>
           </Form>
         </Modal.Body>

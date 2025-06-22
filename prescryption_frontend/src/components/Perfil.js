@@ -221,7 +221,7 @@ function Perfil() {
 
   return (
     <div className="perfil-card-aesthetic">
-      <h2 className="perfil-title">Perfil de {userType}</h2>
+      <h2 className="perfil-title">Información personal</h2>
       <div className="perfil-content">{renderFields()}</div>
     </div>
   );
