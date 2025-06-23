@@ -241,85 +241,38 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
     }
 };
 
-
 exports.getMedicationOptions = async (req, res) => {
     try {
         const { prescriptionId } = req.params;
-
-        console.log(`🔍 Searching medication options for prescription ID: ${prescriptionId}`);
 
         if (!prescriptionId) {
             return res.status(400).json({ message: "❌ Prescription ID is required." });
         }
 
-        console.log("🛠️ Fetching prescription from blockchain...");
-
-        // 📌 Obtener la receta desde la blockchain
         const prescription = await blockchainService.getPrescriptionById(prescriptionId);
 
         if (!prescription) {
             return res.status(404).json({ message: "❌ Prescription not found in blockchain." });
         }
 
-        console.log(`✅ Prescription retrieved:`, prescription);
-
-        // 📌 Extraer los nombres de los medicamentos y **filtrar los que sean "N/A"**
         const medications = [prescription.meds.med1, prescription.meds.med2]
-            .filter(med => med && med !== "N/A"); // ❌ Evita buscar "N/A"
+            .filter(med => med && med !== "N/A");
 
         if (medications.length === 0) {
             return res.status(400).json({ message: "⚠️ No valid medication found in the prescription." });
         }
 
-        console.log(`🔍 Fetching medication options for: ${medications}`);
+        const results = await Promise.all(
+            medications.map(name => medicationScraper.scrapeMedicationData(name))
+        );
 
-        // 📌 Buscar en caché primero
-        const cachedMedications = await MedicationCache.find({
-            genericName: { $in: medications }
-        });
+        const merged = results.flat();
 
-        // 📌 Verificar si los datos en caché están actualizados
-        const outdated = cachedMedications.some(med => {
-            return (Date.now() - med.updatedAt) / (1000 * 60 * 60 * 24) > 7; // Más de 7 días
-        });
-
-        if (cachedMedications.length === medications.length && !outdated) {
-            console.log("✅ Using cached data.");
-            return res.json({ fromCache: true, results: cachedMedications });
-        }
-
-        console.log("⚠️ Cache is outdated or missing data, fetching new data...");
-
-        // 📌 Realizar scraping solo de medicamentos válidos
-        const scrapedResults = [];
-        for (const drugName of medications) {
-            const results = await medicationScraper.scrapeMedicationData(drugName);
-            scrapedResults.push(...results);
-        }
-
-        if (scrapedResults.length === 0) {
+        if (merged.length === 0) {
             return res.status(404).json({ message: "⚠️ No medication options found." });
         }
 
-        // 📌 Limitar resultados a 30 medicamentos
-        const limitedResults = scrapedResults.slice(0, 30);
-
-        // 📌 Guardar en caché los nuevos datos
-        await MedicationCache.deleteMany({ genericName: { $in: medications } }); // Limpiar caché previa
-        await MedicationCache.insertMany(limitedResults);
-        
-        // Después de insertar medicamentos con insertMany, los objetos que tenemos (limitedResults)
-        // no tienen garantizado el campo _id generado por MongoDB. Para asegurarnos de devolver objetos con _id válido
-        // (necesario para que el frontend pueda usarlos), hacemos una nueva búsqueda desde la base de datos.
-
-        const savedMeds = await MedicationCache.find({
-            genericName: { $in: medications }
-        });
-
-        return res.json({ fromCache: false, results: savedMeds });
-
-        
-        //res.json({ fromCache: false, results: limitedResults });
+        return res.json({ fromCache: false, results: merged });
 
     } catch (error) {
         console.error("❌ Error fetching medication options:", error);
