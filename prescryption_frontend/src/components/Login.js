@@ -109,38 +109,44 @@ function Login() {
   return (
     <div className="formLogin">
       <h2 className="loginTitle">{displayUserType}</h2>
-
-      <p className="inputTitle">DNI</p>
-      <input
-        className="loginInput"
-        type="text"
-        placeholder="DNI (sin puntos)"
-        value={nid}
-        onChange={(e) => setNid(e.target.value)}
-      />
-
-      <p className="inputTitle">Contraseña</p>
-
-      <div className="password-container">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleLogin();
+        }}
+      >
+        <p className="inputTitle">DNI</p>
         <input
-          className="loginInput password-field"
-          type={showPassword ? "text" : "password"}
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          className="loginInput"
+          type="text"
+          placeholder="DNI (sin puntos)"
+          value={nid}
+          onChange={(e) => setNid(e.target.value)}
         />
-        <span
-          className="eye-icon"
-          onClick={() => setShowPassword(!showPassword)}
-          title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-        >
-          {showPassword ? <FiEyeOff /> : <FiEye />}
-        </span>
-      </div>
 
-      <button className="loginButton" onClick={handleLogin}>
-        Ingresar
-      </button>
+        <p className="inputTitle">Contraseña</p>
+
+        <div className="password-container">
+          <input
+            className="loginInput password-field"
+            type={showPassword ? "text" : "password"}
+            placeholder="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <span
+            className="eye-icon"
+            onClick={() => setShowPassword(!showPassword)}
+            title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          >
+            {showPassword ? <FiEyeOff /> : <FiEye />}
+          </span>
+        </div>
+
+        <button className="loginButton" type="submit" onClick={handleLogin}>
+          Ingresar
+        </button>
+      </form>
       <button className="RecordarButton">Recordar Contraseña</button>
 
       {(userType === "patient" ||

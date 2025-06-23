@@ -277,6 +277,7 @@ button.btn-success:hover {
   border-color: #d8b7af;
   box-shadow: 0 0 5px rgba(230, 144, 195, 0.804);
 }
+
 .modal-body {
   max-height: 70vh;
   overflow-y: auto;
