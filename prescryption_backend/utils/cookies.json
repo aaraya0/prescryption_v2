@@ -1,0 +1,42 @@
+[
+  {
+    "name": "JSESSIONID",
+    "value": "A24C073877967931821D5F376F56EEC3.jvm1",
+    "domain": "sisa.msal.gov.ar",
+    "path": "/sisa",
+    "httpOnly": true,
+    "secure": true
+  },
+  {
+    "name": "a28d40bfc02d38069ca0e0818f0ce5e3",
+    "value": "7e54340d5ede6d1701e8419b696cea05",
+    "domain": "sisa.msal.gov.ar",
+    "path": "/",
+    "httpOnly": true,
+    "secure": true
+  },
+  {
+    "name": "__utma",
+    "value": "7153712.495946437.1716841328.1748180286.1750520921.17",
+    "domain": "sisa.msal.gov.ar",
+    "path": "/"
+  },
+    {
+    "name": "__utmc",
+    "value": "7153712",
+    "domain": "sisa.msal.gov.ar",
+    "path": "/"
+  },
+    {
+    "name": "__utmz",
+    "value": "7153712.1718832208.3.3.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided)",
+    "domain": "sisa.msal.gov.ar",
+    "path": "/"
+    },
+    {
+    "name": "_cfuvid",
+    "value": "Vnsbt91SB100vlZZdztRR51h3CpZI0aqnDKcIjqn3SE-1750520920198-0.0.1.1-604800000",
+    "domain": ".highcharts.com",
+    "path": "/"
+    }
+]

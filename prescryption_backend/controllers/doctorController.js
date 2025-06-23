@@ -5,7 +5,7 @@ const blockchainService = require('../services/blockchainService');
 const { Web3 } = require('web3');
 const { encrypt } = require('../utils/encryption');
 const fundNewAccount = require('../utils/fundAccount');
-
+const validateDoctorCordoba = require('../utils/validateDoctor_cba');
 // ✅ Configuración de Web3
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 
@@ -21,18 +21,39 @@ exports.registerDoctor = async (req, res) => {
             return res.status(400).send('❌ Missing required fields');
         }
 
-        //✅ Validar mediante el servicio de verificación
-        const verifyResponse = await axios.post('http://localhost:5000/verify', {
-            nid,
-            license,
-            user_type: "doctor"
-        }, {
-            headers: { Authorization: "Bearer securetoken123" }
-        });
 
-        if (!verifyResponse.data.valid) {
-            return res.status(400).send('❌ Invalid license or NID');
+        // ✅ Validación híbrida
+        let isValid = false;
+
+        // Validar contra el Colegio Médico de Córdoba (si aplica)
+        const cordobaResult = await validateDoctorCordoba(nid, license);
+        if (cordobaResult.valid) {
+            console.log("✅ Validación exitosa vía Colegio Médico de Córdoba.");
+            isValid = true;
+        } else {
+            console.warn("⚠️ No se pudo validar en Córdoba. Intentando fallback al mock...");
         }
+
+        // Fallback al mock
+        if (!isValid) {
+            const verifyResponse = await axios.post('http://localhost:5000/verify', {
+                nid,
+                license,
+                user_type: "doctor"
+            }, {
+                headers: { Authorization: "Bearer securetoken123" }
+            });
+
+            if (verifyResponse.data.valid) {
+                console.log("✅ Validación exitosa vía servicio mock.");
+                isValid = true;
+            }
+        }
+
+        if (!isValid) {
+            return res.status(400).send('❌ No se pudo validar la matrícula del médico');
+        }
+
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const account = web3.eth.accounts.create();
