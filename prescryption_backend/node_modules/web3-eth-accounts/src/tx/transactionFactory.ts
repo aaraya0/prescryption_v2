@@ -36,7 +36,7 @@ const extraTxTypes: Map<Numbers, typeof BaseTransaction<unknown>> = new Map();
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class TransactionFactory {
 	// It is not possible to instantiate a TransactionFactory object.
-	// eslint-disable-next-line @typescript-eslint/no-empty-function, no-useless-constructor
+	// eslint-disable-next-line no-useless-constructor, @typescript-eslint/no-empty-function
 	private constructor() {}
 
 	public static typeToInt(txType: Numbers) {
@@ -137,7 +137,7 @@ export class TransactionFactory {
 	 */
 	public static fromBlockBodyData(data: Uint8Array | Uint8Array[], txOptions: TxOptions = {}) {
 		if (isUint8Array(data)) {
-			return this.fromSerializedData(data , txOptions);
+			return this.fromSerializedData(data, txOptions);
 		}
 		if (Array.isArray(data)) {
 			// It is a legacy transaction

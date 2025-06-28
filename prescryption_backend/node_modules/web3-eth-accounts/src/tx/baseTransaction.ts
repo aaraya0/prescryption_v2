@@ -307,7 +307,7 @@ export abstract class BaseTransaction<TransactionObject> {
 			// Main signature verification is done in `getSenderPublicKey()`
 			const publicKey = this.getSenderPublicKey();
 			return unpadUint8Array(publicKey).length !== 0;
-		} catch (e: any) {
+		} catch (e) {
 			return false;
 		}
 	}
@@ -510,6 +510,7 @@ export abstract class BaseTransaction<TransactionObject> {
 		}
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protected static _validateNotArray(values: { [key: string]: any }) {
 		const txDataKeys = [
 			'nonce',
@@ -556,19 +557,19 @@ export abstract class BaseTransaction<TransactionObject> {
 		let hash = '';
 		try {
 			hash = this.isSigned() ? bytesToHex(this.hash()) : 'not available (unsigned)';
-		} catch (e: any) {
+		} catch (e) {
 			hash = 'error';
 		}
 		let isSigned = '';
 		try {
 			isSigned = this.isSigned().toString();
-		} catch (e: any) {
+		} catch (e) {
 			hash = 'error';
 		}
 		let hf = '';
 		try {
 			hf = this.common.hardfork();
-		} catch (e: any) {
+		} catch (e) {
 			hf = 'error';
 		}
 
@@ -578,7 +579,11 @@ export abstract class BaseTransaction<TransactionObject> {
 		return postfix;
 	}
 	// eslint-disable-next-line class-methods-use-this
-	private _ecsign(msgHash: Uint8Array, privateKey: Uint8Array, chainId?: bigint): ECDSASignature {
+	protected _ecsign(
+		msgHash: Uint8Array,
+		privateKey: Uint8Array,
+		chainId?: bigint,
+	): ECDSASignature {
 		const signature = secp256k1.sign(msgHash, privateKey);
 		const signatureBytes = signature.toCompactRawBytes();
 
@@ -599,15 +604,16 @@ export abstract class BaseTransaction<TransactionObject> {
 		serialized: Uint8Array,
 		// @ts-expect-error unused variable
 		opts: TxOptions = {},
-		// eslint-disable-next-line @typescript-eslint/no-empty-function
+		// eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-explicit-any
 	): any {}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	public static fromTxData(
 		// @ts-expect-error unused variable
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		txData: any,
 		// @ts-expect-error unused variable
 		opts: TxOptions = {},
-		// eslint-disable-next-line @typescript-eslint/no-empty-function
+		// eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-explicit-any
 	): any {}
 }

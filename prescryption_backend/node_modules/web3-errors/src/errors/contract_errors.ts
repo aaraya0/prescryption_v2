@@ -150,6 +150,7 @@ export class Eip838ExecutionError extends Web3ContractError {
 		super(error.message || 'Error');
 
 		this.name = ('name' in error && error.name) || this.constructor.name;
+		// eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
 		this.stack = ('stack' in error && error.stack) || undefined;
 		this.code = error.code;
 
@@ -159,7 +160,7 @@ export class Eip838ExecutionError extends Web3ContractError {
 		//	 error.data, error.data.data or error.data.originalError.data (https://github.com/web3/web3.js/issues/4454#issuecomment-1485953455)
 		if (typeof error.data === 'object') {
 			let originalError: { data: string };
-			if ('originalError' in error.data) {
+			if (error.data && 'originalError' in error.data) {
 				originalError = error.data.originalError;
 			} else {
 				// Ganache has no `originalError` sub-object unlike others

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./prescryption_backend
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./prescryption_backend/.env
+    volumes:
+      - ./prescryption_backend:/app
+      - /app/node_modules
+      - ./prescryption_solidity:/prescryption_solidity
+
+
+  frontend:
+    build: ./prescryption_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./prescryption_frontend:/app
+    
+
+  invoice_service:
+    build: ./prescryption_microservices/invoice_service
+    command: python invoice_service.py
+
+  verify_insurance:
+    build: ./prescryption_microservices/verify_insurance
+    command: python verify_insurance.py
+
+  verify_license:
+    build: ./prescryption_microservices/verify_license
+    command: python verify_license.py
+    volumes:
+      - ./prescryption_microservices/verify_license/professionals_data.json:/app/professionals_data.json
+
+  verify_prescription:
+    build: ./prescryption_microservices/verify_prescription
+    command: python verify_prescription.py
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

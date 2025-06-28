@@ -45,6 +45,7 @@ import {
 import { ethRpcMethods } from 'web3-rpc-methods';
 
 import {
+	InternalTransaction,
 	SendSignedTransactionEvents,
 	SendTransactionEvents,
 	SendTransactionOptions,
@@ -123,13 +124,18 @@ export class SendTxHelper<
 	public async checkRevertBeforeSending(tx: TransactionCall) {
 		if (this.options.checkRevertBeforeSending !== false) {
 			let formatTx = tx;
-			if (isNullish(tx.data) && isNullish(tx.input) && isNullish(tx.gas)) { // eth.call runs into error if data isnt filled and gas is not defined, its a simple transaction so we fill it with 21000
+			if (isNullish(tx.data) && isNullish(tx.input) && isNullish(tx.gas)) {
+				// eth.call runs into error if data isnt filled and gas is not defined, its a simple transaction so we fill it with 21000
 				formatTx = {
 					...tx,
-					gas: 21000
-				}
+					gas: 21000,
+				};
 			}
-			const reason = await getRevertReason(this.web3Context, formatTx, this.options.contractAbi);
+			const reason = await getRevertReason(
+				this.web3Context,
+				formatTx,
+				this.options.contractAbi,
+			);
 			if (reason !== undefined) {
 				throw await getTransactionError<ReturnFormat>(
 					this.web3Context,
@@ -145,7 +151,12 @@ export class SendTxHelper<
 
 	public emitSending(tx: TxType | HexString) {
 		if (this.promiEvent.listenerCount('sending') > 0) {
-			this.promiEvent.emit('sending', tx);
+			this.promiEvent.emit(
+				'sending',
+				tx as
+					| SendSignedTransactionEvents<ReturnFormat>['sending']
+					| SendTransactionEvents<ReturnFormat>['sending'],
+			);
 		}
 	}
 
@@ -158,6 +169,7 @@ export class SendTxHelper<
 	}): Promise<TxType> {
 		let result = transactionFormatted;
 		if (
+			!this.web3Context.config.ignoreGasPricing &&
 			!this.options?.ignoreGasPricing &&
 			isNullish((transactionFormatted as Transaction).gasPrice) &&
 			(isNullish((transaction as Transaction).maxPriorityFeePerGas) ||
@@ -168,7 +180,7 @@ export class SendTxHelper<
 				// @TODO gasPrice, maxPriorityFeePerGas, maxFeePerGas
 				// should not be included if undefined, but currently are
 				...(await getTransactionGasPricing(
-					transactionFormatted,
+					transactionFormatted as InternalTransaction,
 					this.web3Context,
 					ETH_DATA_FORMAT,
 				)),
@@ -186,7 +198,7 @@ export class SendTxHelper<
 		tx: TxType;
 	}) {
 		if (wallet) {
-			const signedTransaction = await wallet.signTransaction(tx);
+			const signedTransaction = await wallet.signTransaction(tx as Transaction);
 
 			return trySendTransaction(
 				this.web3Context,
@@ -210,7 +222,12 @@ export class SendTxHelper<
 
 	public emitSent(tx: TxType | HexString) {
 		if (this.promiEvent.listenerCount('sent') > 0) {
-			this.promiEvent.emit('sent', tx);
+			this.promiEvent.emit(
+				'sent',
+				tx as
+					| SendSignedTransactionEvents<ReturnFormat>['sent']
+					| SendTransactionEvents<ReturnFormat>['sent'],
+			);
 		}
 	}
 	public emitTransactionHash(hash: string & Uint8Array) {
