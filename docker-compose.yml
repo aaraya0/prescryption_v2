@@ -24,20 +24,27 @@ services:
   invoice_service:
     build: ./prescryption_microservices/invoice_service
     command: python invoice_service.py
+    ports:
+      - "5005:5005"   
 
   verify_insurance:
     build: ./prescryption_microservices/verify_insurance
     command: python verify_insurance.py
-
+    ports:
+      - "5003:5003"
   verify_license:
     build: ./prescryption_microservices/verify_license
     command: python verify_license.py
+    ports:
+      - "5000:5000"
     volumes:
       - ./prescryption_microservices/verify_license/professionals_data.json:/app/professionals_data.json
 
   verify_prescription:
     build: ./prescryption_microservices/verify_prescription
     command: python verify_prescription.py
+    ports:
+      - "5004:5004"
 
   mongo:
     image: mongo:6

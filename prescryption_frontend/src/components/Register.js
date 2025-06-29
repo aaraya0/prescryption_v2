@@ -31,7 +31,7 @@ function Register() {
     }
 
     try {
-      const response = await api.post("http://localhost:5003/get_affiliation", {
+      const response = await api.post("http://verify_service:5003/get_affiliation", {
         nid,
         insurance_name,
       });

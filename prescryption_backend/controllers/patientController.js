@@ -27,7 +27,7 @@ exports.registerPatient = async (req, res) => {
     if (insurance_name && insurance_name !== "PARTICULAR") {
         try {
             // 🔍 Consultar la API de la obra social para obtener afiliación
-            const response = await axios.post('http://localhost:5003/get_affiliation', { nid, insurance_name });
+            const response = await axios.post('http://verify_insurance:5003/get_affiliation', { nid, insurance_name });
 
             if (response.data.status === "not_found") {
                 return res.status(400).json({

@@ -36,7 +36,7 @@ exports.registerDoctor = async (req, res) => {
 
         // Fallback al mock
         if (!isValid) {
-            const verifyResponse = await axios.post('http://localhost:5000/verify', {
+            const verifyResponse = await axios.post('http://verify_license:5000/verify', {
                 nid,
                 license,
                 user_type: "doctor"
