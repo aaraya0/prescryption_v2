@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import api from "../AxiosConfig";
 import { useNavigate } from "react-router-dom";
+import MedicationAutocomplete from "./MedicationAutocomplete";
 import "./styles.css";
 
 function EmitirReceta() {
@@ -11,14 +12,14 @@ function EmitirReceta() {
     affiliateNum: "",
     insuranceName: "",
     insurancePlan: "",
-    med1: "",
     quantity1: "",
-    med2: "",
     quantity2: "",
     diagnosis: "",
     observations: "",
   });
 
+  const [med1, setMed1] = useState(null);
+  const [med2, setMed2] = useState(null);
   const [message, setMessage] = useState({ text: "", type: "" });
 
   const navigate = useNavigate();
@@ -47,7 +48,6 @@ function EmitirReceta() {
       );
 
       const patientData = response.data.profile;
-      //console.log("Datos del paciente encontrados:", patientData);
 
       setFormData((prev) => ({
         ...prev,
@@ -78,9 +78,10 @@ function EmitirReceta() {
       affiliateNum,
       insuranceName,
       insurancePlan,
-      med1,
       quantity1,
+      quantity2,
       diagnosis,
+      observations,
     } = formData;
 
     if (
@@ -101,7 +102,11 @@ function EmitirReceta() {
     try {
       await api.post(
         "http://localhost:3001/api/prescriptions/issue",
-        formData,
+        {
+          ...formData,
+          med1,
+          med2: med2 || null,
+        },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -145,15 +150,7 @@ function EmitirReceta() {
                   title="Buscar paciente"
                   type="button"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="20"
-                    width="20"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z" />
-                  </svg>
+                  🔍
                 </button>
               </div>
             </div>
@@ -213,36 +210,25 @@ function EmitirReceta() {
               />
             </div>
           </div>
+
           <div className="receipt_right">
-            <div className="form-group">
-              <label>Rp:</label>
-              <input
-                type="text"
-                name="med1"
-                placeholder="Ingresar medicamento 1"
-                onChange={handleChange}
-                required
-              />
-              <input
-                type="number"
-                name="quantity1"
-                placeholder="Ingresar Cantidad"
-                onChange={handleChange}
-                required
-              />
-              <input
-                type="text"
-                name="med2"
-                placeholder="Ingresar medicamento 2"
-                onChange={handleChange}
-              />
-              <input
-                type="number"
-                name="quantity2"
-                placeholder="Ingresar Cantidad"
-                onChange={handleChange}
-              />
-            </div>
+            <MedicationAutocomplete label="Medicamento 1" onMedicationSelected={setMed1} />
+            <input
+              type="number"
+              name="quantity1"
+              placeholder="Cantidad"
+              onChange={handleChange}
+              required
+            />
+
+            <MedicationAutocomplete label="Medicamento 2 (opcional)" onMedicationSelected={setMed2} />
+            <input
+              type="number"
+              name="quantity2"
+              placeholder="Cantidad"
+              onChange={handleChange}
+            />
+
             <div className="form-group">
               <label>Diagnóstico</label>
               <textarea
@@ -273,9 +259,7 @@ function EmitirReceta() {
 
       {message.text && (
         <>
-          {message.type === "success" && (
-            <div className="notification-backdrop"></div>
-          )}
+          {message.type === "success" && <div className="notification-backdrop"></div>}
           <Notification message={message.text} type={message.type} />
         </>
       )}
