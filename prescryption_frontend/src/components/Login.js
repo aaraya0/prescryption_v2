@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../AxiosConfig";
+import Loader from "./components/Loader";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import "./styles.css";
 
@@ -10,6 +11,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [userType, setUserType] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,6 +50,7 @@ function Login() {
   const displayUserType = userTypeMap[userType] || "Iniciar Sesión";
 
   const handleLogin = async () => {
+    setIsLoading(true);
     try {
       if (userType === "admin") {
         const response = await api.post(
@@ -59,6 +62,7 @@ function Login() {
         localStorage.setItem("token", token);
         setMessage({ text: "Login exitoso (Admin)", type: "success" });
         setTimeout(() => {
+          setIsLoading(false);
           navigate("/dashboard/admin");
         }, 800);
         return;
@@ -75,9 +79,11 @@ function Login() {
       setMessage({ text: "Login exitoso", type: "success" });
 
       setTimeout(() => {
+        setIsLoading(false);
         navigate(`/dashboard/${userType}`);
       }, 1000);
     } catch (error) {
+      setIsLoading(false);
       if (error.response && error.response.status === 429) {
         setMessage({
           text: "Has excedido el número de intentos. Esperá 15 minutos.",
@@ -105,6 +111,10 @@ function Login() {
   const handleRegister = () => {
     navigate("/register");
   };
+
+  if (isLoading) {
+    return <Loader mensaje="Ingresando..." />;
+  }
 
   return (
     <div className="formLogin">
