@@ -18,6 +18,10 @@ import VerifyUsers from "./components/VerifyUsers";
 import AdminPrescriptions from "./components/AdminPrescriptions";
 import AdminSettings from "./components/AdminSettings";
 import AdminLogs from "./components/AdminLogs";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+
+
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
@@ -46,6 +50,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/login/admin" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />  
           {/* Dashboard dinámico según rol */}
           <Route path="/dashboard/:userType" element={<Dashboard />} />
           {/* Perfil genérico */}

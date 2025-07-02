@@ -50,4 +50,9 @@ app.use('/api/admin', authMiddleware("admin"), adminRoutes);
 app.use('/api/pharmacy-users', authMiddleware("pharmacyUser"), pharmacyRoutes); // empleados
 app.use('/api/pharmacies', authMiddleware("pharmacy"), pharmacyAdminRoutes); // entidad farmacia
 
+
+const passwordRoutes = require("./routes/passwordRoutes");
+app.use("/api/auth", passwordRoutes);
+
+
 app.listen(3001, () => console.log('✅ Server running on port 3001'));

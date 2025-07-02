@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../AxiosConfig";
-import Loader from "./components/Loader";
+import Loader from "./Loader";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import "./styles.css";
 
