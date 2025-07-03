@@ -16,13 +16,13 @@ html {
 .formUserOptions {
   background-color: white;
   padding: 50px;
-  border-radius: 5px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   gap: 15px;
   width: 420px;
   margin: 0 auto;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .formUserOptions .buttons {
@@ -44,7 +44,7 @@ html {
   font-size: 16px;
   cursor: pointer;
   color: black;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .formUserOptions .doctorsButton {
@@ -77,7 +77,7 @@ html {
   flex-direction: column;
   align-items: center;
   width: 400px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .formLogin form {
@@ -132,7 +132,7 @@ html {
   cursor: pointer;
   width: 280px;
   margin: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .formLogin .loginButton:hover {
@@ -216,7 +216,7 @@ html {
   margin: 350px auto 20px auto;
   padding: 8px 30px;
   border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 .form-header h2 {
   text-align: center;
@@ -396,9 +396,10 @@ html {
   justify-content: space-between;
   background-color: #fff;
   padding: 40px;
-  border-radius: 5px;
-  height: 500px;
+  border-radius: 10px;
+  height: 550px;
   width: auto;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 form {
@@ -434,10 +435,12 @@ textarea {
   font-size: 12px;
   width: 100%;
   margin: 3px 0px;
-  height: 25px;
+  height: 30px;
 }
 ::placeholder {
   font-size: 12px;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
 }
 .textarea {
   height: 80px;
@@ -446,7 +449,7 @@ textarea {
 .buttonGenerarReceta {
   display: flex;
   justify-content: flex-start;
-  margin-top: -10px;
+  margin-top: -40px;
 }
 .button {
   background-color: #a6c4ca;
@@ -456,7 +459,7 @@ textarea {
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 .button:hover {
   text-decoration: underline;
@@ -543,7 +546,7 @@ textarea {
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s ease;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .search-patient-button:hover {
@@ -795,7 +798,7 @@ h4 {
   justify-content: space-between;
   align-items: center;
   z-index: 1000; /* Asegura que esté por encima de otros elementos */
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Encabezado y mensaje de bienvenida */
@@ -1093,4 +1096,63 @@ h4 {
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* Buscar medicamentos para la receta*/
+.medications-scroll-vertical {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 8px;
+  margin-top: 10px;
+}
+
+.medications-scroll-vertical::-webkit-scrollbar {
+  width: 6px;
+}
+
+.medications-scroll-vertical::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 4px;
+}
+
+.medications-scroll-vertical::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.medication-card h4 {
+  font-size: 16px;
+  margin: 0 0 6px;
+  color: #222;
+}
+
+.medication-card {
+  display: inline-block;
+  padding: 12px 18px;
+  margin: 5px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+  font-size: 16px;
+  transition: transform 0.2s ease;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.medication-card:hover {
+  transform: scale(1.02);
+  background-color: rgba(255, 207, 223, 0.411);
+  cursor: pointer;
+}
+
+.medication-card p {
+  font-size: 14px;
+  color: #333;
+  margin: 9px 0;
+}
+
+.tipoventa {
+  font-style: italic;
 }

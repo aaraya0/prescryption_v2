@@ -20,7 +20,7 @@ import AdminSettings from "./components/AdminSettings";
 import AdminLogs from "./components/AdminLogs";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
-
+import MedicationSearcher from "./components/MedicationSearcher";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -51,7 +51,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/login/admin" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />  
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/buscar-medicamento" element={<MedicationSearcher />} />
           {/* Dashboard dinámico según rol */}
           <Route path="/dashboard/:userType" element={<Dashboard />} />
           {/* Perfil genérico */}

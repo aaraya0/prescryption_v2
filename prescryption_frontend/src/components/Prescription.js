@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../AxiosConfig";
 import { useNavigate } from "react-router-dom";
-import MedicationAutocomplete from "./MedicationAutocomplete";
 import "./styles.css";
 
 function EmitirReceta() {
@@ -23,6 +22,21 @@ function EmitirReceta() {
   const [message, setMessage] = useState({ text: "", type: "" });
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const med1Saved = localStorage.getItem("med1");
+    const med2Saved = localStorage.getItem("med2");
+
+    if (med1Saved) {
+      setMed1(JSON.parse(med1Saved));
+      localStorage.removeItem("med1");
+    }
+
+    if (med2Saved) {
+      setMed2(JSON.parse(med2Saved));
+      localStorage.removeItem("med2");
+    }
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -212,7 +226,23 @@ function EmitirReceta() {
           </div>
 
           <div className="receipt_right">
-            <MedicationAutocomplete label="Medicamento 1" onMedicationSelected={setMed1} />
+            <button
+              type="button"
+              className="button"
+              onClick={() => navigate("/buscar-medicamento?campo=med1")}
+            >
+              Buscar Medicamento 1
+            </button>
+            {med1 && (
+              <p>
+                {med1.brandName} -{" "}
+                {Array.isArray(med1.activeComponentsList)
+                  ? med1.activeComponentsList.join(" + ")
+                  : med1.activeComponentsList}{" "}
+                - {med1.details?.presentation}
+              </p>
+            )}
+
             <input
               type="number"
               name="quantity1"
@@ -221,7 +251,23 @@ function EmitirReceta() {
               required
             />
 
-            <MedicationAutocomplete label="Medicamento 2 (opcional)" onMedicationSelected={setMed2} />
+            <button
+              type="button"
+              className="button"
+              onClick={() => navigate("/buscar-medicamento?campo=med2")}
+            >
+              Buscar Medicamento 2 (opcional)
+            </button>
+            {med2 && (
+              <p>
+                {med2.brandName} -{" "}
+                {Array.isArray(med2.activeComponentsList)
+                  ? med2.activeComponentsList.join(" + ")
+                  : med2.activeComponentsList}{" "}
+                - {med2.details?.presentation}
+              </p>
+            )}
+
             <input
               type="number"
               name="quantity2"
@@ -259,7 +305,9 @@ function EmitirReceta() {
 
       {message.text && (
         <>
-          {message.type === "success" && <div className="notification-backdrop"></div>}
+          {message.type === "success" && (
+            <div className="notification-backdrop"></div>
+          )}
           <Notification message={message.text} type={message.type} />
         </>
       )}
