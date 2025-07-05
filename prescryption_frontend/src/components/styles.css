@@ -4,7 +4,8 @@ html {
   margin: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 40px;
 }
 
 .error {
@@ -388,18 +389,22 @@ html {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  width: 100%;
+  padding-top: 0px;
 }
 
 .form-container {
+  background-color: white;
+  padding: 40px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: #fff;
-  padding: 40px;
-  border-radius: 10px;
-  height: 550px;
-  width: auto;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  gap: 40px;
+  width: 90%;
+  width: 790px;
+  margin: 40px auto;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 form {
@@ -449,7 +454,7 @@ textarea {
 .buttonGenerarReceta {
   display: flex;
   justify-content: flex-start;
-  margin-top: -40px;
+  margin-top: 5px;
 }
 .button {
   background-color: #a6c4ca;
@@ -458,12 +463,29 @@ textarea {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 .button:hover {
-  text-decoration: underline;
-  transform: translateX(-1px);
+  transform: scale(1.02);
+  font-weight: 500;
+}
+
+.BuscarMedButton {
+  background-color: #a6c4ca;
+  color: black;
+  padding: 5px 70px;
+  width: 300px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  margin-bottom: 5px;
+}
+.BuscarMedButton:hover {
+  transform: scale(1.02);
+  font-weight: 500;
 }
 
 .medical-info {
@@ -696,8 +718,8 @@ h4 {
 
 .emitir-receta-btn:hover {
   background-color: #d8b7af;
-  text-decoration: underline;
-  transform: translateX(-1px);
+  transform: scale(1.05);
+  font-weight: 500;
 }
 
 .description-doctor {
@@ -1098,7 +1120,6 @@ h4 {
   }
 }
 
-/* Buscar medicamentos para la receta*/
 .medications-scroll-vertical {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -1155,4 +1176,58 @@ h4 {
 
 .tipoventa {
   font-style: italic;
+}
+
+.medication-selection {
+  background-color: #eceff1;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.medication-selection-button {
+  margin-bottom: 8px;
+}
+
+input[name="quantity1"],
+input[name="quantity2"] {
+  margin-top: 8px;
+}
+
+.trash-button {
+  background-color: #f2dede;
+  color: #a94442;
+  border: none;
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.trash-button:hover {
+  background-color: #e4bebe;
+  transform: scale(1.05);
+}
+
+.medication-block {
+  margin-bottom: 20px;
+}
+
+.medication-block .button {
+  margin-bottom: 10px;
+}
+
+.medication-block input {
+  margin-top: 5px;
+}
+
+.medication-block label {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 6px;
 }

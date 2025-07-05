@@ -10,6 +10,8 @@ const Header = () => {
   const handleBackClick = () => {
     if (location.pathname === "/login" || location.pathname === "/register") {
       navigate("/");
+    } else if (location.pathname === "/issue-prescription") {
+      navigate("/dashboard/doctor");
     } else {
       window.history.back();
     }

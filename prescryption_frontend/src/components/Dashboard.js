@@ -79,6 +79,7 @@ function Dashboard() {
           <div className="doctor-menu">
             <Doctor userType={userType} />
             <button
+              type="button"
               className="emitir-receta-btn"
               onClick={() => navigate("/issue-prescription")}
             >

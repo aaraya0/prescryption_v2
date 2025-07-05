@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../AxiosConfig";
+import Loader from "../components/Loader";
 import { useNavigate } from "react-router-dom";
 import "./styles.css";
 
@@ -16,6 +17,7 @@ function EmitirReceta() {
     diagnosis: "",
     observations: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const [med1, setMed1] = useState(null);
   const [med2, setMed2] = useState(null);
@@ -26,6 +28,7 @@ function EmitirReceta() {
   useEffect(() => {
     const med1Saved = localStorage.getItem("med1");
     const med2Saved = localStorage.getItem("med2");
+    const savedFormData = localStorage.getItem("formData");
 
     if (med1Saved) {
       setMed1(JSON.parse(med1Saved));
@@ -36,7 +39,32 @@ function EmitirReceta() {
       setMed2(JSON.parse(med2Saved));
       localStorage.removeItem("med2");
     }
+
+    if (savedFormData) {
+      setFormData(JSON.parse(savedFormData));
+      localStorage.removeItem("formData");
+    }
   }, []);
+
+  const handleGoToSearch = (campo) => {
+    const updatedFormData = { ...formData };
+
+    // Recolectar campos que el usuario puede haber editado justo antes de irse
+    updatedFormData.quantity1 =
+      document.querySelector('input[name="quantity1"]')?.value || "";
+    updatedFormData.quantity2 =
+      document.querySelector('input[name="quantity2"]')?.value || "";
+    updatedFormData.diagnosis =
+      document.querySelector('textarea[name="diagnosis"]')?.value || "";
+    updatedFormData.observations =
+      document.querySelector('textarea[name="observations"]')?.value || "";
+
+    localStorage.setItem("formData", JSON.stringify(updatedFormData));
+    if (med1) localStorage.setItem("med1", JSON.stringify(med1));
+    if (med2) localStorage.setItem("med2", JSON.stringify(med2));
+
+    navigate(`/buscar-medicamento?campo=${campo}`);
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -93,9 +121,7 @@ function EmitirReceta() {
       insuranceName,
       insurancePlan,
       quantity1,
-      quantity2,
       diagnosis,
-      observations,
     } = formData;
 
     if (
@@ -114,6 +140,7 @@ function EmitirReceta() {
     }
 
     try {
+      setIsLoading(true);
       await api.post(
         "http://localhost:3001/api/prescriptions/issue",
         {
@@ -139,6 +166,8 @@ function EmitirReceta() {
       setTimeout(() => {
         setMessage({ text: "", type: "" });
       }, 4000);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -226,55 +255,83 @@ function EmitirReceta() {
           </div>
 
           <div className="receipt_right">
-            <button
-              type="button"
-              className="button"
-              onClick={() => navigate("/buscar-medicamento?campo=med1")}
-            >
-              Buscar Medicamento 1
-            </button>
-            {med1 && (
-              <p>
-                {med1.brandName} -{" "}
-                {Array.isArray(med1.activeComponentsList)
-                  ? med1.activeComponentsList.join(" + ")
-                  : med1.activeComponentsList}{" "}
-                - {med1.details?.presentation}
-              </p>
-            )}
+            <div className="medication-block">
+              <label>Medicamento 1</label>
+              {!med1 ? (
+                <button
+                  type="button"
+                  className="BuscarMedButton"
+                  onClick={() => handleGoToSearch("med1")}
+                >
+                  Buscar Medicamento
+                </button>
+              ) : (
+                <div className="medication-selection">
+                  <p>
+                    {med1.brandName} -{" "}
+                    {Array.isArray(med1.activeComponentsList)
+                      ? med1.activeComponentsList.join(" + ")
+                      : med1.activeComponentsList}{" "}
+                    - {med1.details?.presentation}
+                  </p>
+                  <button
+                    type="button"
+                    className="trash-button"
+                    onClick={() => setMed1(null)}
+                    title="Eliminar medicamento"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              )}
 
-            <input
-              type="number"
-              name="quantity1"
-              placeholder="Cantidad"
-              onChange={handleChange}
-              required
-            />
+              <input
+                type="number"
+                name="quantity1"
+                placeholder="Cantidad"
+                onChange={handleChange}
+                value={formData.quantity1}
+                required
+              />
+            </div>
+            <div className="medication-block">
+              <label>Medicamento 2</label>
+              {!med2 ? (
+                <button
+                  type="button"
+                  className="BuscarMedButton"
+                  onClick={() => handleGoToSearch("med2")}
+                >
+                  Buscar Medicamento
+                </button>
+              ) : (
+                <div className="medication-selection">
+                  <p>
+                    {med2.brandName} -{" "}
+                    {Array.isArray(med2.activeComponentsList)
+                      ? med2.activeComponentsList.join(" + ")
+                      : med2.activeComponentsList}{" "}
+                    - {med2.details?.presentation}
+                  </p>
+                  <button
+                    type="button"
+                    className="trash-button"
+                    onClick={() => setMed2(null)}
+                    title="Eliminar medicamento"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              )}
 
-            <button
-              type="button"
-              className="button"
-              onClick={() => navigate("/buscar-medicamento?campo=med2")}
-            >
-              Buscar Medicamento 2 (opcional)
-            </button>
-            {med2 && (
-              <p>
-                {med2.brandName} -{" "}
-                {Array.isArray(med2.activeComponentsList)
-                  ? med2.activeComponentsList.join(" + ")
-                  : med2.activeComponentsList}{" "}
-                - {med2.details?.presentation}
-              </p>
-            )}
-
-            <input
-              type="number"
-              name="quantity2"
-              placeholder="Cantidad"
-              onChange={handleChange}
-            />
-
+              <input
+                type="number"
+                name="quantity2"
+                placeholder="Cantidad"
+                onChange={handleChange}
+                value={formData.quantity1}
+              />
+            </div>
             <div className="form-group">
               <label>Diagnóstico</label>
               <textarea
@@ -302,7 +359,6 @@ function EmitirReceta() {
           </div>
         </form>
       </div>
-
       {message.text && (
         <>
           {message.type === "success" && (
@@ -311,6 +367,7 @@ function EmitirReceta() {
           <Notification message={message.text} type={message.type} />
         </>
       )}
+      {isLoading && <Loader mensaje="Generando receta..." />}{" "}
     </div>
   );
 }

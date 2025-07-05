@@ -153,7 +153,7 @@ function Login() {
           </span>
         </div>
 
-        <button className="loginButton" type="submit" onClick={handleLogin}>
+        <button className="loginButton" type="submit">
           Ingresar
         </button>
       </form>
