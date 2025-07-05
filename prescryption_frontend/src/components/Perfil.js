@@ -32,38 +32,29 @@ function Perfil() {
           return;
         }
 
-        // 2) Elegimos la ruta EXACTA según el userType
         let url = "";
         if (userType === "doctor") {
-          // ⇒ /api/doctors/profile
           url = "http://localhost:3001/api/doctors/profile";
         } else if (userType === "patient") {
-          // (Asumo que si existe ruta /api/patients/profile en tu back)
           url = "http://localhost:3001/api/patients/profile";
         } else if (userType === "pharmacyUser") {
-          // ⇒ /api/pharmacy-users/profile
           url = "http://localhost:3001/api/pharmacy-users/profile";
         } else if (userType === "pharmacy") {
-          // ⇒ /api/pharmacy-admin/pharmacy_profile
           url = "http://localhost:3001/api/pharmacies/pharmacy_profile";
         } else if (userType === "insurance") {
-          // (Asumo /api/insurance/profile o el router que tengas)
           url = "http://localhost:3001/api/insurances/profile";
         } else {
-          // Si no coincide ningún tipo
           setError("Tipo de usuario desconocido");
           setLoading(false);
           return;
         }
 
-        // 3) Hacemos la petición al endpoint CORRECTO
         const response = await api.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProfile(response.data);
       } catch (err) {
         console.error("Error fetching profile:", err);
-        // Distinguir posibles errores:
         if (err.response && err.response.status === 404) {
           setError("Perfil no encontrado");
         } else if (err.response && err.response.status === 403) {

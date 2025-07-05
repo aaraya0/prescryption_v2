@@ -17,13 +17,13 @@ function PharmacyTypeSelection() {
 
   return (
     <div className="formUserOptions">
-      <h2 className="title">Ingresar como…</h2>
+      <h2 className="title">Ingresar como</h2>
       <div className="buttons">
         <button className="adminButton" onClick={handleAdminLogin}>
-          Farmacia (Administrador)
+          Farmacia
         </button>
         <button className="userButton" onClick={handleUserLogin}>
-          Farmacéutico (Usuario)
+          Farmacéutico
         </button>
       </div>
     </div>

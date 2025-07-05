@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import api from "../AxiosConfig";
 import Loader from "../components/Loader";
 import { useNavigate } from "react-router-dom";
+import { FaSearch, FaTrashAlt } from "react-icons/fa";
 import "./styles.css";
 
 function EmitirReceta() {
@@ -49,7 +50,6 @@ function EmitirReceta() {
   const handleGoToSearch = (campo) => {
     const updatedFormData = { ...formData };
 
-    // Recolectar campos que el usuario puede haber editado justo antes de irse
     updatedFormData.quantity1 =
       document.querySelector('input[name="quantity1"]')?.value || "";
     updatedFormData.quantity2 =
@@ -193,7 +193,7 @@ function EmitirReceta() {
                   title="Buscar paciente"
                   type="button"
                 >
-                  🔍
+                  <FaSearch />
                 </button>
               </div>
             </div>
@@ -280,7 +280,7 @@ function EmitirReceta() {
                     onClick={() => setMed1(null)}
                     title="Eliminar medicamento"
                   >
-                    🗑️
+                    <FaTrashAlt />
                   </button>
                 </div>
               )}
@@ -319,7 +319,7 @@ function EmitirReceta() {
                     onClick={() => setMed2(null)}
                     title="Eliminar medicamento"
                   >
-                    🗑️
+                    <FaTrashAlt />
                   </button>
                 </div>
               )}
@@ -329,7 +329,7 @@ function EmitirReceta() {
                 name="quantity2"
                 placeholder="Cantidad"
                 onChange={handleChange}
-                value={formData.quantity1}
+                value={formData.quantity2}
               />
             </div>
             <div className="form-group">

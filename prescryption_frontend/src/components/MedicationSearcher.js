@@ -15,11 +15,11 @@ const agruparMedicamentos = (lista) => {
         brandName: med.brandName,
         laboratory: med.details?.laboratory || "",
         saleType: med.details?.saleType || "",
-        presentaciones: [], // ahora serán objetos completos
+        presentaciones: [],
       });
     }
 
-    mapa.get(key).presentaciones.push(med); // guardamos el objeto entero
+    mapa.get(key).presentaciones.push(med);
   });
 
   return Array.from(mapa.values());
@@ -104,7 +104,6 @@ function MedicationSearcher() {
           ))}
         </div>
       </div>
-      {/* ✅ MODAL CON BOOTSTRAP */}
       <Modal
         show={!!modalData}
         onHide={() => setModalData(null)}
@@ -115,19 +114,12 @@ function MedicationSearcher() {
           <Modal.Title>Elegí una presentación</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <ul style={{ padding: 0, listStyle: "none" }}>
+          <ul className="modal-list">
             {modalData?.presentaciones.map((objetoOriginal, idx) => (
               <li
                 key={idx}
                 onClick={() => handleFinalSelection(objetoOriginal)}
-                style={{
-                  cursor: "pointer",
-                  padding: "10px",
-                  marginBottom: "8px",
-                  borderRadius: "6px",
-                  border: "1px solid #ccc",
-                  backgroundColor: "#f8f9fa",
-                }}
+                className="modal-list-item"
               >
                 {objetoOriginal.details?.presentation ||
                   "Presentación no disponible"}
