@@ -1205,7 +1205,7 @@ input[name="quantity2"] {
 }
 
 .trash-button {
-  background-color: #d8b7af; /* rojo suave */
+  background-color: #d8b7af;
   margin-left: 5px;
   border: none;
   padding: 7px;
@@ -1216,7 +1216,7 @@ input[name="quantity2"] {
   justify-content: center;
   transition: background-color 0.3s ease, transform 0.3s ease;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  color: #d50d0d; /* rojo oscuro para el ícono */
+  color: #d50d0d;
   font-size: 16px;
 }
 
@@ -1261,4 +1261,27 @@ input[name="quantity2"] {
 
 .modal-list-item:hover {
   background-color: #d8b7af7f;
+}
+
+.download-button-container {
+  text-align: right;
+  padding: 15px;
+  height: fit-content;
+}
+
+.buttonDescargarReceta {
+  background-color: #a6c4ca;
+  border: none;
+  border-radius: 6px;
+  align-items: center;
+  height: 40px;
+  width: 140px;
+  font-weight: 480;
+  font-size: 14px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.buttonDescargarReceta:hover {
+  transform: scale(1.05);
+  font-weight: 500;
 }

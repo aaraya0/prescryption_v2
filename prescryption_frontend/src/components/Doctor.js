@@ -2,45 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../AxiosConfig";
 import "./styles.css";
 import { Accordion } from "react-bootstrap";
-import jsPDF from "jspdf";
-
-const handleDownloadPDF = (receta) => {
-  const doc = new jsPDF();
-
-  doc.setFontSize(18);
-  doc.text("Receta Médica", 20, 20);
-
-  doc.setFontSize(12);
-  doc.text(`Paciente: ${receta.patientName} ${receta.patientSurname}`, 20, 40);
-  doc.text(`DNI: ${receta.patientNid}`, 20, 50);
-  doc.text(`Obra Social: ${receta.insuranceName}`, 20, 60);
-  doc.text(
-    `Fecha de Emisión: ${new Date(receta.createdAt).toLocaleDateString()}`,
-    20,
-    70
-  );
-
-  doc.text("Medicamentos:", 20, 85);
-  doc.text(`1. ${receta.meds.med1}`, 25, 95);
-  doc.text(`Cantidad: ${receta.meds.quantity1}`, 25, 105);
-
-  if (receta.meds.med2 && receta.meds.quantity2 > 0) {
-    doc.text(`2. ${receta.meds.med2}`, 25, 115);
-    doc.text(`Cantidad: ${receta.meds.quantity2}`, 25, 125);
-  }
-
-  doc.text(`Diagnóstico: ${receta.meds.diagnosis}`, 20, 140);
-  doc.text(`Observaciones: ${receta.meds.observations || "-"}`, 20, 150);
-  doc.text(
-    `Fecha de Expiración: ${new Date(
-      receta.expirationDate
-    ).toLocaleDateString()}`,
-    20,
-    160
-  );
-
-  doc.save(`Receta_${receta.patientSurname}_${receta.createdAt}.pdf`);
-};
+import PrescriptionPDF from "./PrescriptionPDF";
 
 const Doctor = () => {
   const [recetas, setRecetas] = useState([]);
@@ -166,13 +128,10 @@ const Doctor = () => {
                     <strong>Fecha de Expiración:</strong>{" "}
                     {formatDate(receta.expirationDate)}
                   </p>
+                  <div className="download-button-container">
+                    <PrescriptionPDF receta={receta} />
+                  </div>
                 </Accordion.Body>
-                <button
-                  onClick={() => handleDownloadPDF(receta)}
-                  className="button"
-                >
-                  Descargar receta
-                </button>
               </Accordion.Item>
             ))}
           </Accordion>

@@ -267,13 +267,22 @@ function EmitirReceta() {
                 </button>
               ) : (
                 <div className="medication-selection">
-                  <p>
-                    {med1.brandName} -{" "}
-                    {Array.isArray(med1.activeComponentsList)
-                      ? med1.activeComponentsList.join(" + ")
-                      : med1.activeComponentsList}{" "}
-                    - {med1.details?.presentation}
-                  </p>
+                  <div className="med-formatted">
+                    <p style={{ marginBottom: 2 }}>
+                      <strong>{med1.brandName}</strong>
+                      {med1.details?.laboratory &&
+                        ` (${med1.details.laboratory})`}
+                    </p>
+                    <p style={{ marginTop: 0 }}>
+                      {Array.isArray(med1.activeComponentsList)
+                        ? med1.activeComponentsList.join("+")
+                        : med1.activeComponentsList}
+                      {med1.details?.presentation &&
+                        `, ${med1.details.presentation}`}
+                      {med1.details?.power && ` - (${med1.details.power})`}
+                    </p>
+                  </div>
+
                   <button
                     type="button"
                     className="trash-button"
@@ -306,13 +315,21 @@ function EmitirReceta() {
                 </button>
               ) : (
                 <div className="medication-selection">
-                  <p>
-                    {med2.brandName} -{" "}
-                    {Array.isArray(med2.activeComponentsList)
-                      ? med2.activeComponentsList.join(" + ")
-                      : med2.activeComponentsList}{" "}
-                    - {med2.details?.presentation}
-                  </p>
+                  <div className="med-formatted">
+                    <p style={{ marginBottom: 2 }}>
+                      <strong>{med2.brandName}</strong>
+                      {med2.details?.laboratory &&
+                        `, ${med2.details.laboratory}`}
+                    </p>
+                    <p style={{ marginTop: 0 }}>
+                      {Array.isArray(med2.activeComponentsList)
+                        ? med2.activeComponentsList.join("+")
+                        : med2.activeComponentsList}
+                      {med2.details?.presentation &&
+                        `, ${med2.details.presentation}`}
+                      {med2.details?.power && ` - (${med2.details.power})`}
+                    </p>
+                  </div>
                   <button
                     type="button"
                     className="trash-button"

@@ -21,6 +21,7 @@ import AdminLogs from "./components/AdminLogs";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import MedicationSearcher from "./components/MedicationSearcher";
+import PrescriptionPDF from "./components/PrescriptionPDF";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -74,6 +75,7 @@ function App() {
           />
           <Route path="/dashboard/admin/settings" element={<AdminSettings />} />
           <Route path="/dashboard/admin/other" element={<AdminLogs />} />
+          <Route path="/receta/:id" element={<PrescriptionPDF />} />
         </Routes>
       </div>
     </Router>
