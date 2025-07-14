@@ -21,12 +21,14 @@ const PharmacyUser = () => {
   const navigate = useNavigate();
 
   const decoded = token ? jwtDecode(token) : {};
-  const isAdmin = decoded.role === "admin";
+  console.log("🧾 Token decodificado:", decoded);
+
+  const isAdmin = decoded.userType === "pharmacy";
 
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
   const [medOptions, setMedOptions] = useState([]);
-  const [selectedMedicationId, setSelectedMedicationId] = useState("");
+  const [selectedMedicationIds, setSelectedMedicationIds] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -56,16 +58,19 @@ const PharmacyUser = () => {
   };
 
   const handleOpenValidationModal = async (prescription) => {
+    let response;
     try {
       setLoading(true);
       console.log("Prescription data:", prescription);
 
-      const response = await api.get(
+      response = await api.get(
         `http://localhost:3001/api/pharmacy-users/medications/search/${prescription.prescriptionId.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
+      console.log("🧪 Recibidos del backend:", response.data.results); // ✅ AHORA sí se puede usar
 
       setMedOptions(response.data.results);
       console.log(
@@ -76,33 +81,24 @@ const PharmacyUser = () => {
       setSelectedPrescription(prescription);
       setShowValidationModal(true);
     } catch (error) {
-      console.error("Error al obtener opciones de medicamento:", error);
+      console.error("❌ Error al obtener opciones de medicamento:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  /*const handleMedicationSelection = (medId) => {
-    console.log("Medicamento seleccionado (ID):", medId);
-    setSelectedMedicationId(medId);
-  };*/
-
   const handleValidatePrescription = async (e) => {
     e.preventDefault();
-    console.log(
-      "Enviando validación...",
-      selectedMedicationId,
-      selectedPrescription
-    );
+    console.log("Enviando validación...", selectedMedicationIds);
 
-    if (!selectedPrescription || !selectedMedicationId) return;
+    if (!selectedPrescription || !selectedMedicationIds) return;
 
     try {
       const response = await api.post(
         "http://localhost:3001/api/pharmacy-users/validate_prescription",
         {
           prescriptionId: selectedPrescription.prescriptionId,
-          selectedMedicationIds: [selectedMedicationId],
+          selectedMedicationIds,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -156,7 +152,7 @@ const PharmacyUser = () => {
       setInvoiceVisible(true); // ✅ muestra la factura
       setShowValidationModal(false);
       setSelectedPrescription(null);
-      setSelectedMedicationId("");
+      setSelectedMedicationIds([]);
       // Guardar los meds detallados para mostrar en PDF
       setFinalPrices(detailedMedications);
       fetchPrescriptions();
@@ -354,7 +350,8 @@ const PharmacyUser = () => {
                 <div className="med-card-container">
                   {medOptions.map((med, index) => {
                     const medIdString = String(med._id || med.id);
-                    const isSelected = selectedMedicationId === medIdString;
+                    const isSelected =
+                      selectedMedicationIds.includes(medIdString);
 
                     return (
                       <div
@@ -363,11 +360,15 @@ const PharmacyUser = () => {
                           isSelected ? "selected" : ""
                         }`}
                         onClick={() => {
-                          setSelectedMedicationId(medIdString);
+                          setSelectedMedicationIds((prev) =>
+                            prev.includes(medIdString)
+                              ? prev.filter((id) => id !== medIdString)
+                              : [...prev, medIdString]
+                          );
                         }}
                       >
                         <Form.Check
-                          type="radio"
+                          type="checkbox"
                           name="medication"
                           value={medIdString}
                           checked={isSelected}
@@ -400,16 +401,28 @@ const PharmacyUser = () => {
                 <Button type="submit" className="validate-button-rosa">
                   Validar con Obra Social
                 </Button>
-
-                {finalPrices && (
-                  <Button
-                    className="mt-2"
-                    variant="success"
-                    onClick={handleProcessPurchase}
-                  >
-                    Usar y Facturar receta
-                  </Button>
-                )}
+                {finalPrices &&
+                  finalPrices.map((item, i) => (
+                    <div key={i}>
+                      <p>
+                        <strong>Medicamento:</strong> {item.name}
+                      </p>
+                      <p>
+                        <strong>Presentación:</strong> {item.presentation}
+                      </p>
+                      <p>
+                        <strong>Laboratorio:</strong> {item.lab}
+                      </p>
+                      <p>
+                        <strong>Precio Lista:</strong> ${item.price}
+                      </p>
+                      <p>
+                        <strong>Precio Final con Cobertura:</strong> $
+                        {item.finalPrice}
+                      </p>
+                      <hr />
+                    </div>
+                  ))}
               </Form>
             )}
           </Modal.Body>
@@ -429,15 +442,25 @@ const PharmacyUser = () => {
                 <strong>Fecha:</strong> {formatDate(new Date())}
               </p>
               <hr />
-              {finalPrices.map((item, i) => (
-                <p key={i}>
-                  {item.medication.genericName} - ${item.finalPrice}
-                </p>
-              ))}
+              {finalPrices &&
+                finalPrices.map((item, i) => (
+                  <p key={i}>
+                    {item.name} ({item.presentation}) - ${item.finalPrice}
+                  </p>
+                ))}
+
               <p>
-                <strong>Total:</strong> $
+                <strong>Total a Facturar:</strong> $
                 {finalPrices.reduce((acc, item) => acc + item.finalPrice, 0)}
               </p>
+
+              <Button
+                className="mt-2"
+                variant="success"
+                onClick={handleProcessPurchase}
+              >
+                Usar y Facturar receta
+              </Button>
             </div>
             <Button onClick={downloadInvoice} className="mt-2">
               Descargar PDF
