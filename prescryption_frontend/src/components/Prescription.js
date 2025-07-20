@@ -384,7 +384,11 @@ function EmitirReceta() {
           <Notification message={message.text} type={message.type} />
         </>
       )}
-      {isLoading && <Loader mensaje="Generando receta..." />}{" "}
+      {isLoading && (
+        <div className="loader-overlay-modal">
+          <Loader mensaje="Generando receta..." />
+        </div>
+      )}{" "}
     </div>
   );
 }

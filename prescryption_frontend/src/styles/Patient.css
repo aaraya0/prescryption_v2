@@ -146,3 +146,18 @@ input[type="number"] {
   transform: scale(1.03);
   font-weight: 600;
 }
+
+.loader-overlay-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(57, 54, 54, 0.493);
+  -webkit-backdrop-filter: blur(4px); /* compatible Safari */
+  backdrop-filter: blur(4px); /* compatible Chrome, Edge, Firefox */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* Lo más alto para cubrir todo */
+}

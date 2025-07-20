@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { Modal, Button, Form, Accordion } from "react-bootstrap";
 import "../styles/Patient.css";
+import Loader from "./Loader";
+import PrescriptionPDF from "./PrescriptionPDF";
 
 const Patient = () => {
   const [recetas, setRecetas] = useState([]);
@@ -22,6 +24,7 @@ const Patient = () => {
   const [availablePharmacies, setAvailablePharmacies] = useState([]);
   const [selectedPharmacyName, setSelectedPharmacyName] = useState("");
   const [matchedPharmacies, setMatchedPharmacies] = useState([]);
+  const [isSending, setIsSending] = useState(false);
 
   const navigate = useNavigate();
 
@@ -127,6 +130,8 @@ const Patient = () => {
 
     if (!selectedPrescriptionId || !pharmacyNid) return;
 
+    setIsSending(true);
+
     try {
       const response = await api.post(
         "http://localhost:3001/api/patients/send_prescription",
@@ -161,6 +166,8 @@ const Patient = () => {
         "❌ Error al transferir la receta. Ya podría estar transferida."
       );
       setSuccessMessage("");
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -265,74 +272,81 @@ const Patient = () => {
         </label>
       </div>
 
-      <Accordion defaultActiveKey="">
-        {recetas.map((receta, index) => (
-          <React.Fragment key={index}>
-            {/*console.log("Receta:", receta)*/}
-            <Accordion.Item
-              eventKey={index.toString()}
-              className={`receta-item ${getStatusBackground(receta.status)}`}
-            >
-              <Accordion.Header>
-                <div style={{ width: "100%" }}>
-                  <strong>Médico: </strong> {receta.doctorName}{" "}
-                  {receta.doctorSurname} | <strong>Especialidad: </strong>{" "}
-                  {receta.doctorSpecialty} | <strong>Estado: </strong>
-                  <span className={getStatusClass(receta.status)}>
-                    {receta.status}
-                  </span>{" "}
-                  | <strong>Fecha de Emisión: </strong>{" "}
-                  {formatDate(receta.issueDate)}
-                </div>
-              </Accordion.Header>
-              <Accordion.Body className="receta-details">
-                <p>
-                  <strong>DNI del Médico:</strong> {receta.doctorNid}
-                </p>
-                <p>
-                  <strong>Medicamento:</strong> {receta.meds.med1}
-                </p>
-                <p>
-                  <strong>Cantidad: </strong> {receta.meds.quantity1}
-                </p>
-                {receta.meds.med2 !== "N/A" && receta.meds.quantity2 > 0 && (
-                  <>
-                    <p>
-                      <strong>Medicamento:</strong> {receta.meds.med2}
-                    </p>
-                    <p>
-                      <strong>Cantidad: </strong> {receta.meds.quantity2}
-                    </p>
-                  </>
-                )}
-                <p>
-                  <strong>Diagnóstico:</strong> {receta.meds.diagnosis}
-                </p>
-                {receta.meds.observations &&
-                  receta.meds.observations.trim() !== "" && (
-                    <p>
-                      <strong>Observaciones:</strong> {receta.meds.observations}
-                    </p>
+      <div className="receta-scroll">
+        <Accordion defaultActiveKey="">
+          {recetas.map((receta, index) => (
+            <React.Fragment key={index}>
+              {/*console.log("Receta:", receta)*/}
+              <Accordion.Item
+                eventKey={index.toString()}
+                className={`receta-item ${getStatusBackground(receta.status)}`}
+              >
+                <Accordion.Header>
+                  <div style={{ width: "100%" }}>
+                    <strong>Médico: </strong> {receta.doctorName}{" "}
+                    {receta.doctorSurname} | <strong>Especialidad: </strong>{" "}
+                    {receta.doctorSpecialty} | <strong>Estado: </strong>
+                    <span className={getStatusClass(receta.status)}>
+                      {receta.status}
+                    </span>{" "}
+                    | <strong>Fecha de Emisión: </strong>{" "}
+                    {formatDate(receta.issueDate)}
+                  </div>
+                </Accordion.Header>
+                <Accordion.Body className="receta-details">
+                  <p>
+                    <strong>DNI del Médico:</strong> {receta.doctorNid}
+                  </p>
+                  <p>
+                    <strong>Medicamento:</strong> {receta.meds.med1}
+                  </p>
+                  <p>
+                    <strong>Cantidad: </strong> {receta.meds.quantity1}
+                  </p>
+                  {receta.meds.med2 !== "N/A" && receta.meds.quantity2 > 0 && (
+                    <>
+                      <p>
+                        <strong>Medicamento:</strong> {receta.meds.med2}
+                      </p>
+                      <p>
+                        <strong>Cantidad: </strong> {receta.meds.quantity2}
+                      </p>
+                    </>
                   )}
-                <p>
-                  <strong>Fecha de Expiración:</strong>{" "}
-                  {formatDate(receta.expirationDate)}
-                </p>
+                  <p>
+                    <strong>Diagnóstico:</strong> {receta.meds.diagnosis}
+                  </p>
+                  {receta.meds.observations &&
+                    receta.meds.observations.trim() !== "" && (
+                      <p>
+                        <strong>Observaciones:</strong>{" "}
+                        {receta.meds.observations}
+                      </p>
+                    )}
+                  <p>
+                    <strong>Fecha de Expiración:</strong>{" "}
+                    {formatDate(receta.expirationDate)}
+                  </p>
 
-                {!receta.isPendingValidation &&
-                  (receta.status === "Valid" || receta.status === "Válida") && (
-                    <button
-                      className="button_t"
-                      onClick={() => handleTransfer(receta.id)}
-                    >
-                      Transferir Receta
-                    </button>
-                  )}
-              </Accordion.Body>
-            </Accordion.Item>
-          </React.Fragment>
-        ))}
-      </Accordion>
+                  {!receta.isPendingValidation &&
+                    (receta.status === "Valid" ||
+                      receta.status === "Válida") && (
+                      <button
+                        className="button_t"
+                        onClick={() => handleTransfer(receta.id)}
+                      >
+                        Transferir Receta
+                      </button>
+                    )}
+                  <div className="download-button-container">
+                    <PrescriptionPDF receta={receta} />
+                  </div>
+                </Accordion.Body>
+              </Accordion.Item>
+            </React.Fragment>
+          ))}
+        </Accordion>
+      </div>
 
       <Modal
         show={showModal}
@@ -407,6 +421,11 @@ const Patient = () => {
           </Form>
         </Modal.Body>
       </Modal>
+      {isSending && (
+        <div className="loader-overlay-modal">
+          <Loader mensaje="Enviando receta..." />
+        </div>
+      )}
     </div>
   );
 };
