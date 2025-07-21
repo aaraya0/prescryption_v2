@@ -17,7 +17,7 @@ const PharmacyUser = () => {
   const [loading, setLoading] = useState(false);
   const [finalPrices, setFinalPrices] = useState(null);
   const [invoiceVisible, setInvoiceVisible] = useState(false);
-  const invoiceRef = useRef();
+  const invoiceRef = useRef({});
 
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
@@ -112,6 +112,21 @@ const PharmacyUser = () => {
       );
 
       setFinalPrices(response.data.finalPrices);
+      setSelectedPrescription((prev) => ({
+        ...prev,
+        finalPrices: response.data.finalPrices,
+      }));
+      setPrescriptions((prev) =>
+        prev.map((p) =>
+          p.prescriptionId === selectedPrescription.prescriptionId
+            ? {
+                ...p,
+                finalPrices: response.data.finalPrices,
+              }
+            : p
+        )
+      );
+
       console.log("📦 Respuesta completa del backend:", response.data);
       setSuccessMessage("✅ Receta validada exitosamente.");
       setTimeout(() => setSuccessMessage(""), 3000); // Se borra sola
@@ -160,6 +175,19 @@ const PharmacyUser = () => {
       setSelectedPrescription(null);
       setSelectedMedicationIds([]);
       fetchPrescriptions();
+      // ✅ Actualizar receta en la lista local para que el comprobante tenga datos
+      setPrescriptions((prev) =>
+        prev.map((p) =>
+          p.prescriptionId === selectedPrescription.prescriptionId
+            ? {
+                ...p,
+                used: true,
+                finalPrices: response.data.finalPrices,
+                invoiceNumber: response.data.invoice.invoice_number,
+              }
+            : p
+        )
+      );
     } catch (error) {
       console.error("❌ Error procesando la compra:", error);
       console.log("🧪 Error response:", error.response);
@@ -169,12 +197,23 @@ const PharmacyUser = () => {
     }
   };
 
-  const downloadValidationProof = () => {
-    if (validationRef.current) {
-      html2pdf()
-        .set({ margin: 1, filename: "comprobante-validacion.pdf" })
-        .from(validationRef.current)
-        .save();
+  const downloadValidationProof = (prescriptionId) => {
+    const element = invoiceRef.current[prescriptionId];
+
+    if (element) {
+      setTimeout(() => {
+        html2pdf()
+          .set({
+            margin: 1,
+            filename: `comprobante-validacion-${prescriptionId}.pdf`,
+          })
+          .from(element)
+          .save();
+      }, 150); // Espera breve para asegurar renderizado
+    } else {
+      console.error(
+        `⚠️ No se encontró el comprobante para la receta con ID ${prescriptionId}`
+      );
     }
   };
 
@@ -389,6 +428,53 @@ const PharmacyUser = () => {
                     <div className="download-button-container">
                       <PrescriptionPDF receta={prescription} />
                     </div>
+
+                    {prescription.used && (
+                      <>
+                        <div className="download-button-container">
+                          <Button
+                            onClick={() => {
+                              setTimeout(
+                                () =>
+                                  downloadValidationProof(
+                                    prescription.prescriptionId
+                                  ),
+                                100
+                              );
+                            }}
+                            className="btn btn-primary mt-2"
+                          >
+                            Descargar documentos
+                          </Button>
+                        </div>
+
+                        {/* Contenedor oculto para impresión */}
+                        <div style={{ display: "none" }}>
+                          <div
+                            ref={(el) =>
+                              (invoiceRef.current[prescription.prescriptionId] =
+                                el)
+                            }
+                          >
+                            <PrintableInvoice
+                              prescription={prescription}
+                              validationResult={prescription.finalPrices || []}
+                              invoiceData={{
+                                invoice_number:
+                                  prescription.invoiceNumber || "FACT-N/A",
+                                patient_name: `${prescription.patientName} ${prescription.patientSurname}`,
+                                date: formatDate(prescription.issueDate),
+                                total_price:
+                                  prescription.finalPrices?.reduce(
+                                    (acc, item) => acc + item.finalPrice,
+                                    0
+                                  ) || "-",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </Accordion.Body>
                 </Accordion.Item>
               ))}
@@ -468,9 +554,8 @@ const PharmacyUser = () => {
 
                 {finalPrices &&
                   finalPrices.map((item, i) => {
-                    const { medication, finalPrice, coverage } = item;
+                    const { medication, finalPrice, finalCoverage } = item;
                     const precioOriginal = medication.price || 0;
-                    const porcentaje = Math.round(coverage || 0);
                     const descuento = precioOriginal - finalPrice;
 
                     return (
@@ -491,7 +576,8 @@ const PharmacyUser = () => {
                           {precioOriginal.toFixed(2)}
                         </p>
                         <p>
-                          <strong>Cobertura Obra Social:</strong> {porcentaje}%
+                          <strong>Cobertura Obra Social:</strong>{" "}
+                          {finalCoverage || 0}%
                         </p>
                         <p>
                           <strong>Descuento:</strong> ${descuento.toFixed(2)}
@@ -526,60 +612,7 @@ const PharmacyUser = () => {
               </Form>
             )}
           </Modal.Body>
-          {/* ✅ Nuevo bloque para comprobante de validación */}
-          {!invoiceData &&
-            finalPrices &&
-            selectedPrescription?.isPendingValidation && (
-              <div className="invoice-preview p-3">
-                <div ref={validationRef}>
-                  <PrintableInvoice
-                    prescription={selectedPrescription}
-                    validationResult={finalPrices.map((item) => ({
-                      drugName: item.medication.genericName,
-                      brand: item.medication.brandName || "",
-                      coveragePercentage: item.coverage || 0,
-                      originalPrice: item.medication.price || 0,
-                      coveredAmount:
-                        (item.medication.price || 0) * (item.coverage / 100),
-                      finalPrice: item.finalPrice,
-                    }))}
-                  />
-                </div>
-                <Button onClick={downloadValidationProof} className="mt-2">
-                  Descargar comprobante de validación
-                </Button>
-              </div>
-            )}
         </Modal>
-        {invoiceVisible && invoiceData && (
-          <div className="invoice-preview">
-            <div ref={invoiceRef}>
-              <PrintableInvoice
-                prescription={selectedPrescription}
-                validationResult={finalPrices.map((item) => ({
-                  drugName: item.medication.genericName,
-                  brand: item.medication.brandName || "",
-                  coveragePercentage: item.coverage || 0,
-                  originalPrice: item.medication.price || 0,
-                  coveredAmount:
-                    (item.medication.price || 0) * (item.coverage / 100),
-                  finalPrice: item.finalPrice,
-                }))}
-                invoiceData={{
-                  invoice_number: invoiceData.invoiceNumber,
-                  patient_name: `${selectedPrescription.patientName} ${selectedPrescription.patientSurname}`,
-                  date: new Date().toLocaleDateString("es-AR"),
-                  total_price: finalPrices
-                    .reduce((acc, i) => acc + i.finalPrice, 0)
-                    .toFixed(2),
-                }}
-              />
-            </div>
-            <Button onClick={downloadValidationProof} className="mt-2">
-              Descargar PDF
-            </Button>
-          </div>
-        )}
       </div>
       {loading && <Loader mensaje="Cargando..." />}
     </>
