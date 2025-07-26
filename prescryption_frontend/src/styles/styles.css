@@ -12,7 +12,7 @@ html {
   text-align: center;
 }
 
-/* Menu options styles*/
+/* MainMenu.js styles*/
 .formUserOptions {
   background-color: white;
   padding: 50px;
@@ -33,13 +33,13 @@ html {
 
 .formUserOptions .title {
   font-size: 18px;
-  font-weight: normal;
+  font-weight: 500;
   text-align: center;
 }
 
 .formUserOptions button {
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   padding: 10px 10px;
   font-size: 16px;
   cursor: pointer;
@@ -68,6 +68,10 @@ html {
   transform: translateX(-1px);
 }
 
+.formUserOptions button:active {
+  transform: scale(1.02);
+}
+
 .formUserOptions .adminButton {
   background-color: #a6c4ca;
 }
@@ -76,11 +80,23 @@ html {
   background-color: #b0afe2;
 }
 
-/*login styles*/
+.mainMenuContainer {
+  position: relative;
+}
+
+.top-right-logo {
+  position: fixed;
+  top: -50px;
+  right: 20px;
+  width: 250px;
+  height: auto;
+}
+
+/*Login.js styles*/
 .formLogin {
   background-color: white;
   padding: 50px;
-  border-radius: 5px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -100,7 +116,7 @@ html {
   position: relative;
   width: 100%;
   display: flex;
-  padding: 10px;
+  padding-left: 10px;
   align-items: center;
 }
 .password-container input {
@@ -124,7 +140,7 @@ html {
 .formLogin input.loginInput {
   padding: 10px;
   font-size: 14px;
-  border-radius: 5px;
+  border-radius: 6px;
   border: 1px solid #9f9f9f;
   width: 280px;
   margin-bottom: 15px;
@@ -134,7 +150,7 @@ html {
   background-color: #8a88db;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   padding: 10px;
   font-size: 16px;
   cursor: pointer;
@@ -146,6 +162,10 @@ html {
 .formLogin .loginButton:hover {
   transform: translateY(1px);
   font-weight: 650;
+}
+
+.formLogin .loginButton:active {
+  transform: scale(1.02);
 }
 
 .formLogin .loginTitle {
@@ -165,6 +185,10 @@ html {
 .formLogin .RegistrateButton:hover {
   text-decoration: underline;
   transform: translateX(-1px);
+}
+
+.formLogin .RegistrateButton:active {
+  transform: scale(1.02);
 }
 
 .TextoRegistrateButton {
@@ -187,16 +211,21 @@ html {
   transform: translateX(-1px);
 }
 
+.formLogin .RecordarButton:active {
+  transform: scale(1.02);
+}
+
 .formLogin .inputTitle {
   font-size: 16px;
   font-weight: 500;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   color: #000;
   text-align: left;
   width: 92%;
 }
 .login-link {
   text-align: center;
+  font-weight: 500;
   margin-top: 10px;
   font-size: 14px;
   border: none;
@@ -206,6 +235,10 @@ html {
 
 .login-link:hover {
   text-decoration: underline;
+}
+
+.login-link:active {
+  transform: scale(1.02);
 }
 
 .loginInput {
@@ -219,9 +252,9 @@ html {
 
 .register-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 900px;
   background-color: #ffffff;
-  margin: 350px auto 20px auto;
+  margin: 35px auto 20px auto;
   padding: 8px 30px;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
@@ -265,7 +298,10 @@ html {
 }
 .register-button:hover {
   background-color: #c76d94;
-  transform: translateX(-1px);
+}
+
+.register-button:active {
+  transform: scale(1.02);
 }
 
 .register-container p {
@@ -363,6 +399,10 @@ html {
 
 .fetch-plan-button:hover {
   background-color: #9f9f9f;
+}
+
+.fetch-plan-button:active {
+  transform: scale(1.02);
 }
 
 /*Header styles*/
@@ -474,8 +514,11 @@ textarea {
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 .button:hover {
-  transform: scale(1.02);
   font-weight: 500;
+}
+
+.button:active {
+  transform: scale(1.02);
 }
 
 .BuscarMedButton {
@@ -490,9 +533,13 @@ textarea {
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   margin-bottom: 5px;
 }
+
 .BuscarMedButton:hover {
-  transform: scale(1.02);
   font-weight: 500;
+}
+
+.BuscarMedButton:active {
+  transform: scale(1.02);
 }
 
 .medical-info {
@@ -580,8 +627,10 @@ textarea {
 
 .search-patient-button:hover {
   background-color: #d8b7af;
+}
+
+.search-patient-button:active {
   transform: scale(1.05);
-  box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
 }
 
 .search-patient-button svg {
@@ -656,8 +705,11 @@ textarea {
 }
 
 .button_t:hover {
-  transform: translateX(-1px);
   font-weight: bolder;
+}
+
+.button_t:active {
+  transform: scale(1.02);
 }
 
 /* Responsive */
@@ -724,9 +776,11 @@ h4 {
 }
 
 .emitir-receta-btn:hover {
-  background-color: #d8b7af;
-  transform: scale(1.05);
-  font-weight: 500;
+  background-color: #bda39c;
+}
+
+.emitir-receta-btn:active {
+  transform: scale(1.02);
 }
 
 .description-doctor {
@@ -794,7 +848,7 @@ h4 {
 /* Botones en la esquina superior derecha, fijos */
 .top-right-buttons {
   position: fixed;
-  top: 20px;
+  top: 15px;
   right: 20px;
   display: flex;
   gap: 10px;
@@ -805,7 +859,7 @@ h4 {
   background-color: #d8b7af;
   color: black;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   padding: 10px 15px;
   font-size: 16px;
   cursor: pointer;
@@ -816,17 +870,21 @@ h4 {
   transform: scale(1.05);
 }
 
+.dashboard-button:active {
+  transform: scale(1.02);
+}
+
 .fixed-header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  background-color: #e0f7fa; /* Fondo celeste claro */
+  background-color: #e0f7fa;
   padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  z-index: 1000;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -852,6 +910,7 @@ h4 {
   background-color: #f2ece912;
   color: #333;
   border: none;
+  margin-top: 50px;
   padding: 8px 16px;
   border-radius: 5px;
   font-size: 15px;
@@ -865,8 +924,12 @@ h4 {
 }
 
 .back-button-aesthetic:hover {
-  background-color: #e0d1cad2;
-  transform: translateX(-1px);
+  background-color: #a6c4ca4b;
+}
+
+.back-button-aesthetic:active {
+  background-color: #a6c4ca4b;
+  transform: scale(1.05);
 }
 
 .back-icon {
@@ -892,8 +955,11 @@ h4 {
 }
 
 .dashboard-button:hover {
-  transform: scale(1.03);
   font-weight: 600;
+}
+
+.dashboard-button:active {
+  transform: scale(1.03);
 }
 
 .login-success {
@@ -1039,7 +1105,10 @@ h4 {
 
 .admin-btn:hover {
   background-color: #8a9fa3;
-  transform: translateY(-2px);
+}
+
+.admin-btn:active {
+  transform: scale(1.02);
 }
 
 /* Para los botones grandes en el menú de admin */
@@ -1076,54 +1145,40 @@ h4 {
   background-color: #94abaf;
 }
 
+.dashboard-button-large:active {
+  transform: scale(1.02);
+}
 .custom-loader-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.4);
-  /*-webkit-backdrop-filter: blur(5px);*/
+  width: 100%;
+  height: 100%;
+  background-color: #d4f3fbb5;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 9999;
 }
 
-.custom-loader-content {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 30px;
-  border-radius: 12px;
-  text-align: center;
-  color: white;
+.loader-logo {
+  width: 150px;
+  height: auto;
+  animation: pulse 1s infinite;
 }
 
-.custom-logo {
-  width: 100px;
-  margin-bottom: 20px;
-}
-
-.spinner {
-  margin: 0 auto 12px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #00aaff;
-  border-radius: 50%;
-  width: 35px;
-  height: 35px;
-  animation: spin 1s linear infinite;
-}
-
-.custom-message {
-  font-size: 18px;
-  font-weight: 500;
-}
-
-@keyframes spin {
+@keyframes pulse {
   0% {
-    transform: rotate(0deg);
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
   }
   100% {
-    transform: rotate(360deg);
+    transform: scale(1);
+    opacity: 0.8;
   }
 }
 
@@ -1170,11 +1225,12 @@ h4 {
 }
 
 .medication-card:hover {
-  transform: scale(1.02);
   background-color: rgba(255, 207, 223, 0.411);
   cursor: pointer;
 }
-
+.medication-card:active {
+  transform: scale(1.02);
+}
 .medication-card p {
   font-size: 14px;
   color: #333;
@@ -1222,8 +1278,11 @@ input[name="quantity2"] {
 
 .trash-button:hover {
   background-color: #f4a7a7;
-  transform: scale(1.05);
   box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+}
+
+.trash-button:active {
+  transform: scale(1.05);
 }
 
 .medication-block {
@@ -1282,8 +1341,11 @@ input[name="quantity2"] {
 }
 
 .buttonDescargarReceta:hover {
-  transform: scale(1.05);
   font-weight: 500;
+}
+
+.buttonDescargarReceta:active {
+  transform: scale(1.05);
 }
 
 .loader-overlay-modal {

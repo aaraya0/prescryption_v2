@@ -1,13 +1,11 @@
 import React from "react";
-import "./styles.css"; // Asegurate de tener los estilos
+import "../styles/styles.css";
+import logo from "../styles/prescryption_transparent.png";
 
-const Loader = ({ mensaje = "Cargando datos..." }) => {
+const Loader = () => {
   return (
     <div className="custom-loader-overlay">
-      <div className="loader-content">
-        <div className="spinner" />
-        <p className="custom-message">{mensaje}</p>
-      </div>
+      <img src={logo} alt="Prescryption Logo" className="loader-logo" />
     </div>
   );
 };

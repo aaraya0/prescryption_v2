@@ -3,7 +3,7 @@ import api from "../AxiosConfig";
 import Loader from "../components/Loader";
 import { useNavigate } from "react-router-dom";
 import { FaSearch, FaTrashAlt } from "react-icons/fa";
-import "./styles.css";
+import "../styles/styles.css";
 
 function EmitirReceta() {
   const [formData, setFormData] = useState({

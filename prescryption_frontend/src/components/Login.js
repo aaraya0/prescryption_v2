@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import api from "../AxiosConfig";
 import Loader from "./Loader";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import "./styles.css";
+import "../styles/styles.css";
 
 function Login() {
   const [nid, setNid] = useState("");
@@ -40,7 +40,7 @@ function Login() {
 
   const userTypeMap = {
     patient: "Iniciar Sesión como Paciente",
-    doctor: "Iniciar Sesión como Médico",
+    doctor: "¡Que bueno tenerte de vuelta!",
     pharmacist: "Iniciar Sesión como Farmacéutico",
     pharmacy: "Iniciar Sesión como Farmacia (Administrador)",
     insurance: "Iniciar Sesión como Obra Social",
@@ -157,7 +157,12 @@ function Login() {
           Ingresar
         </button>
       </form>
-      <button className="RecordarButton">Recordar Contraseña</button>
+      <button
+        className="RecordarButton"
+        onClick={() => navigate("/forgot-password", { state: { userType } })}
+      >
+        Recordar Contraseña
+      </button>
 
       {(userType === "patient" ||
         userType === "doctor" ||

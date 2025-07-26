@@ -6,7 +6,7 @@ import PharmacyUser from "./PharmacyUser";
 import PharmacyAdmin from "./PharmacyAdmin";
 import Insurance from "./Insurance";
 import api from "../AxiosConfig";
-import "./styles.css";
+import "../styles/styles.css";
 
 function Dashboard() {
   const { userType } = useParams();

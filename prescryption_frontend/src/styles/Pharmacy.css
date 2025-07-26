@@ -68,8 +68,11 @@
 }
 
 .validate-button:hover {
-  transform: scale(1.02);
   font-weight: 600;
+}
+
+.validate-button:active {
+  transform: scale(1.02);
 }
 
 .filtros-container label {
@@ -111,6 +114,10 @@ button.btn-success {
 
 button.btn-success:hover {
   background-color: #45a049;
+}
+
+button.btn-success:active {
+  transform: scale(1.01);
 }
 
 .invoice-preview {
@@ -240,6 +247,10 @@ button.btn-success:hover {
   background: #c0392b;
 }
 
+.ph-admin__btn--off:active {
+  transform: scale(1.01);
+}
+
 .ph-admin__btn--on {
   background: #2ecc71;
   color: #fff;
@@ -247,6 +258,10 @@ button.btn-success:hover {
 
 .ph-admin__btn--on:hover {
   background: #27ae60;
+}
+
+.ph-admin__btn--on:active {
+  transform: scale(1.01);
 }
 
 .ph-admin__msg {
@@ -314,9 +329,13 @@ button.btn-success:hover {
 }
 
 .validate-button-rosa:hover {
-  transform: scale(1.02) !important;
   font-weight: 650 !important;
 }
+
+.validate-button-rosa:active {
+  transform: scale(1.02) !important;
+}
+
 .brand-name {
   margin-top: 5px;
   font-weight: bold;

@@ -1,7 +1,7 @@
 // src/components/VerifyUsers.jsx
 import React, { useEffect, useState } from "react";
 import api from "../AxiosConfig";
-import "./styles.css"; // Reutiliza tus estilos o agrega estilos específicos si quieres
+import "../styles/styles.css";
 
 function VerifyUsers() {
   const [pendingList, setPendingList] = useState([]);

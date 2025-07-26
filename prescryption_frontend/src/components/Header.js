@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import "./styles.css";
+import "../styles/styles.css";
+import logo from "../styles/prescryption_transparent.png";
 import { FaArrowLeft } from "react-icons/fa";
 
 const Header = () => {
@@ -22,7 +23,9 @@ const Header = () => {
       <button className="back-button-aesthetic" onClick={handleBackClick}>
         <FaArrowLeft className="back-icon" /> Volver
       </button>
-      <h1 className="logo">PresCryption</h1>
+      <div className="mainMenuContainer">
+        <img src={logo} alt="Prescryption Logo" className="top-right-logo" />
+      </div>
     </header>
   );
 };

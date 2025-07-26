@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "./styles.css"; // si tenés estilos generales
+import "../styles/styles.css";
 
 function PharmacyTypeSelection() {
   const navigate = useNavigate();

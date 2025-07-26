@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../AxiosConfig";
-import "./styles.css";
+import "../styles/styles.css";
 
 function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -13,7 +13,10 @@ function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("http://localhost:3001/api/auth/reset-password", { token, newPassword });
+      await api.post("http://localhost:3001/api/auth/reset-password", {
+        token,
+        newPassword,
+      });
       setMessage("✅ Contraseña actualizada correctamente.");
     } catch (err) {
       setMessage("❌ Token inválido o expirado.");
@@ -31,7 +34,9 @@ function ResetPassword() {
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
         />
-        <button className="loginButton" type="submit">Restablecer</button>
+        <button className="loginButton" type="submit">
+          Restablecer
+        </button>
       </form>
       {message && <p>{message}</p>}
     </div>

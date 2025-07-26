@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../AxiosConfig";
-import "./styles.css";
+import "../styles/styles.css";
 import { Accordion } from "react-bootstrap";
 import PrescriptionPDF from "./PrescriptionPDF";
 

@@ -14,8 +14,11 @@
 }
 
 .button_t:hover {
-  transform: scale(1.02);
   font-weight: 700;
+}
+
+.button_t:active {
+  transform: scale(1.01);
 }
 
 .status-valid {
@@ -73,6 +76,11 @@
 .farmacia-sugerida:hover {
   text-decoration: underline;
 }
+
+.farmacia-sugerida:active {
+  transform: scale(1.01);
+}
+
 .input-button-row {
   display: flex !important;
   align-items: center !important;
@@ -106,8 +114,10 @@
 }
 
 .button-enviar-modal:hover {
-  transform: scale(1.03);
   font-weight: 700;
+}
+.button-enviar-modal:active {
+  transform: scale(1.02);
 }
 .status-pending {
   color: orange;
@@ -143,8 +153,11 @@ input[type="number"] {
 }
 
 .dashboard-button:hover {
-  transform: scale(1.03);
   font-weight: 600;
+}
+
+.dashboard-button:active {
+  transform: scale(1.02);
 }
 
 .loader-overlay-modal {

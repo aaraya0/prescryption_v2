@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Modal } from "react-bootstrap";
 import api from "../AxiosConfig";
-import "./styles.css";
+import "../styles/styles.css";
 
 const agruparMedicamentos = (lista) => {
   const mapa = new Map();
