@@ -39,12 +39,12 @@ function Login() {
   }, [location.pathname, navigate]);
 
   const userTypeMap = {
-    patient: "Iniciar Sesión como Paciente",
-    doctor: "¡Que bueno tenerte de vuelta!",
-    pharmacist: "Iniciar Sesión como Farmacéutico",
-    pharmacy: "Iniciar Sesión como Farmacia (Administrador)",
-    insurance: "Iniciar Sesión como Obra Social",
-    admin: "Iniciar Sesión como Administrador",
+    patient: "Ingresá a tu cuenta",
+    doctor: "Ingresá a tu cuenta",
+    pharmacist: "Ingresá a tu cuenta",
+    pharmacy: "Ingresá a tu cuenta",
+    insurance: "Ingresá a tu cuenta",
+    admin: "Ingresá a tu cuenta",
   };
 
   const displayUserType = userTypeMap[userType] || "Iniciar Sesión";
