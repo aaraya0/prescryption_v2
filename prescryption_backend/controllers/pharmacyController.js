@@ -247,12 +247,29 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
       pharmacy.address
     );
 
-    res
-      .status(200)
-      .json({
-        message: "✅ Prescriptions retrieved successfully",
-        prescriptions,
-      });
+    // ✅ Obtener de cada receta la info del médico desde MongoDB
+    const enrichedPrescriptions = await Promise.all(
+      prescriptions.map(async (prescription) => {
+        const doctor = await Doctor.findOne({ nid: prescription.doctorNid });
+        return {
+          ...prescription,
+          doctorName: doctor ? doctor.name : "N/A",
+          doctorSurname: doctor ? doctor.surname : "N/A",
+          doctorLicense: doctor ? doctor.license : "N/A",
+          doctorSpecialty: doctor ? doctor.specialty : "N/A",
+        };
+      })
+    );
+
+    res.status(200).json({
+      message: "✅ Prescriptions retrieved successfully",
+      prescriptions: enrichedPrescriptions,
+    });
+
+    res.status(200).json({
+      message: "✅ Prescriptions retrieved successfully",
+      prescriptions,
+    });
   } catch (err) {
     console.error("❌ Error fetching prescriptions for pharmacy:", err.message);
     res
@@ -369,12 +386,10 @@ exports.getMedicationOptions = async (req, res) => {
     return res.json({ fromCache: false, results: cachedMeds });
   } catch (error) {
     console.error("❌ Error fetching medication options:", error);
-    res
-      .status(500)
-      .json({
-        message: "Error fetching medication options",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error fetching medication options",
+      error: error.message,
+    });
   }
 };
 
@@ -388,11 +403,9 @@ exports.validatePrescription = async (req, res) => {
       !selectedMedicationIds ||
       !Array.isArray(selectedMedicationIds)
     ) {
-      return res
-        .status(400)
-        .json({
-          message: "❌ Prescription ID and medication selection are required.",
-        });
+      return res.status(400).json({
+        message: "❌ Prescription ID and medication selection are required.",
+      });
     }
 
     const pharmacyUser = await PharmacyUser.findOne({ nid });
@@ -459,12 +472,10 @@ exports.validatePrescription = async (req, res) => {
 
         insuranceCoverage = coverageResponse.data.coverage || 0;
       } catch (error) {
-        return res
-          .status(500)
-          .json({
-            message: "Error fetching insurance coverage.",
-            details: error.response?.data || error.message,
-          });
+        return res.status(500).json({
+          message: "Error fetching insurance coverage.",
+          details: error.response?.data || error.message,
+        });
       }
 
       const finalCoverage = insuranceCoverage;
@@ -633,12 +644,10 @@ exports.processPurchase = async (req, res) => {
     );
     console.log("✅ Factura generada:", invoiceResponse.data);
 
-    return res
-      .status(200)
-      .json({
-        message: "✅ Purchase completed.",
-        invoice: invoiceResponse.data,
-      });
+    return res.status(200).json({
+      message: "✅ Purchase completed.",
+      invoice: invoiceResponse.data,
+    });
   } catch (error) {
     console.error("❌ Error processing purchase:", error);
     return res.status(500).json({ message: "Error processing purchase." });
