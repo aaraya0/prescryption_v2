@@ -11,16 +11,41 @@ const Doctor = () => {
   //const token = localStorage.getItem("token");
 
   useEffect(() => {
-    api
-      .get("http://localhost:3001/api/doctors/prescriptions")
-      .then((response) => {
-        if (Array.isArray(response.data)) {
-          setRecetas(response.data);
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const [recetasRes, doctorRes] = await Promise.all([
+          api.get("http://localhost:3001/api/doctors/prescriptions", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          api.get("http://localhost:3001/api/doctors/profile", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        const doctor = doctorRes.data;
+
+        if (Array.isArray(recetasRes.data)) {
+          // Agregamos los datos del doctor a cada receta
+          const enrichedRecetas = recetasRes.data.map((r) => ({
+            ...r,
+            doctorName: doctor.name,
+            doctorSurname: doctor.surname,
+            doctorLicense: doctor.license,
+            doctorNid: doctor.nid,
+          }));
+
+          setRecetas(enrichedRecetas);
         } else {
           setRecetas([]);
         }
-      })
-      .catch((error) => console.error("Error al obtener las recetas:", error));
+      } catch (error) {
+        console.error("Error al obtener recetas o perfil del doctor:", error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const filteredRecetas = recetas
