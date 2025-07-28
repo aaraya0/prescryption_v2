@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import api from "../AxiosConfig";
 import "../styles/styles.css";
-import { Accordion } from "react-bootstrap";
+import { Accordion, Button } from "react-bootstrap";
+import PrescriptionPDF from "./PrescriptionPDF";
+import PrintableInvoice from "./PrintableInvoice";
+import html2pdf from "html2pdf.js";
 
 function Insurance() {
   const [prescriptions, setPrescriptions] = useState([]);
@@ -10,8 +13,9 @@ function Insurance() {
   const [sortOrder, setSortOrder] = useState("asc");
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
+  const invoiceRef = useRef({});
 
-  // 1) Traer recetas usadas
+  // ✅ Traer recetas usadas
   useEffect(() => {
     const fetchUsedPrescriptions = async () => {
       try {
@@ -47,11 +51,11 @@ function Insurance() {
     fetchUsedPrescriptions();
   }, [token]);
 
-  // 2) Filtrar y ordenar
+  // ✅ Filtrar y ordenar
   useEffect(() => {
     let temp = [...prescriptions];
 
-    // 2.1) Filtrar por paciente
+    // Filtrar por paciente
     if (searchPaciente.trim() !== "") {
       const term = searchPaciente.toLowerCase();
       temp = temp.filter((p) => {
@@ -64,7 +68,7 @@ function Insurance() {
       });
     }
 
-    // 2.2) Ordenar por fecha de emisión
+    // Ordenar por fecha de emisión
     temp.sort((a, b) => {
       const dateA = new Date(a.issueDate);
       const dateB = new Date(b.issueDate);
@@ -78,6 +82,25 @@ function Insurance() {
     if (!isoDate) return "N/A";
     const date = new Date(isoDate);
     return date.toLocaleDateString("es-AR");
+  };
+
+  const downloadValidationProof = (prescriptionId) => {
+    const element = invoiceRef.current[prescriptionId];
+    if (element) {
+      setTimeout(() => {
+        html2pdf()
+          .set({
+            margin: 1,
+            filename: `comprobante-validacion-${prescriptionId}.pdf`,
+          })
+          .from(element)
+          .save();
+      }, 150);
+    } else {
+      console.error(
+        `⚠️ No se encontró el comprobante para la receta con ID ${prescriptionId}`
+      );
+    }
   };
 
   if (error) return <p style={{ color: "red" }}>{error}</p>;
@@ -127,8 +150,8 @@ function Insurance() {
                     <strong>ID Receta:</strong> {p.id} &nbsp;|&nbsp;
                     <strong>Paciente:</strong> {p.patientName}{" "}
                     {p.patientSurname}
-                    <strong>DNI Paciente:</strong> {p.patientNid}
-                    <strong>Nº Afiliado :</strong> {p.insurance?.affiliateNum}
+                    <strong> DNI Paciente:</strong> {p.patientNid}
+                    <strong> Nº Afiliado :</strong> {p.insurance?.affiliateNum}
                   </div>
                 </Accordion.Header>
 
@@ -153,6 +176,50 @@ function Insurance() {
                     </p>
                   )}
                   <hr />
+
+                  {/* ✅ Botón para descargar receta */}
+                  <div className="download-button-container">
+                    <PrescriptionPDF receta={p} />
+                  </div>
+
+                  {/* ✅ Botón para descargar documentos (si tiene factura) */}
+                  {p.invoiceNumber && (
+                    <>
+                      <div className="download-button-container">
+                        <Button
+                          onClick={() => {
+                            setTimeout(
+                              () => downloadValidationProof(p.id),
+                              100
+                            );
+                          }}
+                          className="btn btn-primary mt-2"
+                        >
+                          Descargar documentos
+                        </Button>
+                      </div>
+
+                      {/* Contenedor oculto para impresión */}
+                      <div style={{ display: "none" }}>
+                        <div ref={(el) => (invoiceRef.current[p.id] = el)}>
+                          <PrintableInvoice
+                            prescription={p}
+                            validationResult={p.finalPrices || []}
+                            invoiceData={{
+                              invoice_number: p.invoiceNumber || "FACT-N/A",
+                              patient_name: `${p.patientName} ${p.patientSurname}`,
+                              date: formatDate(p.issueDate),
+                              total_price:
+                                p.finalPrices?.reduce(
+                                  (acc, item) => acc + item.finalPrice,
+                                  0
+                                ) || "-",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </Accordion.Body>
               </Accordion.Item>
             ))}

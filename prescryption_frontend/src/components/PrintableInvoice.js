@@ -58,14 +58,16 @@ const PrintableInvoice = ({ prescription, validationResult, invoiceData }) => {
           )}
           <br />
           <p>
-            <strong>Dr.:</strong> {prescription?.doctor?.name}{" "}
-            {prescription?.doctor?.surname}
+            <strong>Dr.:</strong> {prescription?.doctorName}{" "}
+            {prescription?.doctorSurname}
           </p>
+
           <p>
-            <strong>Matrícula:</strong> {prescription?.doctor?.license}
+            <strong>Matrícula:</strong> {prescription?.doctorLicense}
           </p>
+
           <p>
-            <strong>DNI:</strong> {prescription?.doctor?.nid}
+            <strong>Especialidad:</strong> {prescription?.doctorSpecialty}
           </p>
         </div>
       </div>

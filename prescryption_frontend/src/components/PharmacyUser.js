@@ -43,6 +43,8 @@ const PharmacyUser = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      console.log("📦 Recetas obtenidas:", response.data.prescriptions);
+
       setPrescriptions(response.data.prescriptions || []);
     } catch (error) {
       console.error(
