@@ -247,23 +247,9 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
       pharmacy.address
     );
 
-    // ✅ Obtener de cada receta la info del médico desde MongoDB
-    const enrichedPrescriptions = await Promise.all(
-      prescriptions.map(async (prescription) => {
-        const doctor = await Doctor.findOne({ nid: prescription.doctorNid });
-        return {
-          ...prescription,
-          doctorName: doctor ? doctor.name : "N/A",
-          doctorSurname: doctor ? doctor.surname : "N/A",
-          doctorLicense: doctor ? doctor.license : "N/A",
-          doctorSpecialty: doctor ? doctor.specialty : "N/A",
-        };
-      })
-    );
-
     res.status(200).json({
       message: "✅ Prescriptions retrieved successfully",
-      prescriptions: enrichedPrescriptions,
+      prescriptions,
     });
   } catch (err) {
     console.error("❌ Error fetching prescriptions for pharmacy:", err.message);
@@ -634,7 +620,7 @@ exports.processPurchase = async (req, res) => {
     };
 
     const invoiceResponse = await axios.post(
-      "http://localhost:5005/api/invoice/generate",
+      "http://invoice_service:5005/api/invoice/generate",
       invoiceData
     );
     console.log("✅ Factura generada:", invoiceResponse.data);
