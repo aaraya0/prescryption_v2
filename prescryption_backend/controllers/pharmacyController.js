@@ -265,11 +265,6 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
       message: "✅ Prescriptions retrieved successfully",
       prescriptions: enrichedPrescriptions,
     });
-
-    /*res.status(200).json({
-      message: "✅ Prescriptions retrieved successfully",
-      prescriptions,
-    });*/
   } catch (err) {
     console.error("❌ Error fetching prescriptions for pharmacy:", err.message);
     res
@@ -462,7 +457,7 @@ exports.validatePrescription = async (req, res) => {
 
       try {
         const coverageResponse = await axios.post(
-          "http://localhost:5004/api/insurance/coverage",
+          "http://verify_prescription:5004/api/insurance/coverage",
           {
             insurance_name: prescription.insurance.insuranceName,
             plan: prescription.insurance.insurancePlan,
