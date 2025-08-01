@@ -266,10 +266,10 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
       prescriptions: enrichedPrescriptions,
     });
 
-    res.status(200).json({
+    /*res.status(200).json({
       message: "✅ Prescriptions retrieved successfully",
       prescriptions,
-    });
+    });*/
   } catch (err) {
     console.error("❌ Error fetching prescriptions for pharmacy:", err.message);
     res
@@ -462,7 +462,7 @@ exports.validatePrescription = async (req, res) => {
 
       try {
         const coverageResponse = await axios.post(
-          "http://verify_prescription:5004/api/insurance/coverage",
+          "http://localhost:5004/api/insurance/coverage",
           {
             insurance_name: prescription.insurance.insuranceName,
             plan: prescription.insurance.insurancePlan,
@@ -639,7 +639,7 @@ exports.processPurchase = async (req, res) => {
     };
 
     const invoiceResponse = await axios.post(
-      "http://invoice_service:5005/api/invoice/generate",
+      "http://localhost:5005/api/invoice/generate",
       invoiceData
     );
     console.log("✅ Factura generada:", invoiceResponse.data);
