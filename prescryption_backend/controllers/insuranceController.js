@@ -113,11 +113,6 @@ exports.getUsedPrescriptionsByInsurance = async (req, res) => {
       message: "✅ Used prescriptions fetched",
       prescriptions: enrichedPrescriptions,
     });
-
-    res.status(200).json({
-      message: "✅ Used prescriptions fetched",
-      prescriptions: filtered,
-    });
   } catch (err) {
     console.error("❌ Error fetching prescriptions:", err);
     res.status(500).json({ message: "Server error" });
