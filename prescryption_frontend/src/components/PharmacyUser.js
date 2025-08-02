@@ -186,6 +186,7 @@ const PharmacyUser = () => {
                 used: true,
                 finalPrices: response.data.finalPrices,
                 invoiceNumber: response.data.invoice.invoice_number,
+                invoiceData: response.data.invoice, // ✅ GUARDA TODO EL OBJETO REAL
               }
             : p
         )
@@ -461,17 +462,9 @@ const PharmacyUser = () => {
                             <PrintableInvoice
                               prescription={prescription}
                               validationResult={prescription.finalPrices || []}
-                              invoiceData={{
-                                invoice_number:
-                                  prescription.invoiceNumber || "FACT-N/A",
-                                patient_name: `${prescription.patientName} ${prescription.patientSurname}`,
-                                date: formatDate(prescription.issueDate),
-                                total_price:
-                                  prescription.finalPrices?.reduce(
-                                    (acc, item) => acc + item.finalPrice,
-                                    0
-                                  ) || "-",
-                              }}
+                              invoiceData={
+                                prescription.invoiceData || invoiceData
+                              } // ✅ fallback
                             />
                           </div>
                         </div>

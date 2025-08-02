@@ -72,26 +72,31 @@ const PrintableInvoice = ({ prescription, validationResult, invoiceData }) => {
         </div>
       </div>
 
-      {/* Cuadrante 2: Detalle de Factura */}
-      {invoiceData && (
-        <div className="quadrant">
-          <h3>Detalles de la Factura</h3>
-          <div>
-            <p>
-              <strong>Número de Factura:</strong> {invoiceData.invoice_number}
-            </p>
-            <p>
-              <strong>Paciente:</strong> {invoiceData.patient_name}
-            </p>
-            <p>
-              <strong>Fecha de Emisión:</strong> {invoiceData.date}
-            </p>
-            <p>
-              <strong>Total:</strong> ${invoiceData.total_price}
-            </p>
-          </div>
+      {/* ✅ Cuadrante 2: Detalle de Factura */}
+      <div className="quadrant">
+        <h3>Detalles de la Factura</h3>
+        <div>
+          <p>
+            <strong>Número de Factura:</strong>{" "}
+            {invoiceData?.invoiceNumber || "N/A"}
+          </p>
+          <p>
+            <strong>Paciente:</strong> {invoiceData?.patient?.name || "N/A"}{" "}
+            {invoiceData?.patient?.surname ||
+              prescription?.patientSurname ||
+              "N/A"}
+          </p>
+          <p>
+            <strong>Fecha de Emisión:</strong> {invoiceData?.date || "N/A"}
+          </p>
+          <p>
+            <strong>Total:</strong>
+            {invoiceData?.totalAmount
+              ? `$${invoiceData.totalAmount.toFixed(2)}`
+              : "N/A"}
+          </p>
         </div>
-      )}
+      </div>
 
       {/* Cuadrante 3: Espacio para Troqueles */}
       <div className="quadrant">
