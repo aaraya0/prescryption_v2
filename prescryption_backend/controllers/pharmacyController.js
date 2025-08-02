@@ -247,9 +247,23 @@ exports.getPresbyPharmacyAddress = async (req, res) => {
       pharmacy.address
     );
 
+    // ✅ Obtener de cada receta la info del médico desde MongoDB
+    const enrichedPrescriptions = await Promise.all(
+      prescriptions.map(async (prescription) => {
+        const doctor = await Doctor.findOne({ nid: prescription.doctorNid });
+        return {
+          ...prescription,
+          doctorName: doctor ? doctor.name : "N/A",
+          doctorSurname: doctor ? doctor.surname : "N/A",
+          doctorLicense: doctor ? doctor.license : "N/A",
+          doctorSpecialty: doctor ? doctor.specialty : "N/A",
+        };
+      })
+    );
+
     res.status(200).json({
       message: "✅ Prescriptions retrieved successfully",
-      prescriptions,
+      prescriptions: enrichedPrescriptions,
     });
   } catch (err) {
     console.error("❌ Error fetching prescriptions for pharmacy:", err.message);
@@ -512,7 +526,8 @@ exports.processPurchase = async (req, res) => {
   console.log("📌 Body recibido:", req.body);
 
   try {
-    const { prescriptionId, selectedMedications, totalAmount } = req.body;
+    const { prescriptionId, selectedMedications, totalAmount, finalPrices } =
+      req.body;
     const { nid } = req.user;
 
     console.log(`🛒 Procesando compra para la receta ${prescriptionId}...`);
@@ -607,6 +622,7 @@ exports.processPurchase = async (req, res) => {
       patient: {
         dni: prescription.patientNid,
         name: prescription.patientName,
+        surname: prescription.patientSurname,
         address: prescription.patientAddress,
       },
       doctor: {
@@ -623,11 +639,15 @@ exports.processPurchase = async (req, res) => {
       "http://invoice_service:5005/api/invoice/generate",
       invoiceData
     );
+    console.log(`💰 Monto total enviado en factura: ${totalAmount}`);
+
     console.log("✅ Factura generada:", invoiceResponse.data);
 
     return res.status(200).json({
       message: "✅ Purchase completed.",
+      totalAmount, // ✅ Se devuelve el monto total en la respuesta
       invoice: invoiceResponse.data,
+      finalPrices,
     });
   } catch (error) {
     console.error("❌ Error processing purchase:", error);
