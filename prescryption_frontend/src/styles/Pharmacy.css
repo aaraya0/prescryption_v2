@@ -423,10 +423,11 @@ button.btn-success:active {
 .actions-container .btn-primary:hover,
 .actions-container .download-button-container-pharmacy-btn button:hover,
 .validate-button:hover {
-  font-weight: 600;
-  transform: scale(1.01); /* ligero aumento */
-  filter: brightness(1.08); /* ilumina el color */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* sombra elegante */
+  font-weight: 600 !important;
+  transform: scale(1.01) !important; /* ligero aumento */
+  filter: brightness(1.08) !important; /* ilumina el color */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important; /* sombra elegante */
+  color: #000 !important;
 }
 
 /* Active: efecto al presionar */
@@ -436,8 +437,9 @@ button.btn-success:active {
 .actions-container .btn-primary:active,
 .actions-container .download-button-container-pharmacy-btn button:active,
 .validate-button:active {
-  transform: scale(0.96); /* reduce un poco */
-  filter: brightness(0.95); /* oscurece un toque */
+  transform: scale(0.96) !important; /* reduce un poco */
+  filter: brightness(0.95) !important; /* oscurece un toque */
+  color: #000;
 }
 /* ✅ Colores asignados según tu esquema */
 .actions-container .consulta-button {

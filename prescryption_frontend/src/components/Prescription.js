@@ -67,10 +67,25 @@ function EmitirReceta() {
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    if (name === "quantity1" || name === "quantity2") {
+      let num = Number(value);
+
+      // Lógica para mínimo y máximo
+      if (num > 2) num = 2;
+      if (num < 1 && value !== "") num = 1;
+
+      setFormData({
+        ...formData,
+        [name]: value === "" ? "" : num,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleSearchPatient = async () => {
@@ -301,6 +316,8 @@ function EmitirReceta() {
                 onChange={handleChange}
                 value={formData.quantity1}
                 required
+                min="1"
+                max="2"
               />
             </div>
             <div className="medication-block">
@@ -347,6 +364,8 @@ function EmitirReceta() {
                 placeholder="Cantidad"
                 onChange={handleChange}
                 value={formData.quantity2}
+                min="1"
+                max="2"
               />
             </div>
             <div className="form-group">

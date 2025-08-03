@@ -404,26 +404,30 @@ const Patient = () => {
               </div>
 
               {selectedPharmacyName && (
-                <Form.Text className="text-success">
-                  Farmacia encontrada: <strong>{selectedPharmacyName}</strong>
+                <Form.Text className="text-selected-pharmacy">
+                  Farmacia seleccionada: <strong>{selectedPharmacyName}</strong>
                 </Form.Text>
               )}
               {pharmacyNid.trim() !== "" && matchedPharmacies.length > 0 && (
-                <ul className="text-success">
+                <div className="pharmacy-card-container">
                   {matchedPharmacies.map((ph, i) => (
-                    <li
+                    <div
                       key={i}
-                      className="farmacia-sugerida"
+                      className="pharmacy-card"
                       onClick={() => {
                         setPharmacyNid(ph.nid);
                         setSelectedPharmacyName(ph.pharmacy_name);
                         setMatchedPharmacies([]);
                       }}
                     >
-                      <strong>{ph.pharmacy_name}</strong> ({ph.nid})
-                    </li>
+                      <h4 className="pharmacy-name">{ph.pharmacy_name}</h4>
+                      <p className="pharmacy-nid">CUIT: {ph.nid}</p>
+                      <p className="pharmacy-address">
+                        Dirección: {ph.physicalAddress}
+                      </p>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </Form.Group>
           </Form>

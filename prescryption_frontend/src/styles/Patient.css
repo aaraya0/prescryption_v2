@@ -119,6 +119,56 @@
 .button-enviar-modal:active {
   transform: scale(1.02);
 }
+
+.pharmacy-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+  max-height: 200px; /* Scroll si hay muchas */
+  overflow-y: auto;
+}
+
+.text-selected-pharmacy {
+  color: #333;
+  font-weight: 500;
+}
+
+.pharmacy-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pharmacy-card:hover {
+  transform: translateY(-3px);
+  background-color: rgba(255, 207, 223, 0.411);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.pharmacy-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 5px;
+}
+
+.pharmacy-nid {
+  font-size: 14px;
+  color: #333;
+  margin: 0;
+}
+
+.pharmacy-address {
+  font-size: 14px;
+  font-style: italic;
+  color: #555;
+  margin: 3px 0 0;
+}
+
 .status-pending {
   color: orange;
   font-weight: bold;

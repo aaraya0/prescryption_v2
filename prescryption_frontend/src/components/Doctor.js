@@ -7,6 +7,7 @@ import PrescriptionPDF from "./PrescriptionPDF";
 const Doctor = () => {
   const [recetas, setRecetas] = useState([]);
   const [searchPaciente, setSearchPaciente] = useState("");
+  const [searchObraSocial, setSearchObraSocial] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   //const token = localStorage.getItem("token");
 
@@ -60,6 +61,11 @@ const Doctor = () => {
           .includes(searchPaciente.toLowerCase()) ||
         receta.patientNid?.toString().includes(searchPaciente)
     )
+    .filter((receta) =>
+      receta.insurance?.[1]
+        ?.toLowerCase()
+        .includes(searchObraSocial.toLowerCase())
+    )
     .sort((a, b) => {
       const dateA = new Date(a.issueDate);
       const dateB = new Date(b.issueDate);
@@ -84,6 +90,15 @@ const Doctor = () => {
             placeholder="Nombre, Apellido o DNI"
             value={searchPaciente}
             onChange={(e) => setSearchPaciente(e.target.value)}
+          />
+        </label>
+        <label>
+          Buscar por Obra Social:
+          <input
+            type="text"
+            placeholder="Ingresar OS"
+            value={searchObraSocial}
+            onChange={(e) => setSearchObraSocial(e.target.value)}
           />
         </label>
 

@@ -101,13 +101,13 @@ const PrescriptionPDF = ({ receta }) => {
       doc.text("Medicamento 1:", 110, yRight);
       doc.setFont("helvetica", "normal");
       const med1Lines = doc.splitTextToSize(`${receta.meds.med1}`, 45);
-      doc.text(med1Lines, 160, yRight);
+      doc.text(med1Lines, 150, yRight);
       yRight += med1Lines.length * 6;
 
       doc.setFont("helvetica", "bold");
       doc.text("Cantidad:", 110, yRight);
       doc.setFont("helvetica", "normal");
-      doc.text(`${receta.meds.quantity1}`, 160, yRight);
+      doc.text(`${receta.meds.quantity1}`, 150, yRight);
       yRight += 10;
 
       // Medicamento 2 (si existe)
@@ -116,40 +116,74 @@ const PrescriptionPDF = ({ receta }) => {
         doc.text("Medicamento 2:", 110, yRight);
         doc.setFont("helvetica", "normal");
         const med2Lines = doc.splitTextToSize(`${receta.meds.med2}`, 45);
-        doc.text(med2Lines, 160, yRight);
+        doc.text(med2Lines, 150, yRight);
         yRight += med2Lines.length * 6;
 
         doc.setFont("helvetica", "bold");
         doc.text("Cantidad:", 110, yRight);
         doc.setFont("helvetica", "normal");
-        doc.text(`${receta.meds.quantity2}`, 160, yRight);
+        doc.text(`${receta.meds.quantity2}`, 150, yRight);
         yRight += 10;
       }
 
-      // Diagnóstico
-      doc.setFont("helvetica", "bold");
-      doc.text("Diagnóstico:", 110, yRight);
-      doc.setFont("helvetica", "normal");
-      const diagnosisLines = doc.splitTextToSize(
-        `${receta.meds.diagnosis}`,
-        45
-      );
-      doc.text(diagnosisLines, 160, yRight);
-      yRight += diagnosisLines.length * 6;
+      // --- Diagnóstico y Observaciones ---
+      let yFirma;
 
-      // Observaciones (si existen)
-      if (receta.meds.observations?.trim()) {
+      if (receta.meds.med2 && receta.meds.quantity2 > 0) {
+        // ✅ Si hay 2 medicamentos: mostramos en ancho completo debajo
+        let yBottom = Math.max(yLeft, yRight) + 10;
+
         doc.setFont("helvetica", "bold");
-        doc.text("Observaciones:", 110, yRight);
+        doc.text("Diagnóstico:", 20, yBottom);
         doc.setFont("helvetica", "normal");
-        const obsLines = doc.splitTextToSize(`${receta.meds.observations}`, 45);
-        doc.text(obsLines, 160, yRight);
-        yRight += obsLines.length * 6;
+        const diagnosisLines = doc.splitTextToSize(
+          `${receta.meds.diagnosis}`,
+          170
+        );
+        doc.text(diagnosisLines, 20, yBottom + 6);
+        yBottom += diagnosisLines.length * 6 + 10;
+
+        if (receta.meds.observations?.trim()) {
+          doc.setFont("helvetica", "bold");
+          doc.text("Observaciones:", 20, yBottom);
+          doc.setFont("helvetica", "normal");
+          const obsLines = doc.splitTextToSize(
+            `${receta.meds.observations}`,
+            170
+          );
+          doc.text(obsLines, 20, yBottom + 6);
+          yBottom += obsLines.length * 6;
+        }
+
+        yFirma = yBottom + 20;
+      } else {
+        // ✅ Caso 1 medicamento: seguimos en la columna derecha
+        doc.setFont("helvetica", "bold");
+        doc.text("Diagnóstico:", 110, yRight);
+        doc.setFont("helvetica", "normal");
+        const diagnosisLines = doc.splitTextToSize(
+          `${receta.meds.diagnosis}`,
+          45
+        );
+        doc.text(diagnosisLines, 150, yRight);
+        yRight += diagnosisLines.length * 6;
+
+        if (receta.meds.observations?.trim()) {
+          doc.setFont("helvetica", "bold");
+          doc.text("Observaciones:", 110, yRight);
+          doc.setFont("helvetica", "normal");
+          const obsLines = doc.splitTextToSize(
+            `${receta.meds.observations}`,
+            45
+          );
+          doc.text(obsLines, 150, yRight);
+          yRight += obsLines.length * 6;
+        }
+
+        yFirma = Math.max(yLeft, yRight) + 20;
       }
 
-      // Firma del profesional
-      let yFirma = Math.max(yLeft, yRight) + 20;
-
+      // --- Firma del profesional ---
       doc.setFont("helvetica", "normal");
       doc.text(
         `Dr. ${receta.doctorName} ${receta.doctorSurname}`,
@@ -177,16 +211,6 @@ const PrescriptionPDF = ({ receta }) => {
 
       doc.setFont("helvetica", "italic");
       doc.text("Firma del Profesional", 155, yFirma, { align: "center" });
-
-      // Pie de página
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      doc.text(
-        `Obra Social: ${receta.insurance?.insuranceName || "N/A"}`,
-        105,
-        280,
-        { align: "center" }
-      );
 
       // Guardar PDF
       doc.save(`Receta_${receta.patientSurname}_${issueText}.pdf`);
