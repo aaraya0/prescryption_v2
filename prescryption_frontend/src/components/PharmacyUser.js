@@ -162,34 +162,35 @@ const PharmacyUser = () => {
       setLoading(true);
 
       const medsToSend = finalPrices.map((item) => item.medication);
-      const totalAmount = finalPrices.reduce(
-        (acc, item) => acc + item.finalPrice,
-        0
-      );
 
       const response = await api.post(
         "http://localhost:3001/api/pharmacy-users/process_purchase",
         {
           prescriptionId: selectedPrescription.prescriptionId,
           selectedMedications: medsToSend,
-          totalAmount,
+          totalAmount: finalPrices.reduce(
+            (acc, item) => acc + item.finalPrice,
+            0
+          ),
           finalPrices,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       console.log("✅ Respuesta de la compra:", response);
 
-      setInvoiceData(response.data.invoice);
+      // ✅ Usamos el totalAmount real del backend
+      setInvoiceData({
+        ...response.data.invoice,
+        totalAmount: response.data.totalAmount,
+      });
       setInvoiceVisible(true);
-      //setShowValidationModal(false);
-      //setSelectedPrescription(null);
-      //setSelectedMedicationIds([]);
-      handleCloseValidationModal(); // ✅ Resetea modal
 
-      fetchPrescriptions();
-      // ✅ Actualizar receta en la lista local para que el comprobante tenga datos
+      handleCloseValidationModal();
+
+      // ✅ Actualizar lista de recetas localmente con datos completos
       setPrescriptions((prev) =>
         prev.map((p) =>
           p.prescriptionId === selectedPrescription.prescriptionId
@@ -197,12 +198,16 @@ const PharmacyUser = () => {
                 ...p,
                 used: true,
                 finalPrices: response.data.finalPrices,
-                invoiceNumber: response.data.invoice.invoice_number,
-                invoiceData: response.data.invoice,
+                invoiceNumber: response.data.invoice.invoiceNumber, // corregido
+                invoiceData: {
+                  ...response.data.invoice,
+                  totalAmount: response.data.totalAmount,
+                },
               }
             : p
         )
       );
+
       // ✅ Mostrar mensaje de éxito
       setPurchaseMessage({
         text: "¡La compra se procesó correctamente! Ya podés descargar el comprobante.",
@@ -212,6 +217,8 @@ const PharmacyUser = () => {
       setTimeout(() => {
         setPurchaseMessage({ text: "", type: "" });
       }, 4000);
+
+      fetchPrescriptions();
     } catch (error) {
       console.error("❌ Error procesando la compra:", error);
       alert("❌ Error al usar y facturar la receta.");
@@ -486,6 +493,21 @@ const PharmacyUser = () => {
                       >
                         Descargar comprobante
                       </Button>
+                      {/* Contenedor oculto para impresión */}
+                      <div style={{ display: "none" }}>
+                        <div
+                          ref={(el) =>
+                            (invoiceRef.current[prescription.prescriptionId] =
+                              el)
+                          }
+                        >
+                          <PrintableInvoice
+                            prescription={prescription}
+                            validationResult={prescription.finalPrices || []}
+                            invoiceData={prescription.invoiceData}
+                          />
+                        </div>
+                      </div>
 
                       {/* Devolver al paciente */}
                       {!prescription.used &&

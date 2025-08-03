@@ -3,6 +3,13 @@ import React from "react";
 import "../styles/PrintableInvoice.css";
 
 const PrintableInvoice = ({ prescription, validationResult, invoiceData }) => {
+  const totalFactura = invoiceData?.totalAmount
+    ? Number(invoiceData.totalAmount)
+    : validationResult?.reduce(
+        (acc, item) => acc + (item.finalPrice || 0),
+        0
+      ) || 0;
+
   return (
     <div className="container">
       {/* Cuadrante 1: Datos de la receta */}
@@ -78,22 +85,25 @@ const PrintableInvoice = ({ prescription, validationResult, invoiceData }) => {
         <div>
           <p>
             <strong>Número de Factura:</strong>{" "}
-            {invoiceData?.invoiceNumber || "N/A"}
+            {invoiceData?.invoiceNumber || prescription.invoiceNumber || "N/A"}
           </p>
           <p>
-            <strong>Paciente:</strong> {invoiceData?.patient?.name || "N/A"}{" "}
+            <strong>Paciente:</strong>{" "}
+            {invoiceData?.patient?.name || prescription.patientName || "N/A"}{" "}
             {invoiceData?.patient?.surname ||
-              prescription?.patientSurname ||
+              prescription.patientSurname ||
               "N/A"}
           </p>
           <p>
-            <strong>Fecha de Emisión:</strong> {invoiceData?.date || "N/A"}
+            <strong>Fecha de Emisión:</strong>{" "}
+            {new Date(prescription?.issueDate).toLocaleDateString("es-AR")}
           </p>
           <p>
-            <strong>Total:</strong>
-            {invoiceData?.totalAmount
-              ? `$${invoiceData.totalAmount.toFixed(2)}`
-              : "N/A"}
+            <strong>Total:</strong>{" "}
+            {totalFactura.toLocaleString("es-AR", {
+              style: "currency",
+              currency: "ARS",
+            })}
           </p>
         </div>
       </div>

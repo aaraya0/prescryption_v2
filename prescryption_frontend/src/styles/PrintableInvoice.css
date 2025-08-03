@@ -1,53 +1,54 @@
 /* PrintableInvoice.css */
 
 .container {
-    width: 595px;
-    height: 842px;
-    padding: 20px;
-    box-sizing: border-box;
-    font-size: 10px;
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+  width: 595px;
+  height: 842px;
+  padding: 20px;
+  box-sizing: border-box;
+  font-size: 10px;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .quadrant {
-    border: 1px solid black;
-    padding: 10px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  border: 1px solid black;
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .quadrant h3 {
-    font-size: 12px;
-    margin-bottom: 8px;
-    text-align: center;
+  font-size: 12px;
+  margin-bottom: 8px;
+  text-align: center;
 }
 
-.quadrant p, .quadrant div {
-    margin: 2px 0;
-    line-height: 1.2;
+.quadrant p,
+.quadrant div {
+  margin: 2px 0;
+  line-height: 1.2;
 }
 
 /* Ajustes para resultados de validación */
 .validation-item {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 /* Ajustes para el contenedor de troqueles */
 #troqueles-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around; /* Distribuye los troqueles equitativamente */
-    margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around; /* Distribuye los troqueles equitativamente */
+  margin-top: 10px;
 }
 
 #troqueles-container div {
-    border: 1px solid black;
-    width: 100%;
-    height: 30px; /* Ajusta la altura para que los troqueles sean más largos y compactos */
-    margin-bottom: 5px;
+  border: 1px solid black;
+  width: 100%;
+  height: 30px; /* Ajusta la altura para que los troqueles sean más largos y compactos */
+  margin-bottom: 5px;
 }
