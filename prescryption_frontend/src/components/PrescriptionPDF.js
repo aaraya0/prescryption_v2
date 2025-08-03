@@ -108,8 +108,9 @@ const PrescriptionPDF = ({ receta }) => {
       doc.text("Cantidad:", 110, yRight);
       doc.setFont("helvetica", "normal");
       doc.text(`${receta.meds.quantity1}`, 160, yRight);
-      yRight += 6 + 4;
+      yRight += 10;
 
+      // Medicamento 2 (si existe)
       if (receta.meds.med2 && receta.meds.quantity2 > 0) {
         doc.setFont("helvetica", "bold");
         doc.text("Medicamento 2:", 110, yRight);
@@ -122,22 +123,28 @@ const PrescriptionPDF = ({ receta }) => {
         doc.text("Cantidad:", 110, yRight);
         doc.setFont("helvetica", "normal");
         doc.text(`${receta.meds.quantity2}`, 160, yRight);
-        yRight += 6 + 4;
+        yRight += 10;
       }
 
-      // Diagnóstico y Observaciones
+      // Diagnóstico
       doc.setFont("helvetica", "bold");
       doc.text("Diagnóstico:", 110, yRight);
       doc.setFont("helvetica", "normal");
-      doc.text(`${receta.meds.diagnosis}`, 160, yRight);
-      yRight += 8;
+      const diagnosisLines = doc.splitTextToSize(
+        `${receta.meds.diagnosis}`,
+        45
+      );
+      doc.text(diagnosisLines, 160, yRight);
+      yRight += diagnosisLines.length * 6;
 
+      // Observaciones (si existen)
       if (receta.meds.observations?.trim()) {
         doc.setFont("helvetica", "bold");
         doc.text("Observaciones:", 110, yRight);
         doc.setFont("helvetica", "normal");
-        doc.text(`${receta.meds.observations}`, 160, yRight);
-        yRight += 8;
+        const obsLines = doc.splitTextToSize(`${receta.meds.observations}`, 45);
+        doc.text(obsLines, 160, yRight);
+        yRight += obsLines.length * 6;
       }
 
       // Firma del profesional

@@ -54,7 +54,7 @@
 
 /* Botón de transferencia mejorado */
 .validate-button {
-  background-color: #d8b7af;
+  background-color: #b0afe2;
   color: black;
   border: none;
   border-radius: 5px;
@@ -328,14 +328,6 @@ button.btn-success:active {
   font-weight: 500 !important;
 }
 
-.validate-button-rosa:hover {
-  font-weight: 650 !important;
-}
-
-.validate-button-rosa:active {
-  transform: scale(1.02) !important;
-}
-
 .brand-name {
   margin-top: 5px;
   font-weight: bold;
@@ -363,4 +355,105 @@ button.btn-success:active {
   background-color: #f8d7da;
   color: #842029;
   border: 1px solid #f5c2c7;
+}
+
+.consulta-button {
+  background-color: #b0afe2; /* Azul suave */
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.consulta-button:hover {
+  font-weight: bold;
+}
+
+.cancel-button {
+  background-color: #ffc107; /* Amarillo */
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.cancel-button:hover {
+  font-weight: bold;
+}
+
+.actions-container .consulta-button,
+.actions-container .cancel-button {
+  margin-left: 0 !important;
+}
+
+.actions-container {
+  display: flex;
+  justify-content: flex-start; /* Alinear a la izquierda */
+  gap: 21px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+  width: 100%; /* Ocupa todo el ancho */
+}
+
+.actions-container button,
+.actions-container .consulta-button,
+.actions-container .cancel-button,
+.actions-container .btn-primary,
+.actions-container .download-button-container-pharmacy-btn button {
+  height: 45px; /* mismo alto para todos */
+  min-width: 160px; /* ancho mínimo uniforme */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease; /* Transición suave */
+}
+
+/* Hover: efecto visual al pasar el mouse */
+.actions-container button:hover,
+.actions-container .consulta-button:hover,
+.actions-container .cancel-button:hover,
+.actions-container .btn-primary:hover,
+.actions-container .download-button-container-pharmacy-btn button:hover,
+.validate-button:hover {
+  font-weight: 600;
+  transform: scale(1.01); /* ligero aumento */
+  filter: brightness(1.08); /* ilumina el color */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* sombra elegante */
+}
+
+/* Active: efecto al presionar */
+.actions-container button:active,
+.actions-container .consulta-button:active,
+.actions-container .cancel-button:active,
+.actions-container .btn-primary:active,
+.actions-container .download-button-container-pharmacy-btn button:active,
+.validate-button:active {
+  transform: scale(0.96); /* reduce un poco */
+  filter: brightness(0.95); /* oscurece un toque */
+}
+/* ✅ Colores asignados según tu esquema */
+.actions-container .consulta-button {
+  background-color: #a6c4ca; /* Igual que osButton */
+}
+
+.actions-container .cancel-button {
+  background-color: #d8b7af; /* Igual que patientButton */
+}
+
+.actions-container .download-button-container-pharmacy-btn button {
+  background-color: #a6c4ca; /* Igual que pharmacistButton */
+}
+
+.actions-container .btn-primary {
+  background-color: #a6c4ca !important; /* Igual que doctorsButton */
+  border: none;
+  color: #000;
 }

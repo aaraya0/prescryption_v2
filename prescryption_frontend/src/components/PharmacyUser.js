@@ -38,6 +38,7 @@ const PharmacyUser = () => {
     text: "",
     type: "",
   });
+  const [isConsultaMode, setIsConsultaMode] = useState(false);
 
   const fetchPrescriptions = async () => {
     try {
@@ -64,10 +65,11 @@ const PharmacyUser = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleOpenValidationModal = async (prescription) => {
+  const handleOpenValidationModal = async (prescription, consulta = false) => {
     let response;
     try {
       setLoading(true);
+      setIsConsultaMode(consulta);
       console.log("Prescription data:", prescription);
 
       response = await api.get(
@@ -92,6 +94,14 @@ const PharmacyUser = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCloseValidationModal = () => {
+    setShowValidationModal(false);
+    setFinalPrices(null);
+    setSelectedMedicationIds([]);
+    setMedOptions([]);
+    setSelectedPrescription(null);
   };
 
   const handleValidatePrescription = async (e) => {
@@ -132,8 +142,6 @@ const PharmacyUser = () => {
       );
 
       console.log("📦 Respuesta completa del backend:", response.data);
-      setSuccessMessage("✅ Receta validada exitosamente.");
-      setTimeout(() => setSuccessMessage(""), 3000); // Se borra sola
     } catch (error) {
       console.error("❌ Error validando receta:", error);
 
@@ -173,16 +181,13 @@ const PharmacyUser = () => {
       );
       console.log("✅ Respuesta de la compra:", response);
 
-      //alert("🧾 Receta usada y factura emitida correctamente.");
-
-      //setSuccessMessage("✅ Receta usada y factura emitida correctamente.");
-      //setTimeout(() => setSuccessMessage(""), 4000);
-
       setInvoiceData(response.data.invoice);
       setInvoiceVisible(true);
-      setShowValidationModal(false);
-      setSelectedPrescription(null);
-      setSelectedMedicationIds([]);
+      //setShowValidationModal(false);
+      //setSelectedPrescription(null);
+      //setSelectedMedicationIds([]);
+      handleCloseValidationModal(); // ✅ Resetea modal
+
       fetchPrescriptions();
       // ✅ Actualizar receta en la lista local para que el comprobante tenga datos
       setPrescriptions((prev) =>
@@ -198,9 +203,17 @@ const PharmacyUser = () => {
             : p
         )
       );
+      // ✅ Mostrar mensaje de éxito
+      setPurchaseMessage({
+        text: "¡La compra se procesó correctamente! Ya podés descargar el comprobante.",
+        type: "success",
+      });
+
+      setTimeout(() => {
+        setPurchaseMessage({ text: "", type: "" });
+      }, 4000);
     } catch (error) {
       console.error("❌ Error procesando la compra:", error);
-      console.log("🧪 Error response:", error.response);
       alert("❌ Error al usar y facturar la receta.");
     } finally {
       setLoading(false);
@@ -425,60 +438,69 @@ const PharmacyUser = () => {
                       <strong>Fecha de Expiración:</strong>{" "}
                       {formatDate(prescription.expirationDate)}
                     </p>
-
+                    {/* Botón principal */}
                     {!prescription.used && (
                       <button
                         className="validate-button"
-                        onClick={() => handleOpenValidationModal(prescription)}
+                        onClick={() =>
+                          handleOpenValidationModal(prescription, false)
+                        }
                       >
                         Buscar medicamentos
                       </button>
                     )}
 
-                    <div className="download-button-container">
-                      <PrescriptionPDF receta={prescription} />
-                    </div>
+                    <div className="actions-container">
+                      {/* Consultar precios */}
+                      {!prescription.used && (
+                        <button
+                          className="consulta-button"
+                          onClick={() =>
+                            handleOpenValidationModal(prescription, true)
+                          }
+                        >
+                          Consultar precios
+                        </button>
+                      )}
 
-                    {prescription.used && (
-                      <>
-                        <div className="download-button-container">
-                          <Button
+                      {/* Descargar receta */}
+                      <div className="download-button-container-pharmacy-btn">
+                        <PrescriptionPDF receta={prescription} />
+                      </div>
+
+                      {/* Descargar documentos */}
+                      <Button
+                        onClick={() => {
+                          if (prescription.used) {
+                            setTimeout(
+                              () =>
+                                downloadValidationProof(
+                                  prescription.prescriptionId
+                                ),
+                              100
+                            );
+                          }
+                        }}
+                        className="btn btn-primary"
+                        disabled={!prescription.used}
+                      >
+                        Descargar comprobante
+                      </Button>
+
+                      {/* Devolver al paciente */}
+                      {!prescription.used &&
+                        prescription.isPendingValidation && (
+                          <button
+                            className="cancel-button"
                             onClick={() => {
-                              setTimeout(
-                                () =>
-                                  downloadValidationProof(
-                                    prescription.prescriptionId
-                                  ),
-                                100
-                              );
+                              setSelectedPrescription(prescription);
+                              handleCancelValidation();
                             }}
-                            className="btn btn-primary mt-2"
                           >
-                            Descargar documentos
-                          </Button>
-                        </div>
-
-                        {/* Contenedor oculto para impresión */}
-                        <div style={{ display: "none" }}>
-                          <div
-                            ref={(el) =>
-                              (invoiceRef.current[prescription.prescriptionId] =
-                                el)
-                            }
-                          >
-                            <PrintableInvoice
-                              prescription={prescription}
-                              validationResult={
-                                prescription.finalPrices || finalPrices || []
-                              }
-                              invoiceData={
-                                prescription.invoiceData || invoiceData
-                              } // ✅ fallback
-                            />
-                          </div>
-                        </div>
-                      </>
-                    )}
+                            Devolver al paciente
+                          </button>
+                        )}
+                    </div>
                   </Accordion.Body>
                 </Accordion.Item>
               ))}
@@ -488,7 +510,7 @@ const PharmacyUser = () => {
 
         <Modal
           show={showValidationModal}
-          onHide={() => setShowValidationModal(false)}
+          onHide={handleCloseValidationModal}
           centered
         >
           <Modal.Header closeButton>
@@ -552,7 +574,9 @@ const PharmacyUser = () => {
 
                 {!finalPrices && (
                   <Button type="submit" className="validate-button-rosa">
-                    Validar con Obra Social
+                    {isConsultaMode
+                      ? "Simular validación"
+                      : "Validar con Obra Social"}
                   </Button>
                 )}
 
@@ -594,7 +618,9 @@ const PharmacyUser = () => {
                       </div>
                     );
                   })}
+
                 {finalPrices &&
+                  !isConsultaMode &&
                   selectedPrescription?.isPendingValidation &&
                   !selectedPrescription?.used && (
                     <>
@@ -602,15 +628,8 @@ const PharmacyUser = () => {
                         onClick={handleProcessPurchase}
                         className="btn btn-success mt-2"
                       >
-                        ✅ Usar y Facturar receta
+                        Usar y Facturar receta
                       </Button>
-
-                      <button
-                        onClick={handleCancelValidation}
-                        className="btn btn-warning mt-2"
-                      >
-                        ❌ Cancelar validación
-                      </button>
                     </>
                   )}
               </Form>
