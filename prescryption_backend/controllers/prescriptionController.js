@@ -8,12 +8,9 @@ function formatMedicationString({ brandName, details }) {
   const presentation = details?.presentation?.trim() || "";
   const laboratory = details?.laboratory?.trim() || "";
 
-  //return [brandName.trim(), presentation, laboratory].filter(Boolean).join(" + ");
-
-  let main = brandName.trim();
-  if (presentation) main += ` ${presentation}`;
-
-  return laboratory ? `${main} - ${laboratory}` : main;
+  return [brandName.trim(), presentation, laboratory]
+    .filter(Boolean)
+    .join(" + ");
 }
 
 exports.searchMedications = async (req, res) => {
