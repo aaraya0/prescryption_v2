@@ -34,6 +34,7 @@ const Doctor = () => {
             doctorSurname: doctor.surname,
             doctorLicense: doctor.license,
             doctorNid: doctor.nid,
+            doctorSpecialty: doctor.specialty,
           }));
 
           setRecetas(enrichedRecetas);

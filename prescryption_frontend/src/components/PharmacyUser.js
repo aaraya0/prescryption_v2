@@ -34,6 +34,10 @@ const PharmacyUser = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [invoiceData, setInvoiceData] = useState(null);
   const [statusFilter, setStatusFilter] = useState("");
+  const [purchaseMessage, setPurchaseMessage] = useState({
+    text: "",
+    type: "",
+  });
 
   const fetchPrescriptions = async () => {
     try {
@@ -43,8 +47,6 @@ const PharmacyUser = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("📦 Recetas obtenidas:", response.data.prescriptions);
-
       setPrescriptions(response.data.prescriptions || []);
     } catch (error) {
       console.error(
@@ -163,6 +165,7 @@ const PharmacyUser = () => {
           prescriptionId: selectedPrescription.prescriptionId,
           selectedMedications: medsToSend,
           totalAmount,
+          finalPrices,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -170,8 +173,12 @@ const PharmacyUser = () => {
       );
       console.log("✅ Respuesta de la compra:", response);
 
-      alert("🧾 Receta usada y factura emitida correctamente.");
-      setInvoiceData(response.data.invoice); // ✅ guardamos la info de la factura
+      //alert("🧾 Receta usada y factura emitida correctamente.");
+
+      //setSuccessMessage("✅ Receta usada y factura emitida correctamente.");
+      //setTimeout(() => setSuccessMessage(""), 4000);
+
+      setInvoiceData(response.data.invoice);
       setInvoiceVisible(true);
       setShowValidationModal(false);
       setSelectedPrescription(null);
@@ -186,7 +193,7 @@ const PharmacyUser = () => {
                 used: true,
                 finalPrices: response.data.finalPrices,
                 invoiceNumber: response.data.invoice.invoice_number,
-                invoiceData: response.data.invoice, // ✅ GUARDA TODO EL OBJETO REAL
+                invoiceData: response.data.invoice,
               }
             : p
         )
@@ -212,7 +219,7 @@ const PharmacyUser = () => {
           })
           .from(element)
           .save();
-      }, 150); // Espera breve para asegurar renderizado
+      }, 150);
     } else {
       console.error(
         `⚠️ No se encontró el comprobante para la receta con ID ${prescriptionId}`
@@ -461,7 +468,9 @@ const PharmacyUser = () => {
                           >
                             <PrintableInvoice
                               prescription={prescription}
-                              validationResult={prescription.finalPrices || []}
+                              validationResult={
+                                prescription.finalPrices || finalPrices || []
+                              }
                               invoiceData={
                                 prescription.invoiceData || invoiceData
                               } // ✅ fallback
@@ -610,8 +619,36 @@ const PharmacyUser = () => {
         </Modal>
       </div>
       {loading && <Loader mensaje="Cargando..." />}
+
+      {/* ✅ Notificación */}
+      {purchaseMessage.text && (
+        <>
+          {purchaseMessage.type === "success" && (
+            <div className="notification-backdrop"></div>
+          )}
+          <Notification
+            message={purchaseMessage.text}
+            type={purchaseMessage.type}
+          />
+        </>
+      )}
     </>
   );
 };
+// ✅ Componente Notification reutilizable
+function Notification({ message, type }) {
+  if (type === "success") {
+    return (
+      <div className="login-success">
+        <div className="checkmark-circle">
+          <span className="checkmark">&#10003;</span>
+        </div>
+        <h2>¡Éxito!</h2>
+        <p>{message}</p>
+      </div>
+    );
+  }
+  return <div className={`notification ${type}`}>{message}</div>;
+}
 
 export default PharmacyUser;

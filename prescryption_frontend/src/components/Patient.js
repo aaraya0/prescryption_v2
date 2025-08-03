@@ -25,6 +25,10 @@ const Patient = () => {
   const [selectedPharmacyName, setSelectedPharmacyName] = useState("");
   const [matchedPharmacies, setMatchedPharmacies] = useState([]);
   const [isSending, setIsSending] = useState(false);
+  const [transferMessage, setTransferMessage] = useState({
+    text: "",
+    type: "",
+  });
 
   const navigate = useNavigate();
 
@@ -144,7 +148,15 @@ const Patient = () => {
         }
       );
 
-      setSuccessMessage("✅ Receta enviada exitosamente.");
+      setTransferMessage({
+        text: "Receta enviada exitosamente.",
+        type: "success",
+      });
+
+      setTimeout(() => {
+        setTransferMessage({ text: "", type: "" });
+      }, 3000);
+
       setErrorMessage("");
       setShowModal(false);
       setPharmacyNid("");
@@ -156,10 +168,6 @@ const Patient = () => {
           r.id === selectedPrescriptionId ? { ...r, status: "Pendiente" } : r
         )
       );
-
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 2000);
     } catch (error) {
       console.error("Error al transferir la receta:", error);
       setErrorMessage(
@@ -426,8 +434,35 @@ const Patient = () => {
           <Loader mensaje="Enviando receta..." />
         </div>
       )}
+
+      {transferMessage.text && (
+        <>
+          {transferMessage.type === "success" && (
+            <div className="notification-backdrop"></div>
+          )}
+          <Notification
+            message={transferMessage.text}
+            type={transferMessage.type}
+          />
+        </>
+      )}
     </div>
   );
 };
+
+function Notification({ message, type }) {
+  if (type === "success") {
+    return (
+      <div className="login-success">
+        <div className="checkmark-circle">
+          <span className="checkmark">&#10003;</span>
+        </div>
+        <h2>¡Éxito!</h2>
+        <p>{message}</p>
+      </div>
+    );
+  }
+  return <div className={`notification ${type}`}>{message}</div>;
+}
 
 export default Patient;
