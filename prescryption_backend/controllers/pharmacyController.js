@@ -457,7 +457,7 @@ exports.validatePrescription = async (req, res) => {
 
       try {
         const coverageResponse = await axios.post(
-          "http://verify_prescription:5004/api/insurance/coverage",
+          "http://verify_prescryption:5004/api/insurance/coverage",
           {
             insurance_name: prescription.insurance.insuranceName,
             plan: prescription.insurance.insurancePlan,
@@ -497,13 +497,22 @@ exports.cancelPrescriptionValidation = async (req, res) => {
         .json({ message: "❌ Prescription ID is required." });
     }
 
+    const { nid } = req.user; // faltaba esto -> NID del farmacéutico autenticado
+    const pharmacyUser = await PharmacyUser.findOne({ nid });
+    if (!pharmacyUser) {
+      return res.status(404).json({ message: "❌ Pharmacy user not found." });
+    }
+
+    const pharmacyNid = pharmacyUser.pharmacyNid;
+
     console.log(
-      `🔄 Cancelling validation for prescription ID: ${prescriptionId}...`
+      `🔄 Cancelling validation for prescription ID: ${prescriptionId} by pharmacy ${pharmacyNid}...`
     );
 
     // 🔄 Llamar a `clearPendingValidation` en la blockchain
     const result = await blockchainService.clearPendingValidation(
-      prescriptionId
+      prescriptionId,
+      pharmacyNid // faltaba esto
     );
 
     res.status(200).json({

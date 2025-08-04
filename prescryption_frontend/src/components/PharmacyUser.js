@@ -24,7 +24,7 @@ const PharmacyUser = () => {
 
   const decoded = token ? jwtDecode(token) : {};
   const isAdmin = decoded.userType === "pharmacy";
-  const validationRef = useRef();
+  //const validationRef = useRef();
 
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
@@ -39,6 +39,7 @@ const PharmacyUser = () => {
     type: "",
   });
   const [isConsultaMode, setIsConsultaMode] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const fetchPrescriptions = async () => {
     try {
@@ -284,27 +285,33 @@ const PharmacyUser = () => {
     });
   }
 
-  // revisar esta funcion no andaaaaaaaaaaaaaaaaaaa
   const handleCancelValidation = async () => {
     try {
-      const response = await api.post("/pharmacies/cancel_validation", {
-        prescriptionId:
-          selectedPrescription.prescriptionId ||
-          selectedPrescription.id ||
-          selectedPrescription,
-      });
-
-      console.log("🟡 Respuesta del cancel:", response.data);
-
+      setLoading(true);
+      const response = await api.post(
+        "http://localhost:3001/api/pharmacy-users/cancel_validation",
+        { prescriptionId: selectedPrescription.prescriptionId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       if (response.status === 200) {
-        alert("✅ Validación cancelada correctamente.");
-        setShowValidationModal(false);
+        setShowCancelModal(false);
+        setPurchaseMessage({
+          text: "Se devolvió la receta al paciente",
+          type: "success",
+        });
+        setPrescriptions((prev) =>
+          prev.filter(
+            (p) => p.prescriptionId !== selectedPrescription.prescriptionId
+          )
+        );
         fetchPrescriptions();
+        setTimeout(() => setPurchaseMessage({ text: "", type: "" }), 4000);
       }
     } catch (error) {
-      console.error("❌ Error procesando la compra:", error);
-      console.log("🧪 Error response:", error.response);
-      alert("❌ Error al usar y facturar la receta.");
+      console.error("❌ Error cancelando validación:", error);
+      alert("❌ No se pudo cancelar la validación.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -516,7 +523,7 @@ const PharmacyUser = () => {
                             className="cancel-button"
                             onClick={() => {
                               setSelectedPrescription(prescription);
-                              handleCancelValidation();
+                              setShowCancelModal(true);
                             }}
                           >
                             Devolver al paciente
@@ -659,6 +666,24 @@ const PharmacyUser = () => {
           </Modal.Body>
         </Modal>
       </div>
+      <Modal
+        show={showCancelModal}
+        onHide={() => setShowCancelModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirmar devolución</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          ¿Seguro que querés devolver esta receta al paciente?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button className="btn-devolver" onClick={handleCancelValidation}>
+            Devolver al paciente
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {loading && <Loader mensaje="Cargando..." />}
 
       {/* ✅ Notificación */}
@@ -689,6 +714,7 @@ function Notification({ message, type }) {
       </div>
     );
   }
+
   return <div className={`notification ${type}`}>{message}</div>;
 }
 
