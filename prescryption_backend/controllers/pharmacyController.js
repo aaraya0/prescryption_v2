@@ -9,6 +9,7 @@ const blockchainService = require("../services/blockchainService");
 const medicationScraper = require("../services/medicationScraper"); // Importa el scraper
 const MedicationCache = require("../models/MedicationCache"); // Importamos el modelo de caché
 const fundAccount = require("../utils/fundAccount");
+const PrescriptionValidation = require("../models/PrescriptionValidation");
 
 // ✅ Configuración de Web3
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
@@ -457,7 +458,7 @@ exports.validatePrescription = async (req, res) => {
 
       try {
         const coverageResponse = await axios.post(
-          "http://verify_prescryption:5004/api/insurance/coverage",
+          "http://verify_prescription:5004/api/insurance/coverage",
           {
             insurance_name: prescription.insurance.insuranceName,
             plan: prescription.insurance.insurancePlan,
@@ -531,36 +532,26 @@ exports.cancelPrescriptionValidation = async (req, res) => {
   }
 };
 
+
 exports.processPurchase = async (req, res) => {
   console.log("📌 Body recibido:", req.body);
 
   try {
-    const { prescriptionId, selectedMedications, totalAmount, finalPrices } =
-      req.body;
+    const { prescriptionId, selectedMedications, totalAmount, finalPrices } = req.body;
     const { nid } = req.user;
 
     console.log(`🛒 Procesando compra para la receta ${prescriptionId}...`);
 
-    if (
-      !prescriptionId ||
-      !selectedMedications ||
-      selectedMedications.length === 0
-    ) {
-      return res
-        .status(400)
-        .json({ message: "❌ Prescription ID and medications are required." });
+    if (!prescriptionId || !selectedMedications || selectedMedications.length === 0) {
+      return res.status(400).json({ message: "❌ Prescription ID and medications are required." });
     }
 
     // 📌 Obtener la receta desde la blockchain
     console.log(`🔍 Buscando receta en blockchain con ID: ${prescriptionId}`);
-    const prescription = await blockchainService.getPrescriptionById(
-      prescriptionId
-    );
+    const prescription = await blockchainService.getPrescriptionById(prescriptionId);
     if (!prescription) {
       console.log("❌ La receta no fue encontrada en la blockchain.");
-      return res
-        .status(404)
-        .json({ message: "❌ Prescription not found in blockchain." });
+      return res.status(404).json({ message: "❌ Prescription not found in blockchain." });
     }
 
     console.log(`✅ Receta encontrada: ${JSON.stringify(prescription)}`);
@@ -568,18 +559,14 @@ exports.processPurchase = async (req, res) => {
     // 📌 Buscar el usuario farmacéutico en la base de datos
     console.log(`🔍 Buscando usuario de farmacia con NID: ${nid}`);
     const pharmacyUser = await PharmacyUser.findOne({ nid });
-
     if (!pharmacyUser) {
       console.log("❌ No se encontró el usuario de la farmacia.");
       return res.status(404).json({ message: "❌ Pharmacy user not found." });
     }
 
-    // 📌 Ahora buscamos la farmacia con el pharmacyNid del usuario
-    console.log(
-      `🔍 Buscando información de la farmacia con NID: ${pharmacyUser.pharmacyNid}`
-    );
+    // 📌 Buscar la farmacia
+    console.log(`🔍 Buscando información de la farmacia con NID: ${pharmacyUser.pharmacyNid}`);
     const pharmacy = await Pharmacy.findOne({ nid: pharmacyUser.pharmacyNid });
-
     if (!pharmacy) {
       console.log("❌ No se encontró la farmacia.");
       return res.status(404).json({ message: "❌ Pharmacy not found." });
@@ -587,10 +574,8 @@ exports.processPurchase = async (req, res) => {
 
     console.log(`✅ Farmacia encontrada: ${pharmacy.pharmacy_name}`);
 
-    // 📌 Buscar la información del médico en la base de datos
-    console.log(
-      `🔍 Buscando información del médico con NID: ${prescription.doctorNid}`
-    );
+    // 📌 Buscar información del médico
+    console.log(`🔍 Buscando información del médico con NID: ${prescription.doctorNid}`);
     const doctor = await Doctor.findOne({ nid: prescription.doctorNid });
     if (!doctor) {
       console.log("❌ No se encontró el médico.");
@@ -599,13 +584,13 @@ exports.processPurchase = async (req, res) => {
 
     console.log(`✅ Médico encontrado: ${doctor.name} ${doctor.surname}`);
 
-    // 🔹 Generar un número de factura único (ejemplo: FACT-20240316-123456)
+    // 🔹 Generar un número de factura único
     const invoiceNumber = `FACT-${new Date()
       .toISOString()
       .replace(/[-T:.Z]/g, "")
       .slice(0, 12)}-${Math.floor(Math.random() * 100000)}`;
 
-    // 🔹 Marcar la receta como usada en la blockchain
+    // 🔹 Marcar receta como usada en blockchain
     const blockchainResponse = await blockchainService.markPrescriptionAsUsed(
       prescriptionId,
       invoiceNumber,
@@ -613,12 +598,10 @@ exports.processPurchase = async (req, res) => {
       pharmacyUser.nid
     );
     if (!blockchainResponse.success) {
-      return res
-        .status(500)
-        .json({ message: "❌ Failed to mark prescription as used." });
+      return res.status(500).json({ message: "❌ Failed to mark prescription as used." });
     }
 
-    // 🔹 Generar factura simulada llamando a la API de facturación
+    // 🔹 Generar factura simulada
     const invoiceData = {
       invoiceNumber,
       prescriptionId,
@@ -649,12 +632,22 @@ exports.processPurchase = async (req, res) => {
       invoiceData
     );
     console.log(`💰 Monto total enviado en factura: ${totalAmount}`);
-
     console.log("✅ Factura generada:", invoiceResponse.data);
+
+    // 🔹 Guardar validación y factura en MongoDB
+    await PrescriptionValidation.findOneAndUpdate(
+      { prescriptionId },
+      {
+        prescriptionId,
+        validatedMeds: finalPrices,
+        invoiceData: invoiceResponse.data,
+      },
+      { upsert: true, new: true }
+    );
 
     return res.status(200).json({
       message: "✅ Purchase completed.",
-      totalAmount, // ✅ Se devuelve el monto total en la respuesta
+      totalAmount,
       invoice: invoiceResponse.data,
       finalPrices,
     });
@@ -663,6 +656,7 @@ exports.processPurchase = async (req, res) => {
     return res.status(500).json({ message: "Error processing purchase." });
   }
 };
+
 
 // 📌 Obtener el perfil del farmaceutico autenticado
 exports.getPharmacyUserProfile = async (req, res) => {
@@ -713,5 +707,26 @@ exports.getPharmacyProfile = async (req, res) => {
   } catch (err) {
     console.error("❌ Error fetching pharmacy profile:", err.message);
     res.status(500).json({ message: "Error fetching pharmacy profile" });
+  }
+};
+
+exports.getValidationData = async (req, res) => {
+  try {
+    const { prescriptionId } = req.params;
+
+    if (!prescriptionId) {
+      return res.status(400).json({ message: "❌ Prescription ID is required." });
+    }
+
+    const record = await PrescriptionValidation.findOne({ prescriptionId });
+
+    if (!record) {
+      return res.status(404).json({ message: "❌ No validation data found." });
+    }
+
+    res.status(200).json(record);
+  } catch (err) {
+    console.error("❌ Error fetching validation data:", err.message);
+    res.status(500).json({ message: "Error fetching validation data." });
   }
 };

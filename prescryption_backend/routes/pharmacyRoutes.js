@@ -8,6 +8,7 @@ const {
   getMedicationOptions,
   cancelPrescriptionValidation,
   getPharmacyUserProfile,
+  getValidationData
 } = require("../controllers/pharmacyController");
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.get("/medications/search/:prescriptionId", getMedicationOptions);
 router.get("/prescriptions", getPresbyPharmacyAddress);
 router.post("/cancel_validation", cancelPrescriptionValidation);
 router.get("/profile", getPharmacyUserProfile);
+router.get("/pr_validation/:prescriptionId", getValidationData);
 
 module.exports = router;
