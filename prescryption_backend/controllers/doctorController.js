@@ -96,7 +96,7 @@ exports.getPresbyDoctorNid = async (req, res) => {
 // 📌 Obtener datos del paciente por NID (visible para el médico)
 exports.getPatientByNid = async (req, res) => {
     const { nid } = req.params;
-  
+    
     try {
       const patient = await Patient.findOne({ nid });
       if (!patient) {

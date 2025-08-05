@@ -202,6 +202,7 @@ exports.registerPharmacyUser = async (req, res) => {
 
 // 📌 Resetear dirección de farmacia en una receta específica YA NO SE USA CREO
 exports.resetPharmacyAddress = async (req, res) => {
+  //await fundIfLow(pharmacy.address);
   try {
     const { prescriptionId } = req.body;
     await blockchainService.resetPharmacyAddress(prescriptionId);
@@ -226,6 +227,7 @@ exports.getAvailablePharmacies = async (req, res) => {
 
 // 📌 Obtener Recetas Asignadas a la Farmacia
 exports.getPresbyPharmacyAddress = async (req, res) => {
+  //await fundIfLow(pharmacy.address);
   try {
     const { nid } = req.user; // El NID del usuario logueado (usuario de la farmacia)
 
@@ -390,6 +392,7 @@ exports.getMedicationOptions = async (req, res) => {
 };
 
 exports.validatePrescription = async (req, res) => {
+  //await fundIfLow(pharmacy.address);
   try {
     const { prescriptionId, selectedMedicationIds } = req.body;
     const { nid } = req.user;
@@ -490,6 +493,7 @@ exports.validatePrescription = async (req, res) => {
 };
 
 exports.cancelPrescriptionValidation = async (req, res) => {
+  //await fundIfLow(pharmacy.address);
   try {
     const { prescriptionId } = req.body;
     if (!prescriptionId) {
@@ -532,8 +536,8 @@ exports.cancelPrescriptionValidation = async (req, res) => {
   }
 };
 
-
 exports.processPurchase = async (req, res) => {
+  //await fundIfLow(pharmacy.address);
   console.log("📌 Body recibido:", req.body);
 
   try {

@@ -6,6 +6,7 @@ const Doctor = require("../models/Doctor");
 const { decrypt } = require("../utils/encryption");
 const { web3, systemAccount } = require("../utils/systemSigner");
 const { getPharmacySigner } = require("../utils/pharmacySigner");
+const { fundIfLow } = require("../utils/fundAccount");
 
 // ✅ Configuración de Web3
 //const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
@@ -167,6 +168,9 @@ exports.issuePrescription = async (prescriptionData, doctorNid) => {
     const decryptedKey = decrypt(doctor.privateKey);
     const doctorAccount = web3.eth.accounts.privateKeyToAccount(decryptedKey);
     web3.eth.accounts.wallet.add(doctorAccount);
+    console.log(`🔄 [issuePrescription] Chequeando gas para doctor ${doctorAccount.address}`);
+    await fundIfLow(doctorAccount.address);
+    console.log(`✅ [issuePrescription] Gas chequeado para ${doctorAccount.address}`);
 
     const patientStruct = {
       name: prescriptionData.patientName,
@@ -431,6 +435,7 @@ exports.validatePrescriptionOnBlockchain = async (
 ) => {
   try {
     const pharmacyAccount = await getPharmacySigner(pharmacyNid);
+    await fundIfLow(pharmacyAccount.address);
     const validationTimestamp = Math.floor(Date.now() / 1000);
 
     const result = await prescriptionContract.methods
@@ -458,6 +463,7 @@ exports.validatePrescriptionOnBlockchain = async (
 exports.clearPendingValidation = async (prescriptionId, pharmacyNid) => {
   try {
     const pharmacyAccount = await getPharmacySigner(pharmacyNid);
+    await fundIfLow(pharmacyAccount.address);
 
     const result = await prescriptionContract.methods
       .clearPendingValidation(prescriptionId)
@@ -484,6 +490,7 @@ exports.markPrescriptionAsUsed = async (
 ) => {
   try {
     const pharmacyAccount = await getPharmacySigner(pharmacyNid);
+    await fundIfLow(pharmacyAccount.address);
     const invoiceNumber = `${originalInvoiceNumber}|${pharmacistNid}`;
 
     await prescriptionContract.methods
