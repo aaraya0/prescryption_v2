@@ -31,10 +31,13 @@ function Register() {
     }
 
     try {
-      const response = await api.post("http://verify_service:5003/get_affiliation", {
-        nid,
-        insurance_name,
-      });
+      const response = await api.post(
+        "http://verify_service:5003/get_affiliation",
+        {
+          nid,
+          insurance_name,
+        }
+      );
 
       const plan = response.data.insurance_plan;
       const affiliateNum = response.data.affiliate_number;
@@ -495,7 +498,7 @@ function Register() {
 
   return (
     <div className="register-wrapper">
-      <div className="register-container">
+      <div className="register-container register-scrollable">
         <div className="form-header">
           <h2>Formulario de Registro de {userType}</h2>
         </div>

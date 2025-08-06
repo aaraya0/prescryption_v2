@@ -54,8 +54,7 @@ const PharmacyAdmin = () => {
               <tr>
                 <th>Nombre</th>
                 <th>DNI</th>
-                <th>Correo</th>
-                <th>Activo</th>
+                <th>Correo Electrónico</th>
                 <th>Acción</th>
               </tr>
             </thead>
@@ -63,18 +62,10 @@ const PharmacyAdmin = () => {
               {users.map((u) => (
                 <tr key={u._id}>
                   <td>
-                    <FaUser className="ph-admin__icon" />
                     {u.name} {u.surname}
                   </td>
                   <td>{u.nid}</td>
                   <td>{u.email}</td>
-                  <td className="ph-admin__center">
-                    {u.isActive ? (
-                      <FaToggleOn className="ph-admin__icon--active" />
-                    ) : (
-                      <FaToggleOff className="ph-admin__icon--inactive" />
-                    )}
-                  </td>
                   <td className="ph-admin__center">
                     <button
                       className={`ph-admin__btn ${

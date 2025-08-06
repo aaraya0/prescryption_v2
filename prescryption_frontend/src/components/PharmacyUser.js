@@ -115,6 +115,8 @@ const PharmacyUser = () => {
     }
 
     try {
+      setLoading(true);
+
       const response = await api.post(
         "http://localhost:3001/api/pharmacy-users/validate_prescription",
         {
@@ -153,6 +155,8 @@ const PharmacyUser = () => {
 
       setErrorMessage(msg);
       setTimeout(() => setErrorMessage(""), 4000);
+    } finally {
+      setLoading(false);
     }
   };
 
