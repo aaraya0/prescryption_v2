@@ -391,7 +391,7 @@ exports.getMedicationOptions = async (req, res) => {
   }
 };
 
-exports.validatePrescription = async (req, res) => {
+/*exports.validatePrescription = async (req, res) => {
   //await fundIfLow(pharmacy.address);
   try {
     const { prescriptionId, selectedMedicationIds } = req.body;
@@ -490,7 +490,124 @@ exports.validatePrescription = async (req, res) => {
     console.error("❌ Error validating prescription:", error.message);
     return res.status(500).json({ message: "Error validating prescription." });
   }
+};*/
+exports.validatePrescription = async (req, res) => {
+  try {
+    const { prescriptionId, selectedMedicationIds } = req.body;
+    const { nid } = req.user;
+
+    if (
+      !prescriptionId ||
+      !selectedMedicationIds ||
+      !Array.isArray(selectedMedicationIds)
+    ) {
+      return res.status(400).json({
+        message: "❌ Prescription ID and medication selection are required.",
+      });
+    }
+
+    const pharmacyUser = await PharmacyUser.findOne({ nid });
+    if (!pharmacyUser)
+      return res.status(404).json({ message: "❌ Pharmacy user not found." });
+
+    const pharmacy = await Pharmacy.findOne({ nid: pharmacyUser.pharmacyNid });
+    if (!pharmacy)
+      return res.status(404).json({ message: "❌ Pharmacy not found." });
+
+    const prescription = await blockchainService.getPrescriptionById(
+      prescriptionId
+    );
+    if (!prescription)
+      return res
+        .status(404)
+        .json({ message: "❌ Prescription not found in blockchain." });
+
+    if (prescription.used)
+      return res
+        .status(400)
+        .json({ message: "⚠️ Prescription is already used." });
+
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (currentTime > prescription.expirationDate) {
+      return res.status(400).json({ message: "⚠️ Prescription has expired." });
+    }
+
+    const selectedMedications = await MedicationCache.find({
+      _id: { $in: selectedMedicationIds },
+    });
+
+    if (selectedMedications.length !== selectedMedicationIds.length) {
+      return res
+        .status(404)
+        .json({ message: "❌ One or more selected medications not found." });
+    }
+
+    // 🔒 Confirmar uso y limpiar el resto
+    await MedicationCache.updateMany(
+      { _id: { $in: selectedMedicationIds } },
+      { $set: { used: true } }
+    );
+
+    await MedicationCache.deleteMany({
+      prescriptionId,
+      used: false,
+    });
+
+    let finalPrices = [];
+
+    for (const med of selectedMedications) {
+      let insuranceCoverage = 0;
+
+      try {
+        const coverageResponse = await axios.post(
+          "http://verify_prescription:5004/api/insurance/coverage",
+          {
+            insurance_name: prescription.insurance.insuranceName,
+            plan: prescription.insurance.insurancePlan,
+            drug_name: med.genericName,
+          }
+        );
+
+        insuranceCoverage = coverageResponse.data.coverage || 0;
+      } catch (error) {
+        return res.status(500).json({
+          message: "Error fetching insurance coverage.",
+          details: error.response?.data || error.message,
+        });
+      }
+
+      const finalCoverage = insuranceCoverage;
+
+      // 📌 Determinar cantidad según la receta
+      const quantity =
+        med.brandName === prescription.meds.med1.split(" + ")[0]
+          ? Number(prescription.meds.quantity1)
+          : Number(prescription.meds.quantity2);
+
+      // 💰 Calcular precio bruto antes del descuento
+      const grossPrice = med.price * quantity;
+
+      // 💰 Calcular precio final con descuento
+      const finalPrice = grossPrice * (1 - finalCoverage / 100);
+
+      finalPrices.push({
+        medication: med,
+        quantity,
+        grossPrice, // Precio antes del descuento
+        finalPrice, // Precio después del descuento
+        finalCoverage,
+      });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "✅ Prescription validated.", finalPrices });
+  } catch (error) {
+    console.error("❌ Error validating prescription:", error.message);
+    return res.status(500).json({ message: "Error validating prescription." });
+  }
 };
+
 
 exports.cancelPrescriptionValidation = async (req, res) => {
   //await fundIfLow(pharmacy.address);
@@ -536,7 +653,7 @@ exports.cancelPrescriptionValidation = async (req, res) => {
   }
 };
 
-exports.processPurchase = async (req, res) => {
+/*exports.processPurchase = async (req, res) => {
   //await fundIfLow(pharmacy.address);
   console.log("📌 Body recibido:", req.body);
 
@@ -644,6 +761,142 @@ exports.processPurchase = async (req, res) => {
       {
         prescriptionId,
         validatedMeds: finalPrices,
+        invoiceData: invoiceResponse.data,
+      },
+      { upsert: true, new: true }
+    );
+
+    return res.status(200).json({
+      message: "✅ Purchase completed.",
+      totalAmount,
+      invoice: invoiceResponse.data,
+      finalPrices,
+    });
+  } catch (error) {
+    console.error("❌ Error processing purchase:", error);
+    return res.status(500).json({ message: "Error processing purchase." });
+  }
+};
+*/
+exports.processPurchase = async (req, res) => {
+  console.log("📌 Body recibido:", req.body);
+
+  try {
+    const { prescriptionId, selectedMedications, totalAmount, finalPrices } = req.body;
+    const { nid } = req.user;
+
+    console.log(`🛒 Procesando compra para la receta ${prescriptionId}...`);
+
+    if (!prescriptionId || !selectedMedications || selectedMedications.length === 0) {
+      return res.status(400).json({ message: "❌ Prescription ID and medications are required." });
+    }
+
+    // 📌 Obtener la receta desde la blockchain
+    console.log(`🔍 Buscando receta en blockchain con ID: ${prescriptionId}`);
+    const prescription = await blockchainService.getPrescriptionById(prescriptionId);
+    if (!prescription) {
+      console.log("❌ La receta no fue encontrada en la blockchain.");
+      return res.status(404).json({ message: "❌ Prescription not found in blockchain." });
+    }
+
+    console.log(`✅ Receta encontrada: ${JSON.stringify(prescription)}`);
+
+    // 📌 Buscar el usuario farmacéutico en la base de datos
+    console.log(`🔍 Buscando usuario de farmacia con NID: ${nid}`);
+    const pharmacyUser = await PharmacyUser.findOne({ nid });
+    if (!pharmacyUser) {
+      console.log("❌ No se encontró el usuario de la farmacia.");
+      return res.status(404).json({ message: "❌ Pharmacy user not found." });
+    }
+
+    // 📌 Buscar la farmacia
+    console.log(`🔍 Buscando información de la farmacia con NID: ${pharmacyUser.pharmacyNid}`);
+    const pharmacy = await Pharmacy.findOne({ nid: pharmacyUser.pharmacyNid });
+    if (!pharmacy) {
+      console.log("❌ No se encontró la farmacia.");
+      return res.status(404).json({ message: "❌ Pharmacy not found." });
+    }
+
+    console.log(`✅ Farmacia encontrada: ${pharmacy.pharmacy_name}`);
+
+    // 📌 Buscar información del médico
+    console.log(`🔍 Buscando información del médico con NID: ${prescription.doctorNid}`);
+    const doctor = await Doctor.findOne({ nid: prescription.doctorNid });
+    if (!doctor) {
+      console.log("❌ No se encontró el médico.");
+      return res.status(404).json({ message: "❌ Doctor not found." });
+    }
+
+    console.log(`✅ Médico encontrado: ${doctor.name} ${doctor.surname}`);
+
+    // 🔹 Generar un número de factura único
+    const invoiceNumber = `FACT-${new Date()
+      .toISOString()
+      .replace(/[-T:.Z]/g, "")
+      .slice(0, 12)}-${Math.floor(Math.random() * 100000)}`;
+
+    // 🔹 Marcar receta como usada en blockchain
+    const blockchainResponse = await blockchainService.markPrescriptionAsUsed(
+      prescriptionId,
+      invoiceNumber,
+      pharmacy.nid,
+      pharmacyUser.nid
+    );
+    if (!blockchainResponse.success) {
+      return res.status(500).json({ message: "❌ Failed to mark prescription as used." });
+    }
+
+    // 🔹 Preparar los datos de los medicamentos para la factura con precio bruto y final
+    const invoiceMeds = finalPrices.map(item => ({
+      name: item.medication.brandName,
+      presentation: item.medication.details.presentation,
+      laboratory: item.medication.details.laboratory,
+      quantity: item.quantity,
+      priceUnit: item.medication.price,
+      grossPrice: item.grossPrice,   // 💰 antes del descuento
+      finalPrice: item.finalPrice,   // 💰 después del descuento
+      coverage: item.finalCoverage
+    }));
+
+    // 🔹 Generar factura simulada
+    const invoiceData = {
+      invoiceNumber,
+      prescriptionId,
+      pharmacy: {
+        name: pharmacy.pharmacy_name,
+        cuit: pharmacy.nid,
+        address: pharmacy.physicalAddress,
+        contact: pharmacy.contactInfo,
+      },
+      patient: {
+        dni: prescription.patientNid,
+        name: prescription.patientName,
+        surname: prescription.patientSurname,
+        address: prescription.patientAddress,
+      },
+      doctor: {
+        name: doctor.name,
+        surname: doctor.surname,
+        specialty: doctor.specialty,
+        license: doctor.license,
+      },
+      medications: invoiceMeds,
+      totalAmount,
+    };
+
+    const invoiceResponse = await axios.post(
+      "http://invoice_service:5005/api/invoice/generate",
+      invoiceData
+    );
+    console.log(`💰 Monto total enviado en factura: ${totalAmount}`);
+    console.log("✅ Factura generada:", invoiceResponse.data);
+
+    // 🔹 Guardar validación y factura en MongoDB
+    await PrescriptionValidation.findOneAndUpdate(
+      { prescriptionId },
+      {
+        prescriptionId,
+        validatedMeds: finalPrices, // Incluye grossPrice y finalPrice
         invoiceData: invoiceResponse.data,
       },
       { upsert: true, new: true }

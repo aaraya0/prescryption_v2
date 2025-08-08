@@ -18,7 +18,6 @@ router.post("/validate_prescription", validatePrescription);
 router.post("/process_purchase", processPurchase);
 router.get("/available", getAvailablePharmacies);
 router.get("/medications/search/:prescriptionId", getMedicationOptions);
-router.get("/prescriptions", getPresbyPharmacyAddress);
 router.post("/cancel_validation", cancelPrescriptionValidation);
 router.get("/profile", getPharmacyUserProfile);
 router.get("/pr_validation/:prescriptionId", getValidationData);

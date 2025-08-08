@@ -616,7 +616,7 @@ const PharmacyUser = () => {
                 {finalPrices &&
                   finalPrices.map((item, i) => {
                     const { medication, finalPrice, finalCoverage } = item;
-                    const precioOriginal = medication.price || 0;
+                    const precioOriginal = item.grossPrice || 0;
                     const descuento = precioOriginal - finalPrice;
 
                     return (
@@ -633,8 +633,12 @@ const PharmacyUser = () => {
                           {medication.details?.laboratory || "N/A"}
                         </p>
                         <p>
-                          <strong>Precio Lista:</strong> $
-                          {precioOriginal.toFixed(2)}
+                          <strong>Precio Unitario:</strong> $
+                          {medication.priceUnit.toFixed(2)}
+                        </p>
+                        <p>
+                          <strong>Precio Total:</strong> $
+                          {medication.grossPrice.toFixed(2)}
                         </p>
                         <p>
                           <strong>Cobertura Obra Social:</strong>{" "}
