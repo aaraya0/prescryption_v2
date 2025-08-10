@@ -16,7 +16,7 @@ services:
   frontend:
     build: ./prescryption_frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
     volumes:
       - ./prescryption_frontend:/app
     

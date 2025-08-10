@@ -7,25 +7,24 @@ const PrintableInvoice = ({
   prescription,
   validationResult: propValidation,
   invoiceData: propInvoice,
-  roleOverride // opcional, por si querés forzar el rol desde el padre
+  roleOverride, // opcional, por si querés forzar el rol desde el padre
 }) => {
   const [validationResult, setValidationResult] = useState(propValidation || []);
   const [invoiceData, setInvoiceData] = useState(propInvoice || null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
 
-  // 🔧 Config de API
-  const API_BASE =
-    process.env.REACT_APP_API_BASE_URL?.replace(/\/+$/, "") || "http://localhost:3001";
+  // 🔧 Config de API (normaliza evitando /api doble)
+  const RAW_BASE = (process.env.REACT_APP_API_BASE_URL || "http://localhost:3001").replace(/\/+$/, "");
+  const API_ROOT = /\/api$/i.test(RAW_BASE) ? RAW_BASE : `${RAW_BASE}/api`;
 
-  // 🛠️ Helper: intenta leer rol desde token si no está en localStorage
+  // 🛠️ Helper: leer rol desde token si no está en localStorage
   const getRoleFromToken = (token) => {
     try {
       if (!token) return null;
       const [, payload] = token.split(".");
       if (!payload) return null;
       const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
-      // 🔴 acá incluimos userType además de role / userRole
       return (json?.role || json?.userRole || json?.userType || "").toString();
     } catch {
       return null;
@@ -35,29 +34,21 @@ const PrintableInvoice = ({
   // 🗺️ Mapea rol → basePath
   const resolveBasePath = () => {
     const token = localStorage.getItem("token");
-    const storedRole =
-      roleOverride || localStorage.getItem("role") || getRoleFromToken(token);
-
-    // normalizamos a minúsculas
+    const storedRole = roleOverride || localStorage.getItem("role") || getRoleFromToken(token);
     const normalized = String(storedRole || "").trim().toLowerCase();
-
     const roleToPath = {
       pharmacyuser: "pharmacy-users",
+      pharmacy: "pharmacy-users",
       insurance: "insurances",
     };
-
-    if (roleToPath[normalized]) return roleToPath[normalized];
-
-    console.warn("Rol no reconocido; usando 'pharmacy-users' por defecto.");
-    return "pharmacy-users";
+    return roleToPath[normalized] || "pharmacy-users";
   };
 
-  // 🔹 Consultar datos persistidos de validación/factura si existen
+  // 🔹 Consultar validación/factura persistida si existe
   useEffect(() => {
     const fetchValidationData = async () => {
       setLoading(true);
       setFetchError(null);
-
       try {
         const pid = prescription?.id || prescription?.prescriptionId;
         if (!pid) {
@@ -65,7 +56,6 @@ const PrintableInvoice = ({
           setLoading(false);
           return;
         }
-
         const token = localStorage.getItem("token");
         if (!token) {
           console.warn("⚠️ No hay token en localStorage. No se puede consultar validación.");
@@ -74,9 +64,7 @@ const PrintableInvoice = ({
         }
 
         const basePath = resolveBasePath();
-        const url = `${API_BASE}/api/${basePath}/pr_validation/${pid}`;
-        console.debug("[PrintableInvoice] basePath:", basePath, "url:", url);
-
+        const url = `${API_ROOT}/${basePath}/pr_validation/${pid}`;
         const response = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -85,16 +73,12 @@ const PrintableInvoice = ({
           setValidationResult(response.data.validatedMeds || propValidation || []);
           setInvoiceData(response.data.invoiceData || propInvoice || null);
         } else {
-          // Sin data: usar props como fallback
           setValidationResult(propValidation || []);
           setInvoiceData(propInvoice || null);
         }
       } catch (error) {
         console.warn("⚠️ No se encontró validación persistida. Usando props.", error);
-        setFetchError(
-          error?.response?.data?.message || error.message || "Error al obtener validación."
-        );
-        // fallback a props
+        setFetchError(error?.response?.data?.message || error.message || "Error al obtener validación.");
         setValidationResult(propValidation || []);
         setInvoiceData(propInvoice || null);
       } finally {
@@ -106,27 +90,26 @@ const PrintableInvoice = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prescription?.id, prescription?.prescriptionId, roleOverride]);
 
-  // 🧮 Total de factura
+  // 🧮 Total de factura (preferir total persistido)
   const totalFactura = (() => {
     if (invoiceData?.totalAmount != null) {
       const n = Number(invoiceData.totalAmount);
       return Number.isFinite(n) ? n : 0;
     }
-    const sum =
-      (validationResult || []).reduce(
-        (acc, item) => acc + (Number(item?.finalPrice) || 0),
-        0
-      ) || 0;
-    return sum;
+    const src = invoiceData?.medications?.length ? invoiceData.medications : validationResult || [];
+    const sum = src.reduce((acc, it) => acc + (Number(it?.finalPrice) || 0), 0);
+    return Number.isFinite(sum) ? sum : 0;
   })();
 
   // 🕒 Helpers de fecha seguros
   const safeDate = (d) => (d ? new Date(d) : null);
   const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("es-AR") : "N/A");
+  const money = (v) => (Number.isFinite(Number(v)) ? Number(v).toFixed(2) : "0.00");
 
-  if (loading) {
-    return <p>Cargando datos de validación...</p>;
-  }
+  if (loading) return <p>Cargando datos de validación...</p>;
+
+  // 🧱 Fuente de items a mostrar: si hay invoiceData.medications uso esa, sino validationResult
+  const items = (invoiceData?.medications?.length ? invoiceData.medications : validationResult) || [];
 
   return (
     <div className="container">
@@ -157,7 +140,7 @@ const PrintableInvoice = ({
         </div>
       </div>
 
-      {/* Cuadrante 2: Detalle de Factura */}
+      {/* Cuadrante 2: Detalles de la factura */}
       <div className="quadrant">
         <h3>Detalles de la Factura</h3>
         <div>
@@ -177,7 +160,7 @@ const PrintableInvoice = ({
         </div>
       </div>
 
-      {/* Cuadrante 3: Espacio para Troqueles */}
+      {/* Cuadrante 3: Troqueles */}
       <div className="quadrant">
         <h3>Espacio para Troqueles</h3>
         <div id="troqueles-container">
@@ -189,47 +172,69 @@ const PrintableInvoice = ({
       {/* Cuadrante 4: Resultados de Validación */}
       <div className="quadrant">
         <h3>Resultado de Validación</h3>
-        {validationResult && validationResult.length > 0 ? (
-          validationResult.map((item, index) => {
-            const precioOriginal =
-              Number(item?.medication?.price) ||
-              Number(item?.medication?.originalPrice) ||
-              Number(item?.originalPrice) ||
-              0;
+        {items.length > 0 ? (
+          items.map((raw, index) => {
+            // 🔄 Normalización para soportar ambas fuentes
+            const qty = Number(raw.quantity ?? raw?.medication?.quantity ?? 1);
 
-            const finalCoverage =
-              Number(item?.finalCoverage) ||
-              Number(item?.coveragePercentage) ||
-              0;
+            let priceUnit = Number(
+              raw.priceUnit ??
+              raw?.medication?.priceUnit ??
+              raw?.medication?.price ??
+              0
+            );
 
-            const finalPrice = Number(item?.finalPrice) || 0;
-            const descuento = Math.max(precioOriginal - finalPrice, 0);
+            let grossPrice = Number(
+              raw.grossPrice ??
+              raw?.medication?.grossPrice ??
+              raw?.medication?.price ??
+              0
+            );
 
-            const brand =
-              item?.medication?.brandName ||
-              item?.brand ||
-              item?.medication?.genericName ||
+            // Fallbacks consistentes
+            if (!Number.isFinite(priceUnit) || priceUnit === 0) {
+              if (Number.isFinite(grossPrice) && grossPrice > 0) {
+                priceUnit = grossPrice / (qty || 1);
+              }
+            }
+            if (!Number.isFinite(grossPrice) || grossPrice === 0) {
+              if (Number.isFinite(priceUnit) && priceUnit > 0) {
+                grossPrice = priceUnit * (qty || 1);
+              }
+            }
+
+            const finalPrice = Number(raw.finalPrice ?? 0);
+            const coverage = Number(raw.coverage ?? raw.finalCoverage ?? raw.coveragePercentage ?? 0);
+
+            const name =
+              raw.name ||
+              raw?.medication?.brandName ||
+              raw?.medication?.genericName ||
               "N/A";
 
             const presentation =
-              item?.medication?.details?.presentation ||
-              item?.presentation ||
+              raw.presentation ||
+              raw?.medication?.details?.presentation ||
               "N/A";
 
             const laboratory =
-              item?.medication?.details?.laboratory ||
-              item?.laboratory ||
+              raw.laboratory ||
+              raw?.medication?.details?.laboratory ||
               "N/A";
+
+            const discount = Math.max(grossPrice - finalPrice, 0);
 
             return (
               <div key={index} style={{ marginBottom: "1rem" }}>
-                <p><strong>Medicamento:</strong> {brand}</p>
+                <p><strong>Medicamento:</strong> {name}</p>
                 <p><strong>Presentación:</strong> {presentation}</p>
                 <p><strong>Laboratorio:</strong> {laboratory}</p>
-                <p><strong>Precio Lista:</strong> ${precioOriginal.toFixed(2)}</p>
-                <p><strong>Cobertura Obra Social:</strong> {finalCoverage}%</p>
-                <p><strong>Descuento:</strong> ${descuento.toFixed(2)}</p>
-                <p><strong>Precio Final (a pagar):</strong> ${finalPrice.toFixed(2)}</p>
+                <p><strong>Cantidad:</strong> {qty}</p>
+                <p><strong>Precio Unitario:</strong> ${money(priceUnit)}</p>
+                <p><strong>Costo total:</strong> ${money(grossPrice)}</p>
+                <p><strong>Cobertura Obra Social:</strong> {Number.isFinite(coverage) ? coverage : 0}%</p>
+                <p><strong>Descuento:</strong> ${money(discount)}</p>
+                <p><strong>Precio Final (a pagar):</strong> ${money(finalPrice)}</p>
               </div>
             );
           })

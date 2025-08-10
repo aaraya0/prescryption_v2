@@ -80,9 +80,9 @@ const PharmacyUser = () => {
         }
       );
 
-      console.log("🧪 Recibidos del backend:", response.data.results); // ✅ AHORA sí se puede usar
+      console.log("🧪 Recibidos del backend:", response.data.results);
 
-      setMedOptions(response.data.results);
+      setMedOptions(Array.isArray(response.data.results) ? response.data.results : []);
       console.log(
         "Opciones de medicamentos después de asignar:",
         response.data.results
@@ -128,17 +128,21 @@ const PharmacyUser = () => {
         }
       );
 
-      setFinalPrices(response.data.finalPrices);
+      const normalized = Array.isArray(response.data.finalPrices)
+        ? response.data.finalPrices
+        : [];
+
+      setFinalPrices(normalized);
       setSelectedPrescription((prev) => ({
         ...prev,
-        finalPrices: response.data.finalPrices,
+        finalPrices: normalized,
       }));
       setPrescriptions((prev) =>
         prev.map((p) =>
           p.prescriptionId === selectedPrescription.prescriptionId
             ? {
                 ...p,
-                finalPrices: response.data.finalPrices,
+                finalPrices: normalized,
               }
             : p
         )
@@ -174,7 +178,7 @@ const PharmacyUser = () => {
           prescriptionId: selectedPrescription.prescriptionId,
           selectedMedications: medsToSend,
           totalAmount: finalPrices.reduce(
-            (acc, item) => acc + item.finalPrice,
+            (acc, item) => acc + Number(item.finalPrice || 0),
             0
           ),
           finalPrices,
@@ -317,6 +321,12 @@ const PharmacyUser = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper para formatear dinero sin romper si falta el valor
+  const money = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n.toFixed(2) : "0.00";
   };
 
   return (
@@ -592,12 +602,12 @@ const PharmacyUser = () => {
                             "No especificados"}
                         </p>
                         <p>
-                          <strong>Precio:</strong> ${med.price}
+                          <strong>Precio:</strong> ${money(med.price)}
                         </p>
                         <p>
                           <strong>Precio PAMI:</strong>{" "}
-                          {med.pamiPrice > 0
-                            ? `$${med.pamiPrice}`
+                          {Number(med.pamiPrice) > 0
+                            ? `$${money(med.pamiPrice)}`
                             : "No especificado"}
                         </p>
                       </div>
@@ -615,9 +625,13 @@ const PharmacyUser = () => {
 
                 {finalPrices &&
                   finalPrices.map((item, i) => {
-                    const { medication, finalPrice, finalCoverage } = item;
-                    const precioOriginal = item.grossPrice || 0;
-                    const descuento = precioOriginal - finalPrice;
+                    const { medication = {}, finalPrice, finalCoverage } = item || {};
+                    // Campos defensivos
+                    const priceUnit = Number(medication.priceUnit ?? medication.price ?? 0);
+                    const grossPrice = Number(item.grossPrice ?? medication.grossPrice ?? 0);
+                    const final = Number(finalPrice ?? 0);
+                    const descuento = Math.max(0, grossPrice - final);
+                    const coverage = Number(finalCoverage ?? 0);
 
                     return (
                       <div key={i}>
@@ -634,22 +648,22 @@ const PharmacyUser = () => {
                         </p>
                         <p>
                           <strong>Precio Unitario:</strong> $
-                          {medication.priceUnit.toFixed(2)}
+                          {money(priceUnit)}
                         </p>
                         <p>
                           <strong>Precio Total:</strong> $
-                          {medication.grossPrice.toFixed(2)}
+                          {money(grossPrice)}
                         </p>
                         <p>
                           <strong>Cobertura Obra Social:</strong>{" "}
-                          {finalCoverage || 0}%
+                          {Number.isFinite(coverage) ? coverage : 0}%
                         </p>
                         <p>
-                          <strong>Descuento:</strong> ${descuento.toFixed(2)}
+                          <strong>Descuento:</strong> ${money(descuento)}
                         </p>
                         <p>
                           <strong>Precio Final (a pagar):</strong> $
-                          {finalPrice.toFixed(2)}
+                          {money(final)}
                         </p>
                         <hr />
                       </div>
