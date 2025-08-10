@@ -34,7 +34,7 @@ contract PrescriptionContract {
         uint issueDate;
         uint expirationDate;
         bool used;
-        bool isPendingValidation; // Nuevo campo para bloquear el reenvío
+        bool isPendingValidation; 
         string invoiceNumber;
     }
 
@@ -64,7 +64,6 @@ contract PrescriptionContract {
     event PrescriptionCleared(uint prescriptionId);
 
 
-    // Función para emitir una receta con fecha personalizada
     function issuePrescription(
         PatientInfo memory _patient,
         MedicationInfo memory _meds,
@@ -88,7 +87,7 @@ contract PrescriptionContract {
             issueDate: _issueDate,
             expirationDate: expirationDate,
             used: false,
-            isPendingValidation: false, // Inicialmente no está pendiente de validación
+            isPendingValidation: false, 
             invoiceNumber: ""
         });
 
@@ -107,13 +106,13 @@ contract PrescriptionContract {
         );
     }
 
-    // Función para obtener una receta específica por ID
+
     function getPrescription(uint _prescriptionId) public view returns (Prescription memory) {
         require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
         return prescriptions[_prescriptionId - 1];
     }
 
-    // Función para actualizar la dirección de la farmacia en la receta
+
     function updatePrescription(uint _prescriptionId, address _pharmacyAddress) public {
         require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
         require(!prescriptions[_prescriptionId - 1].isPendingValidation, "Prescription already pending validation.");
@@ -125,7 +124,6 @@ contract PrescriptionContract {
         emit PrescriptionUpdated(_prescriptionId, _pharmacyAddress);
     }
 
-    // Función para liberar la receta de la farmacia
     function clearPendingValidation(uint _prescriptionId) public {
         require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
         prescriptions[_prescriptionId - 1].isPendingValidation = false;
@@ -134,12 +132,10 @@ contract PrescriptionContract {
         emit PrescriptionCleared(_prescriptionId);
     }
 
-    // Función para obtener todas las recetas
     function getPrescriptions() public view returns (Prescription[] memory) {
         return prescriptions;
     }
 
-    // Función para obtener recetas por NID de médico
     function getPresbyDoctorNid(string memory _doctorNid) public view returns (Prescription[] memory) {
         uint count = 0;
         for (uint i = 0; i < prescriptionCount; i++) {
@@ -159,7 +155,7 @@ contract PrescriptionContract {
         return doctorPrescriptions;
     }
 
-    // Función para obtener recetas por dirección del paciente
+
     function getPresbyPatientAddress(address _patientAddress) public view returns (Prescription[] memory) {
         uint count = 0;
         for (uint i = 0; i < prescriptionCount; i++) {
@@ -179,7 +175,6 @@ contract PrescriptionContract {
         return patientPrescriptions;
     }
 
-    // Función para obtener recetas por dirección de la farmacia
     function getPresbyPharmacyAddress(address _pharmacyAddress) public view returns (Prescription[] memory) {
         uint count = 0;
         for (uint i = 0; i < prescriptionCount; i++) {
@@ -199,7 +194,6 @@ contract PrescriptionContract {
         return pharmacyPrescriptions;
     }
 
-    // Función para marcar la receta como usada y agregar el número de factura
     function markPrescriptionAsUsed(uint _prescriptionId, string memory _invoiceNumber) public {
         require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid ID.");
         require(!prescriptions[_prescriptionId - 1].used, "Prescription already used.");
@@ -208,7 +202,7 @@ contract PrescriptionContract {
         prescriptions[_prescriptionId - 1].invoiceNumber = _invoiceNumber;
     }
 
-    // 📌 Función para validar la receta en la blockchain
+
 function validatePrescription(uint _prescriptionId, address _pharmacyAddress, uint _validationTimestamp) public {
     require(_prescriptionId > 0 && _prescriptionId <= prescriptionCount, "Invalid prescription ID.");
     Prescription storage prescription = prescriptions[_prescriptionId - 1];
@@ -217,15 +211,12 @@ function validatePrescription(uint _prescriptionId, address _pharmacyAddress, ui
     require(prescription.pharmacyAddress == _pharmacyAddress, "Pharmacy does not match the assigned pharmacy.");
     require(prescription.isPendingValidation, "Prescription is not pending validation.");
 
-    // 📌 Marcar la receta como validada y lista para facturación
-   // prescription.used = true;
+
     prescription.isPendingValidation = false;
 
-    // 📌 Agregar un timestamp de validación
     emit PrescriptionValidated(_prescriptionId, _pharmacyAddress, _validationTimestamp);
 }
 
-// 📌 Evento para registrar la validación de la receta
 event PrescriptionValidated(uint prescriptionId, address pharmacyAddress, uint validationTimestamp);
 
 }

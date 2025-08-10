@@ -16,7 +16,6 @@ const authMiddleware = (requiredUserType) => {
       req.user = decoded;
       console.log("✅ Token válido. Usuario:", decoded);
 
-      // 📌 Verificar si el usuario tiene el tipo requerido para esta ruta
       if (requiredUserType && decoded.userType !== requiredUserType) {
         console.log(
           `❌ Acceso denegado. Se requiere ${requiredUserType}, pero el usuario es ${decoded.userType}`
@@ -27,11 +26,11 @@ const authMiddleware = (requiredUserType) => {
       }
 
       console.log("✅ Usuario autorizado. Continuando con la ejecución...");
-      next(); // 📌 Si todo está bien, continuar con la ejecución
+      next(); 
     } catch (error) {
       console.log("❌ Error al verificar token:", error.message);
-      return res.status(401).json({ message: "❌ Invalid token" }); // -> lo que estaba originalmente
-      //return res.status(401).json({ message: error.message }); // cambio para que el front detecte la sesión expirada
+      return res.status(401).json({ message: "❌ Invalid token" }); 
+  
     }
   };
 };

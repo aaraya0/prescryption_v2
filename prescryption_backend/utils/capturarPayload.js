@@ -38,7 +38,7 @@ const captureGwtPayload = async (dniOrMatricula) => {
         Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
     });
 
-    // Cargar cookies si las tenés
+    // Cargar cookies 
     try {
         const cookies = require('./cookies.json');
         console.log("🍪 Cookies cargadas desde JSON:");
@@ -100,7 +100,6 @@ const captureGwtPayload = async (dniOrMatricula) => {
         });
         console.log("✅ Hizo clic en el botón de búsqueda.");
 
-        // Esperar a que cargue la tabla
         await page.waitForSelector('.resultTable tbody tr', { timeout: 25000 });
 
         console.log("🎯 Finalizado. Cerrando navegador...");

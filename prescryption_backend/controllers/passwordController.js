@@ -1,4 +1,3 @@
-//📁 backend/controllers/passwordController.js
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");

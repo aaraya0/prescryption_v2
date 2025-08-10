@@ -4,16 +4,15 @@ const bodyParser = require('body-parser');
 const connectDB = require('./config/db');
 const authMiddleware = require('./middleware/authMiddleware');
 
-
-// Rutas públicas
+// public
 const publicPatientRoutes = require('./routes/publicPatientRoutes');
 const publicDoctorRoutes = require('./routes/publicDoctorRoutes');
 const publicPharmacyRoutes = require('./routes/publicPharmacyRoutes');
 const publicInsuranceRoutes = require('./routes/publicInsuranceRoutes');
 const publicAdminRoutes = require('./routes/publicAdminRoutes');
-const authRoutes = require('./routes/authRoutes'); // ✅ Nueva ruta de autenticación
+const authRoutes = require('./routes/authRoutes');
 
-// Rutas protegidas
+// protected
 const patientRoutes = require('./routes/patientRoutes');
 const doctorRoutes = require('./routes/doctorRoutes');
 const prescriptionRoutes = require('./routes/prescriptionRoutes');
@@ -30,25 +29,20 @@ app.use(cors());
 app.use(bodyParser.json());
 connectDB();
 
-// ✅ Rutas Públicas (sin autenticación)
 app.use('/api/public/patients', publicPatientRoutes);
 app.use('/api/public/doctors', publicDoctorRoutes);
 app.use('/api/public/pharmacies', publicPharmacyRoutes);
 app.use('/api/public/insurances', publicInsuranceRoutes);
 app.use('/api/public/admin', publicAdminRoutes);
-app.use('/api/auth', authRoutes); // Ruta de autenticación
+app.use('/api/auth', authRoutes); 
 
-// ✅ Middleware de autenticación para rutas protegidas
-//app.use(authMiddleware);
-
-// ✅ Rutas Protegidas
 app.use('/api/patients', authMiddleware("patient"), patientRoutes);
 app.use('/api/doctors', authMiddleware("doctor"), doctorRoutes);
 app.use('/api/prescriptions', authMiddleware("doctor"), prescriptionRoutes);
 app.use('/api/insurances', authMiddleware("insurance"), insuranceRoutes);
 app.use('/api/admin', authMiddleware("admin"), adminRoutes);
-app.use('/api/pharmacy-users', authMiddleware("pharmacyUser"), pharmacyRoutes); // empleados
-app.use('/api/pharmacies', authMiddleware("pharmacy"), pharmacyAdminRoutes); // entidad farmacia
+app.use('/api/pharmacy-users', authMiddleware("pharmacyUser"), pharmacyRoutes); 
+app.use('/api/pharmacies', authMiddleware("pharmacy"), pharmacyAdminRoutes); 
 
 
 const passwordRoutes = require("./routes/passwordRoutes");

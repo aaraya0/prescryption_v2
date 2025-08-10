@@ -7,12 +7,10 @@ app = Flask(__name__)
 def generate_invoice():
     data = request.json
 
-    # Validar que los datos requeridos están presentes
     required_fields = ["invoiceNumber", "prescriptionId", "pharmacy", "patient", "doctor", "totalAmount", "medications"]
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
-    # Construcción de la factura con datos reales
     invoice = {
         "invoiceNumber": data["invoiceNumber"],
         "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -37,7 +35,7 @@ def generate_invoice():
         "medications": data["medications"],
         "totalAmount": data["totalAmount"],
         "currency": "ARS",
-        "taxes": round(data["totalAmount"] * 0.21, 2),  # Simulación del IVA 21%
+        "taxes": round(data["totalAmount"] * 0.21, 2),  #IVA 21%
         "finalAmount": round(data["totalAmount"] * 1.21, 2)
     }
 

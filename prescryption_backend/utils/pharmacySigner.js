@@ -1,4 +1,4 @@
-const { web3 } = require('./systemSigner'); // usa el mismo web3 que ya configuraste
+const { web3 } = require('./systemSigner'); 
 const Pharmacy = require('../models/Pharmacy');
 const { decrypt } = require('./encryption');
 

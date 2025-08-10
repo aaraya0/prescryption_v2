@@ -1,6 +1,5 @@
 const crypto = require("crypto");
 
-// ✅ Lazy load de la secret
 function getSecret() {
     const secret = process.env.ENCRYPTION_SECRET;
     if (!secret) {

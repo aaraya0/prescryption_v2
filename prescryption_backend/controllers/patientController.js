@@ -8,7 +8,6 @@ const axios = require("axios");
 
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 
-// 📌 Registrar Paciente
 exports.registerPatient = async (req, res) => {
   const {
     name,
@@ -34,12 +33,12 @@ exports.registerPatient = async (req, res) => {
     return res.status(400).json({ message: "❌ Missing required fields" });
   }
 
-  let affiliate_num = "N/A"; // Valor por defecto para pacientes particulares
-  let insurance_plan = "PARTICULAR"; // Plan para pacientes sin obra social
+  let affiliate_num = "N/A"; // default value for patients w/o insurance
+  let insurance_plan = "PARTICULAR"; 
 
   if (insurance_name && insurance_name !== "PARTICULAR") {
     try {
-      // 🔍 Consultar la API de la obra social para obtener afiliación
+      // API request
       const response = await axios.post(
         "http://verify_insurance:5003/get_affiliation",
         { nid, insurance_name }
@@ -51,8 +50,6 @@ exports.registerPatient = async (req, res) => {
             "⚠️ Patient is not affiliated with this insurance. Choose 'PARTICULAR' to continue.",
         });
       }
-
-      // Si el paciente está afiliado, usar los datos obtenidos
       affiliate_num = response.data.affiliate_number;
       insurance_plan = response.data.insurance_plan;
     } catch (error) {
@@ -68,18 +65,15 @@ exports.registerPatient = async (req, res) => {
   }
 
   try {
-    // 🔐 Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
     const account = web3.eth.accounts.create();
-
-    // 📝 Registrar al paciente (ya sea particular o afiliado)
     const newPatient = new Patient({
       name,
       surname,
       nid,
       birth_date,
       sex,
-      insurance_name: insurance_name || "PARTICULAR", // Si no tiene obra social, asignar "PARTICULAR"
+      insurance_name: insurance_name || "PARTICULAR",
       affiliate_num,
       insurance_plan,
       mail,
@@ -96,7 +90,7 @@ exports.registerPatient = async (req, res) => {
   }
 };
 
-// 📌 Obtener Recetas por Paciente (Ruta Protegida)
+
 exports.getPresbyPatientAddress = async (req, res) => {
   try {
     const nid = req.user.nid;
@@ -120,11 +114,6 @@ exports.getPresbyPatientAddress = async (req, res) => {
       prescriptions = [];
     }
 
-    /* 
-        const prescriptions = await blockchainService.getPrescriptionsByPatient(patientAddress);
-        */
-
-    // 🔍 Buscar info del médico para cada receta
     const enrichedPrescriptions = await Promise.all(
       prescriptions.map(async (prescription) => {
         const doctor = await Doctor.findOne({ nid: prescription.doctorNid });
@@ -142,27 +131,23 @@ exports.getPresbyPatientAddress = async (req, res) => {
   } catch (err) {
     console.error("❌ Error retrieving prescriptions:", err.message);
     res.status(500).json({ message: "Internal server error" });
-    //res.status(500).send(err.message);
   }
 };
 
-// 📌 Enviar Receta a Farmacia
 exports.sendPrescriptionToPharmacy = async (req, res) => {
   const { prescriptionId, pharmacyNid } = req.body;
 
   try {
-    // Validar que se proporcionen los datos necesarios
+   
     if (!prescriptionId || !pharmacyNid) {
       return res.status(400).json({ message: "❌ Missing required fields" });
     }
 
-    // Buscar la farmacia en la base de datos
     const pharmacy = await Pharmacy.findOne({ nid: pharmacyNid });
     if (!pharmacy) {
       return res.status(404).json({ message: "❌ Pharmacy not found" });
     }
 
-    // Actualizar la receta en la blockchain con la dirección de la farmacia
     const result = await blockchainService.updatePrescriptionPharmacyAddress(
       prescriptionId,
       pharmacy.address
@@ -180,11 +165,10 @@ exports.sendPrescriptionToPharmacy = async (req, res) => {
   }
 };
 
-// 📌 Visualizar los datos del perfil del Paciente
 exports.getPatientProfile = async (req, res) => {
   try {
     const nid = req.user.nid;
-    const patient = await Patient.findOne({ nid }).select("-password"); // no enviar contraseña
+    const patient = await Patient.findOne({ nid }).select("-password"); 
     if (!patient) return res.status(404).json({ message: "Patient not found" });
 
     res.json(patient);
@@ -194,7 +178,6 @@ exports.getPatientProfile = async (req, res) => {
   }
 };
 
-// 📌 Obtener las Farmacias disponibles
 exports.getAvailablePharmacies = async (req, res) => {
   try {
     const pharmacies = await Pharmacy.find({ isActive: true }).select(

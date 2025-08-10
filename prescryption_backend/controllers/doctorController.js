@@ -6,13 +6,13 @@ const { Web3 } = require('web3');
 const { encrypt } = require('../utils/encryption');
 const fundNewAccount = require('../utils/fundAccount');
 const validateDoctorCordoba = require('../utils/validateDoctor_cba');
-// ✅ Configuración de Web3
+
+// web 3 config
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 
 
 const Patient = require('../models/Patient');
 
-// 📌 Registrar Médico (Ruta Pública)
 exports.registerDoctor = async (req, res) => {
     const { nid, license, name, surname, specialty, password, mail } = req.body;
 
@@ -22,10 +22,9 @@ exports.registerDoctor = async (req, res) => {
         }
 
 
-        // ✅ Validación híbrida
         let isValid = false;
 
-        // Validar contra el Colegio Médico de Córdoba (si aplica)
+        // Colegio Médico de Córdoba (if it applies)
         const cordobaResult = await validateDoctorCordoba(nid, license);
         if (cordobaResult.valid) {
             console.log("✅ Validación exitosa vía Colegio Médico de Córdoba.");
@@ -34,7 +33,7 @@ exports.registerDoctor = async (req, res) => {
             console.warn("⚠️ No se pudo validar en Córdoba. Intentando fallback al mock...");
         }
 
-        // Fallback al mock
+        // Fallback to mock
         if (!isValid) {
             const verifyResponse = await axios.post('http://verify_license:5000/verify', {
                 nid,
@@ -81,7 +80,6 @@ exports.registerDoctor = async (req, res) => {
 };
 
 
-// 📌 Obtener Recetas por Médico (Ruta Protegida)
 exports.getPresbyDoctorNid = async (req, res) => {
     try {
         const prescriptions = await blockchainService.getPrescriptionsByDoctor(req.user.nid);
@@ -92,8 +90,6 @@ exports.getPresbyDoctorNid = async (req, res) => {
 };
 
 
-
-// 📌 Obtener datos del paciente por NID (visible para el médico)
 exports.getPatientByNid = async (req, res) => {
     const { nid } = req.params;
     
@@ -110,11 +106,10 @@ exports.getPatientByNid = async (req, res) => {
     }
   };
 
-  // 📌 Obtener el perfil del doctor autenticado
 exports.getDoctorProfile = async (req, res) => {
     try {
         const nid = req.user.nid;
-      const doctor = await Doctor.findOne({ nid }).select('-password'); // no enviar contraseña
+      const doctor = await Doctor.findOne({ nid }).select('-password'); // exclude pw
 
         if (!doctor) {
             return res.status(404).json({ message: 'Doctor no encontrado' });

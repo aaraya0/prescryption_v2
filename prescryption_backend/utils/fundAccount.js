@@ -1,4 +1,3 @@
-// utils/fundAccount.js
 const { Web3 } = require("web3");
 require("dotenv").config();
 

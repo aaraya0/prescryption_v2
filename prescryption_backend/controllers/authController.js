@@ -8,7 +8,6 @@ const Insurance = require('../models/Insurance');
 const AdminUser = require('../models/AdminUser'); 
 require('dotenv').config();
 
-// 📌 Login General (Paciente, Médico, Usuario de Farmacia, Insurance)
 exports.login = async (req, res) => {
     const { nid, password, userType } = req.body;
 
@@ -18,7 +17,7 @@ exports.login = async (req, res) => {
         }
 
         let user;
-        let userIdentifier = "nid"; // Clave por defecto para búsqueda en DB
+        let userIdentifier = "nid"; 
 
         switch (userType) {
             case 'patient':
@@ -34,10 +33,10 @@ exports.login = async (req, res) => {
                 user = await Pharmacy.findOne({ nid });
                 break;
             case 'insurance':
-                userIdentifier = "insurance_nid"; // 📌 Cambiar clave para buscar en `Insurance`
+                userIdentifier = "insurance_nid"; 
                 user = await Insurance.findOne({ insurance_nid: nid });
                 break;
-            case 'admin': // ✅ Nuevo caso para administrador
+            case 'admin': 
                 user = await AdminUser.findOne({ nid });
                 break;
             default:
@@ -48,7 +47,7 @@ exports.login = async (req, res) => {
             return res.status(401).send('❌ User not found');
         }
 
-        // 📌 Validar si el usuario de farmacia está activo
+        // validates if pharmacyUser is active
         if (userType === 'pharmacyUser' && !user.isActive) {
             return res.status(403).send('❌ User is inactive');
         }
@@ -58,18 +57,16 @@ exports.login = async (req, res) => {
             return res.status(401).send('❌ Invalid credentials');
         }
 
-        // 📌 Generar token JWT con datos específicos para cada tipo de usuario
+        // specific token for each user type
         const tokenPayload = {
             nid: user.nid,
             userType
         };
 
-        // Si el usuario es de farmacia, incluir `pharmacyNid`
         if (userType === 'pharmacyUser') {
             tokenPayload.pharmacyNid = user.pharmacyNid;
         }
 
-        // Si el usuario es una obra social, incluir `insurance_nid`
         if (userType === 'insurance') {
             tokenPayload.insurance_nid = user.insurance_nid;
         }
@@ -79,7 +76,7 @@ exports.login = async (req, res) => {
         res.json({
             message: '✅ Login successful',
             token,
-            debug: tokenPayload // 📌 Agrega esto para verificar los datos en el token
+            debug: tokenPayload
         });
         
     } catch (err) {

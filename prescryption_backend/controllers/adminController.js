@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const AdminUser = require("../models/AdminUser");
 const Insurance = require("../models/Insurance");
 
-// ✅ Login del administrador
 exports.loginAdmin = async (req, res) => {
     try {
         const { nid, password } = req.body;
@@ -27,7 +26,6 @@ exports.loginAdmin = async (req, res) => {
     }
 };
 
-// ✅ Obtener todas las obras sociales no verificadas
 exports.getPendingInsurances = async (req, res) => {
     try {
         const insurances = await Insurance.find({ isVerified: false });
@@ -37,7 +35,6 @@ exports.getPendingInsurances = async (req, res) => {
     }
 };
 
-// ✅ Verificar una obra social por NID
 exports.verifyInsurance = async (req, res) => {
     try {
         const { insurance_nid } = req.params;

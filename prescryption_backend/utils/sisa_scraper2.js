@@ -87,7 +87,6 @@ const scrapeSISAValidation = async (dniOrMatricula) => {
     }
 };
 
-// Si ejecutás directamente este archivo
 if (require.main === module) {
     (async () => {
         const dniOrMatricula = process.argv[2] || "41758877";

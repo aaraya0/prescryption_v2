@@ -1,12 +1,8 @@
 from flask import Flask, request, jsonify
 
-
-
 app = Flask(__name__)
 
-
-
-# Base de datos simulada de afiliaciones
+# simulated insurance db
 INSURANCE_DB = {
     "SWISS MEDICAL": {
         "12345678": {

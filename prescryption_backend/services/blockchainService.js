@@ -8,19 +8,14 @@ const { web3, systemAccount } = require("../utils/systemSigner");
 const { getPharmacySigner } = require("../utils/pharmacySigner");
 const { fundIfLow } = require("../utils/fundAccount");
 
-// ✅ Configuración de Web3
-//const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
-//const web3 = new Web3(`https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`);
-//const web3 = new Web3(process.env.SEPOLIA_RPC_URL);
-
-// ✅ Leer la dirección del contrato
+// reads contract address
 const contractsDataPath = path.join(
   __dirname,
   "..",
   "..",
   "prescryption_solidity",
   "contracts_data.json"
-); //para Belu
+); 
 //const contractsDataPath = 'D:\\prescryption_v3\\prescryption_solidity\\contracts_data.json';
 let contractsData;
 
@@ -37,7 +32,6 @@ try {
   );
 }
 
-// ✅ Leer ABI del contrato
 const prescriptionContractPath = path.join(
   __dirname,
   "..",
@@ -62,19 +56,18 @@ try {
   );
 }
 
-// ✅ Instanciar el contrato
 let prescriptionContract = new web3.eth.Contract(
   prescriptionContractJSON.abi,
   contractsData.PrescriptionContract
 );
 
-// ✅ Funciones del contrato
+// contract functions
 exports.getPrescriptionsByPatient = async (patientAddress) => {
   const rawPrescriptions = await prescriptionContract.methods
     .getPresbyPatientAddress(patientAddress)
     .call();
 
-  // Formatear los datos
+
   const formattedPrescriptions = convertBigIntToString(rawPrescriptions);
 
   return formattedPrescriptions.map((prescription) => {
@@ -113,7 +106,7 @@ exports.getPrescriptionsByPatient = async (patientAddress) => {
       expirationDate: expiration.toISOString(),
       used: prescription.used,
       invoiceNumber: prescription.invoiceNumber,
-      status, // ✅ nuevo campo calculado
+      status, // calculated field
     };
   });
 };
@@ -144,7 +137,7 @@ exports.getPrescriptionsByDoctor = async (nid) => {
 
 function convertBigIntToString(obj) {
   if (typeof obj === "bigint") {
-    return obj.toString(); // Convertir BigInt a String
+    return obj.toString(); 
   } else if (Array.isArray(obj)) {
     return obj.map(convertBigIntToString);
   } else if (typeof obj === "object" && obj !== null) {
@@ -208,7 +201,7 @@ exports.issuePrescription = async (prescriptionData, doctorNid) => {
 };
 
 BigInt.prototype.toJSON = function () {
-  return this.toString(); // Convertir BigInt a String automáticamente
+  return this.toString(); 
 };
 
 exports.getAllPrescriptions = async () => {
@@ -216,7 +209,6 @@ exports.getAllPrescriptions = async () => {
     .getPrescriptions()
     .call();
 
-  // Limpiar y formatear los datos
   const formattedPrescriptions = rawPrescriptions.map((prescription) => ({
     id: prescription.id,
     patientName: prescription.patient.name,
@@ -241,11 +233,11 @@ exports.getAllPrescriptions = async () => {
     issueDate: format(
       new Date(Number(prescription.issueDate) * 1000),
       "yyyy-MM-dd HH:mm:ss"
-    ), // Convertir a Number
+    ), 
     expirationDate: format(
       new Date(Number(prescription.expirationDate) * 1000),
       "yyyy-MM-dd HH:mm:ss"
-    ), // Convertir a Number
+    ), 
     used: prescription.used,
     invoiceNumber: prescription.invoiceNumber,
   }));
@@ -268,7 +260,7 @@ exports.updatePrescriptionPharmacyAddress = async (
 
     const signedTx = await web3.eth.accounts.signTransaction(
       {
-        from: systemAccount.address, // ✅ Agregado
+        from: systemAccount.address, 
         to: prescriptionContract.options.address,
         data: tx.encodeABI(),
         gas,
@@ -291,7 +283,6 @@ exports.updatePrescriptionPharmacyAddress = async (
   } catch (error) {
     console.error("❌ Error updating prescription pharmacy address:", error);
 
-    // Si querés mantener el extractor de errores:
     const revertReason = extractRevertReason(error);
     if (revertReason) {
       console.error("❌ Revert reason:", revertReason);
@@ -303,20 +294,18 @@ exports.updatePrescriptionPharmacyAddress = async (
     );
   }
 };
-// 📌 Función para extraer la razón de la reversión
+
+// extract revert (error) reason in bc for ganache
 function extractRevertReason(error) {
   try {
-    // Verificar si el error contiene `cause.message` con la razón de la reversión
     if (error.cause?.message && error.cause.message.includes("revert")) {
-      return error.cause.message.split("revert ")[1]; // Extraer solo la razón
+      return error.cause.message.split("revert ")[1]; 
     }
 
-    // Buscar en `error.message`
     if (error.message.includes("revert")) {
       return error.message.split("revert ")[1];
     }
 
-    // Verificar en `error.data` (estructura alternativa de Ganache)
     if (error.data) {
       for (let key in error.data) {
         if (error.data[key]?.reason) {
@@ -328,7 +317,7 @@ function extractRevertReason(error) {
     console.error("❌ Failed to extract revert reason:", parseError.message);
   }
 
-  return null; // Si no se encuentra ninguna razón específica
+  return null; 
 }
 
 exports.getPrescriptionsByPharmacy = async (pharmacyAddress) => {
@@ -391,7 +380,6 @@ exports.getPrescriptionById = async (prescriptionId) => {
 
     console.log("✅ Prescription retrieved:", prescription);
 
-    // Convertir BigInt a String para evitar errores con JSON
     const formattedPrescription = {
       id: prescription.id.toString(),
       patientName: prescription.patient.name,

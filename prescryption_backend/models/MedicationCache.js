@@ -2,13 +2,13 @@ const mongoose = require("mongoose");
 
 const medicationCacheSchema = new mongoose.Schema(
   {
-    prescriptionId: { type: String, required: true }, // vínculo con receta
+    prescriptionId: { type: String, required: true }, 
     genericName: { type: String, required: true, lowercase: true, trim: true },
     activeComponentsList: [{ type: String, lowercase: true, trim: true }],
     brandName: { type: String, required: false, trim: true },
     price: { type: Number, required: true },
     pamiPrice: { type: Number, default: 0 },
-    used: { type: Boolean, default: false }, // 🔍 usado en validación o no
+    used: { type: Boolean, default: false }, 
     details: {
       laboratory: { type: String, default: "Unknown", trim: true },
       presentation: { type: String, default: "Unknown", trim: true },

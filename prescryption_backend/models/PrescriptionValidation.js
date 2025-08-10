@@ -1,10 +1,9 @@
-// models/PrescriptionValidation.js
 const mongoose = require("mongoose");
 
 const PrescriptionValidationSchema = new mongoose.Schema({
   prescriptionId: { type: String, required: true, index: true },
-  validatedMeds: { type: Array, required: true }, // medicamentos validados con cobertura y precios
-  invoiceData: { type: Object, required: true }, // número de factura, totales, etc.
+  validatedMeds: { type: Array, required: true }, 
+  invoiceData: { type: Object, required: true }, 
   createdAt: { type: Date, default: Date.now }
 });
 

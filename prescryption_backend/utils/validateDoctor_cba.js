@@ -13,17 +13,14 @@ async function validateDoctorCordoba(dni, license) {
             timeout: 60000
         });
 
-        // Completa DNI y Matrícula
         await page.type('input[name="documento"]', dni.toString());
         await page.type('input[name="matricula"]', license.toString());
 
-        // Clic en "Consultar"
         await Promise.all([
             page.click('input[type="submit"]'),
             page.waitForNavigation({ waitUntil: 'networkidle2' })
         ]);
 
-        // Captura y limpia el contenido de la respuesta
         const rawText = await page.evaluate(() => document.body.innerText.trim());
         await browser.close();
 
@@ -40,7 +37,6 @@ async function validateDoctorCordoba(dni, license) {
             mensajeLegal: mensajeLegal || null
         };
 
-        // Extraer nombre si existe una línea siguiente
         if (habilitada) {
             const idx = lines.indexOf(habilitada);
             if (lines[idx + 1]) {

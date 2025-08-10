@@ -1,11 +1,9 @@
 const bcrypt = require('bcryptjs');
-const connectDB = require('./db'); // Ruta al archivo que compartiste
-const AdminUser = require('../models/AdminUser'); // Ruta a tu modelo de admin
-require('dotenv').config(); // 👈 Esto carga las variables del .env
-
+const connectDB = require('./db'); 
+const AdminUser = require('../models/AdminUser'); 
+require('dotenv').config(); 
 const createAdmin = async () => {
-    await connectDB(); // 👈 Conecta a la DB usando tu función existente
-
+    await connectDB(); 
     const hashedPassword = await bcrypt.hash("admin1234", 10);
 
     const newAdmin = new AdminUser({
@@ -21,7 +19,7 @@ const createAdmin = async () => {
     } catch (err) {
         console.error("❌ Error al crear admin:", err.message);
     } finally {
-        process.exit(); // Cierra el proceso después de ejecutar
+        process.exit(); 
     }
 };
 

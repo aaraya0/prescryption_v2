@@ -8,7 +8,6 @@ module.exports = async function(deployer) {
     await deployer.deploy(PrescriptionContract);
     const prescriptionContractInstance = await PrescriptionContract.deployed();
 
-    // Guardar las direcciones en un archivo JSON
     const contractsData = {
         PrescriptionContract: prescriptionContractInstance.address
     };

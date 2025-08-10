@@ -4,10 +4,8 @@ import logging
 
 app = Flask(__name__)
 
-# ✅ Configurar logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# ✅ Cargar datos desde un archivo JSON
 try:
     with open('professionals_data.json', 'r') as f:
         data = json.load(f)
@@ -18,7 +16,6 @@ except FileNotFoundError:
     VALID_DOCTORS = {}
     VALID_PHARMACISTS = {}
 
-# ✅ Autenticación Básica
 AUTH_TOKEN = "securetoken123"
 
 def authenticate(request):
@@ -27,7 +24,6 @@ def authenticate(request):
         return False
     return True
 
-# 📌 Buscar profesional
 def search_professional(license, nid, user_type):
     """
     Valida si la matrícula y el DNI coinciden con el tipo de profesional.
@@ -39,7 +35,6 @@ def search_professional(license, nid, user_type):
         return VALID_PHARMACISTS.get(nid) == license
     return False
 
-# 📌 Endpoint de verificación
 @app.route('/verify', methods=['POST'])
 def verify():
     if not authenticate(request):
@@ -49,7 +44,6 @@ def verify():
     data = request.json
     logging.info(f"📥 Received data: {data}")
 
-    # ✅ Validación de datos
     license = data.get('license', '').strip()
     nid = data.get('nid', '').strip()
     user_type = data.get('user_type', '').strip().lower()
@@ -62,7 +56,6 @@ def verify():
         logging.warning("⚠️ Invalid user_type.")
         return jsonify({"error": "Invalid user_type"}), 400
 
-    # ✅ Buscar profesional
     is_valid = search_professional(license, nid, user_type)
 
     if is_valid:
@@ -72,7 +65,6 @@ def verify():
         logging.warning(f"❌ {user_type.capitalize()} validation failed.")
         return jsonify({"valid": False}), 404
 
-# ✅ Ruta de Salud para Diagnóstico
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "running", "service": "verify_service"}), 200

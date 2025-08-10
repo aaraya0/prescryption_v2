@@ -3,7 +3,7 @@ const { login } = require('../controllers/authController');
 
 const router = express.Router();
 
-// 📌 Login (Acceso Público)
+// public access
 router.post('/login', login);
 
 module.exports = router;

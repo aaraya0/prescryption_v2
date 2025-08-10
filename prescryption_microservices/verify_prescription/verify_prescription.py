@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# 🔍 Lista de medicamentos con 70% de cobertura por Resolución 27/2022
 RESOLUCION_27_2022 = {
     "acenocumarol", "allopurinol", "amantadina", "amiodarona", "amlodipina",
     "atenolol", "atorvastatín", "bezafibrato", "biperideno", "brimonidina",
@@ -19,13 +18,12 @@ RESOLUCION_27_2022 = {
     "verapamilo"
 }
 
-# 🔍 Medicamentos con 100% de cobertura por PMO
 PMO_MEDICATIONS = {
     "atazanavir", "fosamprenavir", "delavirdina", "entecavir", "enfuvirtide",
     "filgrastim", "molgramostin", "factor vii"
 }
 
-# 🔍 Cobertura de obras sociales por plan
+
 INSURANCE_COVERAGE = {
     "SWISS MEDICAL": {"P063": 40, "SM02": 40, "SMG2": 40},
     "SANCOR SALUD": {"3000B": 50, "1000B CC": 40, "4000": 50, "5000": 60},
@@ -44,7 +42,6 @@ def check_coverage():
     if not drug_name or not insurance_name or not plan:
         return jsonify({"error": "Missing required fields"}), 400
 
-    # ✅ Caso 1: Medicamentos con 100% de cobertura (PMO)
     if drug_name in PMO_MEDICATIONS:
         return jsonify({
             "drug_name": drug_name,
@@ -54,7 +51,7 @@ def check_coverage():
             "source": "PMO - Programa Médico Obligatorio"
         })
 
-    # ✅ Caso 2: Medicamentos con 70% de cobertura (Resolución 27/2022)
+
     if drug_name in RESOLUCION_27_2022:
         return jsonify({
             "drug_name": drug_name,
@@ -64,7 +61,6 @@ def check_coverage():
             "source": "Resolución 27/2022"
         })
 
-    # ✅ Caso 3: Cobertura según la obra social y plan
     if insurance_name in INSURANCE_COVERAGE and plan in INSURANCE_COVERAGE[insurance_name]:
         coverage = INSURANCE_COVERAGE[insurance_name][plan]
         return jsonify({
@@ -75,7 +71,6 @@ def check_coverage():
             "source": f"Plan {plan} de {insurance_name}"
         })
 
-    # ❌ Caso 4: Sin cobertura específica
     return jsonify({
         "drug_name": drug_name,
         "insurance_name": insurance_name,

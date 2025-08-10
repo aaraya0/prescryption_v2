@@ -50,7 +50,6 @@ function estimatePami(price, dPami) {
     return discount > 0 ? Math.round(price * (1 - discount / 100)) : 0;
 }
 
-// 🚀 Permitir ejecución desde la terminal
 if (require.main === module) {
     const input = process.argv.slice(2).join(" ");
 

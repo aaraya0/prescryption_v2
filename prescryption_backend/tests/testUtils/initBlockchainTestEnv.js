@@ -7,15 +7,13 @@ let systemAccount;
 let prescriptionContract;
 
 async function initBlockchain() {
-    web3 = new Web3('http://127.0.0.1:8545');  // Ganache Desktop por ahora
-
+    web3 = new Web3('http://127.0.0.1:8545');  
     const accounts = await web3.eth.getAccounts();
     systemAccount = {
         address: accounts[0],
         privateKey: null
     };
 
-    // Rutas absolutas y siempre correctas
     const contractsDataPath = path.resolve(__dirname, '../../../prescryption_solidity/contracts_data.json');
     const contractBuildPath = path.resolve(__dirname, '../../../prescryption_solidity/build/contracts/PrescriptionContract.json');
 

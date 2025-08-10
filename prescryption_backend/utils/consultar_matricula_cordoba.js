@@ -14,20 +14,18 @@ const consultarMatricula = async (dni) => {
 
     console.log(`🔍 Consultando DNI ${dni} en Colegio Médico de Córdoba...`);
 
-    // Completa el campo "documento"
+    // completes id field
     await page.type('input[name="documento"]', dni.toString());
 
-    // Clic en Consultar
+    // Clicks submit
     await Promise.all([
         page.click('input[type="submit"]'),
         page.waitForNavigation({ waitUntil: 'networkidle2' })
     ]);
 
-    // Captura y limpia el texto del body
     const rawText = await page.evaluate(() => document.body.innerText.trim());
     await browser.close();
 
-    // Procesar el texto para obtener los campos
     const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
     const jsonResult = {
         estado: null,
@@ -36,7 +34,6 @@ const consultarMatricula = async (dni) => {
         textoCompleto: rawText
     };
 
-    // Buscar si hay matrícula habilitada
     const habilitada = lines.find(line => line.toLowerCase().includes('matricula habilitada'));
     if (habilitada) {
         jsonResult.estado = 'Habilitada';
@@ -49,7 +46,6 @@ const consultarMatricula = async (dni) => {
         jsonResult.estado = 'No habilitada o no encontrada';
     }
 
-    // Buscar mensaje legal
     const mensaje = lines.find(l => l.includes('Los datos informados'));
     if (mensaje) {
         jsonResult.mensajeLegal = mensaje;
@@ -58,7 +54,7 @@ const consultarMatricula = async (dni) => {
     return jsonResult;
 };
 
-// Ejecutar si se llama directamente
+
 if (require.main === module) {
     const dni = process.argv[2] || '41758877';
     consultarMatricula(dni).then(res => {

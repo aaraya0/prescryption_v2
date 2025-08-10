@@ -31,7 +31,6 @@ describe('Blockchain Service Full Integration Test - Flujo Completo', () => {
             privateKey: encrypt(doctorAccount.privateKey)
         });
 
-        // Creamos paciente
         const patientAccount = web3.eth.accounts.create();
         await Patient.create({
             name: 'Juan',
@@ -47,7 +46,6 @@ describe('Blockchain Service Full Integration Test - Flujo Completo', () => {
             address: patientAccount.address
         });
 
-        // Creamos y fondeamos farmacia
         const pharmacyAccount = web3.eth.accounts.create();
         await web3.eth.sendTransaction({
             from: systemAccount.address,
@@ -67,7 +65,6 @@ describe('Blockchain Service Full Integration Test - Flujo Completo', () => {
             verificationCode: 'abc123'
         });
 
-        // Emitimos la receta
         const prescriptionData = {
             patientName: 'Juan',
             patientSurname: 'Pérez',
@@ -92,15 +89,12 @@ describe('Blockchain Service Full Integration Test - Flujo Completo', () => {
         expect(receipt).toHaveProperty('prescriptionId');
         const prescriptionId = receipt.prescriptionId;
 
-        // Asignamos farmacia
         const updateResult = await blockchainService.updatePrescriptionPharmacyAddress(prescriptionId, pharmacyAccount.address);
         expect(updateResult).toHaveProperty('transactionHash');
 
-        // Validamos la receta
         const validateResult = await blockchainService.validatePrescriptionOnBlockchain(prescriptionId, 'PHARM001', pharmacyAccount.address);
         expect(validateResult).toHaveProperty('transactionHash');
 
-        // Consultamos para verificar que todo quedó persistido
         const doctorPrescriptions = await blockchainService.getPrescriptionsByDoctor('DOC001');
         expect(doctorPrescriptions.length).toBeGreaterThan(0);
 

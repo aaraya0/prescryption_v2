@@ -10,7 +10,7 @@ const patientSchema = new mongoose.Schema({
     affiliate_num: { type: String, required: true },
     password: { type: String, required: true },
     mail: { type: String, required: true },
-    address: { type: String, required: true }  // Añadir address de Ethereum del paciente
+    address: { type: String, required: true }  
 });
 
 module.exports = mongoose.model('Patient', patientSchema);

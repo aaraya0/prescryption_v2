@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const adminUserSchema = new mongoose.Schema({
-    nid: { type: String, required: true, unique: true }, // DNI o identificador
+    nid: { type: String, required: true, unique: true }, // DNI (ID)
     name: { type: String, required: true },
     mail: { type: String, required: true, unique: true },
     password: { type: String, required: true },

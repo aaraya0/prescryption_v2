@@ -54,7 +54,7 @@ exports.scrapeMedicationData = async (drugName) => {
 
                     const verMasButton = await rows[i].$("button");
                     if (verMasButton) {
-                        for (let attempt = 0; attempt < 2; attempt++) {  // Intentamos dos veces
+                        for (let attempt = 0; attempt < 2; attempt++) {  
                             await verMasButton.click();
                             console.log(`🔍 Intento ${attempt + 1} de obtener información de: ${name}`);
 
@@ -66,7 +66,7 @@ exports.scrapeMedicationData = async (drugName) => {
                                 if (modal) {
                                     detailsText = await modal.evaluate(el => el.innerText);
                                     details = parseDetails(detailsText);
-                                    break; // Salimos del bucle si logramos obtener los detalles
+                                    break; 
                                 }
                             } catch (error) {
                                 console.warn(`⚠️ No se pudo extraer detalles en el intento ${attempt + 1} para ${name}`);

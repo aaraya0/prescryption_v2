@@ -6,11 +6,11 @@ const pharmacySchema = new mongoose.Schema({
     password: { type: String, required: true },
     mail: { type: String, required: true },
     address: { type: String, required: true },
-    privateKey: { type: String, required: true }, // 👈 nuevo campo
+    privateKey: { type: String, required: true },
     physicalAddress: { type: String, required: true },
     contactInfo: { type: String },
     isActive: { type: Boolean, default: true },
-    verificationCode: { type: String, required: true } // Código único de registro
+    verificationCode: { type: String, required: true } 
 }, {
     timestamps: true,
 });
