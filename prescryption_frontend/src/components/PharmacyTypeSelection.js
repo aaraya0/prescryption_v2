@@ -16,15 +16,17 @@ function PharmacyTypeSelection() {
   };
 
   return (
-    <div className="formUserOptions">
-      <h2 className="title">Ingresar como</h2>
-      <div className="buttons">
-        <button className="adminButton" onClick={handleAdminLogin}>
-          Farmacia
-        </button>
-        <button className="userButton" onClick={handleUserLogin}>
-          Farmacéutico
-        </button>
+    <div className="pharmacy-type-page">
+      <div className="formUserOptions">
+        <h2 className="title">Ingresar como</h2>
+        <div className="buttons">
+          <button className="adminButton" onClick={handleAdminLogin}>
+            Farmacia
+          </button>
+          <button className="userButton" onClick={handleUserLogin}>
+            Farmacéutico
+          </button>
+        </div>
       </div>
     </div>
   );

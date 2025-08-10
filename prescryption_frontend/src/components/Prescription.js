@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import api from "../AxiosConfig";
 import Loader from "../components/Loader";
 import { useNavigate } from "react-router-dom";
@@ -72,7 +72,6 @@ function EmitirReceta() {
     if (name === "quantity1" || name === "quantity2") {
       let num = Number(value);
 
-      // Lógica para mínimo y máximo
       if (num > 2) num = 2;
       if (num < 1 && value !== "") num = 1;
 
@@ -193,7 +192,7 @@ function EmitirReceta() {
           <div className="receipt_left">
             <div className="form-group">
               <label>DNI del paciente</label>
-              <div style={{ display: "flex", alignItems: "center" }}>
+              <div className="dni-search-container">
                 <input
                   type="text"
                   name="patientNid"
@@ -201,6 +200,9 @@ function EmitirReceta() {
                   onChange={handleChange}
                   value={formData.patientNid}
                   required
+                  inputMode="numeric"
+                  pattern="\d*"
+                  aria-label="DNI del paciente"
                 />
                 <button
                   onClick={handleSearchPatient}

@@ -1,6 +1,6 @@
-body,
-html {
-  height: 100%;
+html,
+body {
+  min-height: 100%;
   margin: 0;
   display: flex;
   justify-content: center;
@@ -12,15 +12,57 @@ html {
   text-align: center;
 }
 
+.top-right-logo {
+  position: fixed;
+  top: -50px;
+  right: 20px;
+  width: 250px;
+  height: auto;
+}
+
 /* MainMenu.js styles*/
+
+.top-right-logo-menu {
+  position: fixed;
+  top: 16px;
+  right: 24px;
+  width: 250px;
+  height: auto;
+}
+
+@media (max-width: 760px) {
+  html,
+  body {
+    height: auto;
+    margin: 0;
+    display: block;
+  }
+  .top-right-logo-menu {
+    position: static;
+    display: block;
+    margin: 8px auto -6px;
+    width: 190px;
+    height: auto;
+  }
+  .pharmacy-type-page {
+    padding-top: 180px !important;
+  }
+}
+.pharmacy-type-page {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 92px 12px 24px; /* top padding */
+  display: flex;
+  justify-content: center;
+}
 .formUserOptions {
-  background-color: white;
+  background-color: rgb(255, 255, 255);
   padding: 50px;
   border-radius: 10px;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  width: 420px;
+  width: min(420px, 92vw);
   margin: 0 auto;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
@@ -80,19 +122,15 @@ html {
   background-color: #b0afe2;
 }
 
-.mainMenuContainer {
-  position: relative;
-}
-
-.top-right-logo {
-  position: fixed;
-  top: -50px;
-  right: 20px;
-  width: 250px;
-  height: auto;
-}
-
 /*Login.js styles*/
+.login-page {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
 .formLogin {
   background-color: white;
   padding: 50px;
@@ -100,7 +138,9 @@ html {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 400px;
+  width: min(420px, 92vw);
+  padding: 50px;
+  margin: 0;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -116,11 +156,9 @@ html {
   position: relative;
   width: 100%;
   display: flex;
-  padding-left: 10px;
   align-items: center;
 }
 .password-container input {
-  width: 100%;
   padding-top: 40px;
   align-items: center;
 }
@@ -138,11 +176,10 @@ html {
 }
 
 .formLogin input.loginInput {
-  padding: 10px;
   font-size: 14px;
   border-radius: 6px;
   border: 1px solid #9f9f9f;
-  width: 280px;
+  width: 100%;
   margin-bottom: 15px;
 }
 
@@ -154,7 +191,7 @@ html {
   padding: 10px;
   font-size: 16px;
   cursor: pointer;
-  width: 280px;
+  width: 100%;
   margin: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
@@ -248,6 +285,35 @@ html {
   font-size: 14px;
   text-align: left;
 }
+
+@media (max-width: 768px) {
+  .top-right-logo {
+    position: static;
+    display: block;
+    margin: 0 auto;
+    width: 150px;
+  }
+
+  .formLogin {
+    background-color: white;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(420px, 92vw);
+    margin: 120px auto;
+    height: auto;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .loginTitle {
+    text-align: center;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    font-size: 22px;
+  }
+}
+
 /* Register styles*/
 
 .register-container {
@@ -459,8 +525,8 @@ html {
   flex-direction: column;
   justify-content: space-between;
   gap: 40px;
-  width: 90%;
-  width: 790px;
+  max-width: 790px;
+  width: min(92vw, 790px);
   margin: 40px auto;
   box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
   max-height: calc(100vh - 120px);
@@ -555,6 +621,59 @@ textarea {
   transform: scale(1.02);
 }
 
+@media (max-width: 768px) {
+  .receta-container {
+    padding: 92px 12px 24px;
+  }
+
+  .form-container {
+    width: 100%;
+    padding: 16px;
+    margin: 12px auto;
+    border-radius: 12px;
+  }
+
+  form {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .dni-search-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dni-search-container input {
+    flex: 1;
+    height: 40px;
+  }
+  .search-patient-button {
+    height: 40px;
+    padding: 0 12px;
+  }
+
+  .BuscarMedButton {
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  .medication-selection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .medication-selection .trash-button {
+    align-self: flex-end;
+  }
+
+  .buttonGenerarReceta {
+    justify-content: center;
+  }
+  .buttonGenerarReceta .button {
+    width: 100%;
+    max-width: 420px;
+  }
+}
 .medical-info {
   display: flex;
   justify-content: space-between;
@@ -725,7 +844,6 @@ textarea {
   transform: scale(1.02);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .filtros-container,
   .filter-container {
@@ -738,11 +856,35 @@ textarea {
   .receta-details {
     font-size: 13px;
   }
+  .receta-list-container {
+    padding: 2rem 1rem;
+  }
+  .fixed-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 12px 16px;
+  }
+  .fixed-header .header-text {
+    width: 100%;
+    text-align: center;
+    order: 0;
+    margin-bottom: 8px;
+  }
+  .fixed-header .top-right-buttons {
+    position: static !important;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    order: 1;
+  }
 }
 
 .receta-list-container {
   padding: 3rem 1.1rem;
-  width: 800px;
+  width: min(800px, 92vw);
+  margin: 0 auto;
   box-sizing: border-box;
 }
 
@@ -855,6 +997,43 @@ h4 {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .perfil-page {
+    padding: 150px 12px;
+  }
+
+  .perfil-card-aesthetic {
+    max-width: 100%;
+    width: 92vw;
+    margin: 16px auto;
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .perfil-title {
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  .perfil-content {
+    gap: 10px;
+  }
+
+  .perfil-item {
+    font-size: 14px;
+    line-height: 1.3;
+    align-items: flex-start;
+    word-break: break-word;
+    gap: 8px;
+  }
+
+  .perfil-icon {
+    font-size: 16px;
+    min-width: 20px;
+    margin-top: 2px;
   }
 }
 
@@ -1447,7 +1626,6 @@ input[name="quantity2"] {
   color: #fff !important;
 }
 
-/* hover + abierto */
 .clear-btn:hover,
 .button_descargar-documentos:hover,
 .Exportar.dropdown-toggle:hover {

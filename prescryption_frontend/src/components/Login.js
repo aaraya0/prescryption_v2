@@ -38,18 +38,17 @@ function Login() {
     }
   }, [location.pathname, navigate]);
 
-  const userTypeMap = {
-    patient: "Ingresá a tu cuenta",
-    doctor: "Ingresá a tu cuenta",
-    pharmacist: "Ingresá a tu cuenta",
-    pharmacy: "Ingresá a tu cuenta",
-    insurance: "Ingresá a tu cuenta",
-    admin: "Ingresá a tu cuenta",
-  };
-
-  const displayUserType = userTypeMap[userType] || "Iniciar Sesión";
+  const displayUserType = "Iniciar Sesión";
 
   const handleLogin = async () => {
+    const dni = nid.trim();
+    const pass = password.trim();
+
+    if (!dni || !pass) {
+      setMessage({ text: "Ingresá DNI y contraseña.", type: "error" });
+      return;
+    }
+
     setIsLoading(true);
     try {
       if (userType === "admin") {
@@ -113,102 +112,109 @@ function Login() {
   };
 
   if (isLoading) {
-    return <Loader mensaje="Ingresando..." />;
+    return <Loader />;
   }
 
   return (
-    <div className="formLogin">
-      <h2 className="loginTitle">{displayUserType}</h2>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleLogin();
-        }}
-      >
-        <p className="inputTitle">DNI</p>
-        <input
-          className="loginInput"
-          type="text"
-          placeholder="DNI (sin puntos)"
-          value={nid}
-          onChange={(e) => setNid(e.target.value)}
-        />
-
-        <p className="inputTitle">Contraseña</p>
-
-        <div className="password-container">
+    <div className="login-page">
+      <div className="formLogin">
+        <h2 className="loginTitle">{displayUserType}</h2>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+        >
+          <p className="inputTitle">DNI</p>
           <input
-            className="loginInput password-field"
-            type={showPassword ? "text" : "password"}
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <span
-            className="eye-icon"
-            onClick={() => setShowPassword(!showPassword)}
-            title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-          >
-            {showPassword ? <FiEyeOff /> : <FiEye />}
-          </span>
-        </div>
-
-        <button className="loginButton" type="submit">
-          Ingresar
-        </button>
-      </form>
-      <button
-        className="RecordarButton"
-        onClick={() => navigate("/forgot-password", { state: { userType } })}
-      >
-        Recordar Contraseña
-      </button>
-
-      {(userType === "patient" ||
-        userType === "doctor" ||
-        userType === "insurance") && (
-        <p>
-          ¿No tenés una cuenta?{" "}
-          <button className="RegistrateButton" onClick={handleRegister}>
-            Registrate
-          </button>
-        </p>
-      )}
-      {(userType === "pharmacyUser" || userType === "pharmacy") && (
-        <>
-          <p className="TextoRegistrateButton">
-            ¿Tu farmacia aún no está registrada?
-          </p>
-          <button
-            className="RegistrateButton"
-            onClick={() => {
-              document.cookie = "userType=pharmacy; path=/";
-              navigate("/register");
+            className="loginInput"
+            type="tel"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder="DNI (sin puntos)"
+            value={nid}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, "");
+              setNid(value);
             }}
-          >
-            Registrar farmacia
-          </button>
+          />
 
-          <p className="TextoRegistrateButton">
-            ¿Todavía no te registraste y sos farmacéutico?
+          <p className="inputTitle">Contraseña</p>
+
+          <div className="password-container">
+            <input
+              className="loginInput password-field"
+              type={showPassword ? "text" : "password"}
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <span
+              className="eye-icon"
+              onClick={() => setShowPassword(!showPassword)}
+              title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            >
+              {showPassword ? <FiEyeOff /> : <FiEye />}
+            </span>
+          </div>
+
+          <button className="loginButton" type="submit">
+            Ingresar
+          </button>
+        </form>
+        <button
+          className="RecordarButton"
+          onClick={() => navigate("/forgot-password", { state: { userType } })}
+        >
+          Recordar Contraseña
+        </button>
+
+        {(userType === "patient" ||
+          userType === "doctor" ||
+          userType === "insurance") && (
+          <p>
+            ¿No tenés una cuenta?{" "}
+            <button className="RegistrateButton" onClick={handleRegister}>
+              Registrate
+            </button>
           </p>
-          <button
-            className="RegistrateButton"
-            onClick={() => navigate("/register")}
-          >
-            Registrate como usuario
-          </button>
-        </>
-      )}
+        )}
+        {(userType === "pharmacyUser" || userType === "pharmacy") && (
+          <>
+            <p className="TextoRegistrateButton">
+              ¿Tu farmacia aún no está registrada?
+            </p>
+            <button
+              className="RegistrateButton"
+              onClick={() => {
+                document.cookie = "userType=pharmacy; path=/";
+                navigate("/register");
+              }}
+            >
+              Registrar farmacia
+            </button>
 
-      {message.text && (
-        <>
-          {message.type === "success" && (
-            <div className="notification-backdrop"></div>
-          )}
-          <Notification message={message.text} type={message.type} />
-        </>
-      )}
+            <p className="TextoRegistrateButton">
+              ¿Todavía no te registraste y sos farmacéutico?
+            </p>
+            <button
+              className="RegistrateButton"
+              onClick={() => navigate("/register")}
+            >
+              Registrate como usuario
+            </button>
+          </>
+        )}
+
+        {message.text && (
+          <>
+            {message.type === "success" && (
+              <div className="notification-backdrop"></div>
+            )}
+            <Notification message={message.text} type={message.type} />
+          </>
+        )}
+      </div>
     </div>
   );
 }

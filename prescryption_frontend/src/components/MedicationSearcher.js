@@ -75,7 +75,7 @@ function MedicationSearcher() {
 
   return (
     <div className="receta-container">
-      <div className="form-container" style={{ width: "600px" }}>
+      <div className="form-container">
         <h2>Buscar Medicamento</h2>
         <input
           type="text"
