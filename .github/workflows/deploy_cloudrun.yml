@@ -61,6 +61,14 @@ jobs:
       - name: Configure Docker to use Artifact Registry
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
+      # ⬇️ Inyecta los JSON de solidity dentro del backend antes del build
+      - name: Prepare solidity artifacts (backend only)
+        if: matrix.name == 'backend'
+        run: |
+          mkdir -p prescryption_backend/prescryption_solidity/build/contracts
+          cp prescryption_solidity/contracts_data.json prescryption_backend/prescryption_solidity/contracts_data.json
+          cp prescryption_solidity/build/contracts/PrescriptionContract.json prescryption_backend/prescryption_solidity/build/contracts/PrescriptionContract.json
+
       - name: Build image
         run: |
           IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ matrix.name }}:${{ github.sha }}"
