@@ -1,0 +1,105 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      REGION: ${{ secrets.GCP_REGION }}
+      REPO: prescryption
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+    strategy:
+      matrix:
+        include:
+          - name: backend
+            context: ./prescryption_backend
+            port: "3001"
+            env_mongo: true
+            env_jwt: true
+          - name: frontend
+            context: ./prescryption_frontend
+            port: "80"
+          - name: invoice
+            context: ./prescryption_microservices/invoice_service
+            port: "5005"
+            env_mongo: true
+          - name: verify-insurance
+            context: ./prescryption_microservices/verify_insurance
+            port: "5003"
+            env_mongo: true
+          - name: verify-license
+            context: ./prescryption_microservices/verify_license
+            port: "5000"
+            env_mongo: true
+          - name: verify-prescription
+            context: ./prescryption_microservices/verify_prescription
+            port: "5004"
+            env_mongo: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Auth to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Configure Docker to use Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Build image
+        run: |
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ matrix.name }}:${{ github.sha }}"
+          LATEST="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ matrix.name }}:latest"
+
+          docker build -t "$IMAGE" -t "$LATEST" "${{ matrix.context }}"
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          echo "LATEST=$LATEST" >> $GITHUB_ENV
+
+      - name: Push image
+        run: |
+          docker push "$IMAGE"
+          docker push "$LATEST"
+
+      - name: Build env var string
+        id: envs
+        run: |
+          ENV_VARS=""
+          if [[ "${{ matrix.env_mongo }}" == "true" ]]; then
+            ENV_VARS+="MONGODB_URI=${{ secrets.MONGODB_URI }}"
+          fi
+          if [[ "${{ matrix.env_jwt }}" == "true" ]]; then
+            if [[ -n "$ENV_VARS" ]]; then ENV_VARS+=","; fi
+            ENV_VARS+="JWT_SECRET=${{ secrets.JWT_SECRET }}"
+          fi
+          echo "env_vars=$ENV_VARS" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Cloud Run
+        run: |
+          ENV_FLAG=""
+          if [[ -n "${{ steps.envs.outputs.env_vars }}" ]]; then
+            ENV_FLAG="--set-env-vars=${{ steps.envs.outputs.env_vars }}"
+          fi
+
+          gcloud run deploy prescryption-${{ matrix.name }} \
+            --image="${{ env.LATEST }}" \
+            --platform=managed \
+            --region="${{ env.REGION }}" \
+            --allow-unauthenticated \
+            --port="${{ matrix.port }}" \
+            --cpu=1 --memory=512Mi --max-instances=5 --concurrency=80 \
+            $ENV_FLAG
