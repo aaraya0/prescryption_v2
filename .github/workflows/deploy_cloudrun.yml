@@ -48,6 +48,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare solidity artifacts (backend only, Truffle)
+        if: matrix.name == 'backend'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "⛏️ Preparando artefactos de Truffle…"
+          SRC_DIR="prescryption_solidity"
+          DEST_DIR="prescryption_backend/prescryption_solidity"
+          mkdir -p "$DEST_DIR/build/contracts"
+
+          # Debug rápido del árbol de Truffle
+          echo "📁 Contenido de $SRC_DIR:"
+          ls -la "$SRC_DIR" || true
+          echo "📁 Contenido de $SRC_DIR/build/contracts:"
+          ls -la "$SRC_DIR/build/contracts" || true
+
+          # Verificaciones
+          test -f "$SRC_DIR/contracts_data.json" || { echo "::error title=Falta contracts_data.json::No se encontró $SRC_DIR/contracts_data.json"; exit 1; }
+          test -f "$SRC_DIR/build/contracts/PrescriptionContract.json" || { echo "::error title=Falta PrescriptionContract.json::No se encontró $SRC_DIR/build/contracts/PrescriptionContract.json"; exit 1; }
+
+          # Copias
+          cp "$SRC_DIR/contracts_data.json" "$DEST_DIR/contracts_data.json"
+          cp "$SRC_DIR/build/contracts/PrescriptionContract.json" "$DEST_DIR/build/contracts/PrescriptionContract.json"
+
+          echo "✅ Artefactos copiados en $DEST_DIR"
+          ls -la "$DEST_DIR" || true
+          ls -la "$DEST_DIR/build/contracts" || true
+
       - name: Auth to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -60,14 +88,6 @@ jobs:
 
       - name: Configure Docker to use Artifact Registry
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
-
-      # ⬇️ Inyecta los JSON de solidity dentro del backend antes del build
-      - name: Prepare solidity artifacts (backend only)
-        if: matrix.name == 'backend'
-        run: |
-          mkdir -p prescryption_backend/prescryption_solidity/build/contracts
-          cp prescryption_solidity/contracts_data.json prescryption_backend/prescryption_solidity/contracts_data.json
-          cp prescryption_solidity/build/contracts/PrescriptionContract.json prescryption_backend/prescryption_solidity/build/contracts/PrescriptionContract.json
 
       - name: Build image
         run: |
@@ -86,27 +106,25 @@ jobs:
       - name: Build env var string
         id: envs
         run: |
-          ENV_VARS=""
+          ENV_VARS="NODE_ENV=production"
           if [[ "${{ matrix.env_mongo }}" == "true" ]]; then
-            ENV_VARS+="MONGODB_URI=${{ secrets.MONGODB_URI }}"
+            ENV_VARS+=",MONGODB_URI=${{ secrets.MONGODB_URI }}"
           fi
           if [[ "${{ matrix.env_jwt }}" == "true" ]]; then
-            if [[ -n "$ENV_VARS" ]]; then ENV_VARS+=","; fi
-            ENV_VARS+="JWT_SECRET=${{ secrets.JWT_SECRET }}"
+            ENV_VARS+=",JWT_SECRET=${{ secrets.JWT_SECRET }}"
           fi
           echo "env_vars=$ENV_VARS" >> $GITHUB_OUTPUT
 
       - name: Deploy to Cloud Run
         run: |
-          ENV_FLAG=""
-          if [[ -n "${{ steps.envs.outputs.env_vars }}" ]]; then
-            ENV_FLAG="--set-env-vars=${{ steps.envs.outputs.env_vars }}"
-          fi
-
           gcloud run deploy prescryption-${{ matrix.name }} \
             --image="${{ env.LATEST }}" \
             --platform=managed \
             --region="${{ env.REGION }}" \
             --allow-unauthenticated \
+            --port="${{ matrix.port }}" \
+            --timeout=300 \
             --cpu=1 --memory=512Mi --max-instances=5 --concurrency=80 \
-            $ENV_FLAG
+            --cpu-boost \
+            --set-env-vars=${{ steps.envs.outputs.env_vars }}
+
