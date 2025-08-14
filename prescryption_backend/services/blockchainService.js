@@ -1,3 +1,4 @@
+// backend/services/blockchainService.js
 const { Web3 } = require("web3");
 const fs = require("fs");
 const path = require("path");
@@ -8,65 +9,74 @@ const { web3, systemAccount } = require("../utils/systemSigner");
 const { getPharmacySigner } = require("../utils/pharmacySigner");
 const { fundIfLow } = require("../utils/fundAccount");
 
-// reads contract address
-const contractsDataPath = path.join(
-  __dirname,
-  "..",
-  "..",
-  "prescryption_solidity",
-  "contracts_data.json"
-); 
-//const contractsDataPath = 'D:\\prescryption_v3\\prescryption_solidity\\contracts_data.json';
-let contractsData;
+/**
+ * 🔎 Resolución robusta de rutas para contratos
+ * - Soporta empaquetar artefactos en /app/contracts (Cloud Run)
+ * - Soporta volumen local en prescryption_solidity (docker-compose)
+ * - Permite override via env: CONTRACTS_DIR
+ */
 
-try {
-  contractsData = JSON.parse(fs.readFileSync(contractsDataPath, "utf8"));
-  console.log(
-    "✔️ Dirección del contrato cargada:",
-    contractsData.PrescriptionContract
-  );
-} catch (err) {
-  console.error("❌ Error leyendo contracts_data.json:", err.message);
-  throw new Error(
-    `No se pudo leer contracts_data.json en ${contractsDataPath}`
-  );
+const CONTRACTS_DIR =
+  process.env.CONTRACTS_DIR ||
+  path.join(__dirname, "..", "..", "prescryption_solidity");
+
+const CONTRACTS_CANDIDATE_DIRS = [
+  // 1) empaquetado en imagen (recomendado para Cloud Run)
+  path.join(process.cwd(), "contracts"),
+  // 2) por variable de entorno
+  CONTRACTS_DIR,
+];
+
+// --- arriba ya tenés CONTRACTS_DIR y CONTRACTS_CANDIDATE_DIRS definidos ---
+
+function readJSONFromCandidates(relPaths, labelForError) {
+  const tried = [];
+  for (const base of CONTRACTS_CANDIDATE_DIRS) {
+    for (const rel of (Array.isArray(relPaths) ? relPaths : [relPaths])) {
+      const full = path.join(base, rel);
+      tried.push(full);
+      if (fs.existsSync(full)) {
+        const txt = fs.readFileSync(full, "utf8");
+        console.log(`✔️ Cargado ${labelForError}: ${full}`);
+        return JSON.parse(txt);
+      }
+    }
+  }
+  const msg = `No se encontró ${labelForError}. Rutas probadas: ${tried.join(" ; ")}`;
+  console.error(`❌ ${msg}`);
+  throw new Error(msg);
 }
 
-const prescriptionContractPath = path.join(
-  __dirname,
-  "..",
-  "..",
-  "prescryption_solidity",
-  "build",
-  "contracts",
-  "PrescriptionContract.json"
-); //para Belu
-//const prescriptionContractPath = 'D:\\prescryption_v3\\prescryption_solidity\\build\\contracts\\PrescriptionContract.json';
-let prescriptionContractJSON;
+// 1) Dirección del contrato (igual que ya te funciona)
+const contractsData = readJSONFromCandidates("contracts_data.json", "contracts_data.json");
 
-try {
-  prescriptionContractJSON = JSON.parse(
-    fs.readFileSync(prescriptionContractPath, "utf8")
-  );
-  console.log("✔️ ABI del contrato cargado correctamente");
-} catch (err) {
-  console.error("❌ Error leyendo PrescriptionContract.json:", err.message);
-  throw new Error(
-    `No se pudo leer PrescriptionContract.json en ${prescriptionContractPath}`
-  );
-}
+// 2) ABI del contrato — ahora probamos ambas variantes
+const prescriptionContractJSON = readJSONFromCandidates(
+  [
+    // empaquetado “plano” (lo más probable en tu imagen actual)
+    "PrescriptionContract.json",
+    // estructura de Truffle/Hardhat
+    path.join("build", "contracts", "PrescriptionContract.json"),
+  ],
+  "PrescriptionContract.json (ABI)"
+);
 
+
+
+// Instancia del contrato
 let prescriptionContract = new web3.eth.Contract(
   prescriptionContractJSON.abi,
   contractsData.PrescriptionContract
 );
 
-// contract functions
+// ===================================================================
+// Funciones de contrato
+// ===================================================================
+
 exports.getPrescriptionsByPatient = async (patientAddress) => {
   const rawPrescriptions = await prescriptionContract.methods
     .getPresbyPatientAddress(patientAddress)
     .call();
-
 
   const formattedPrescriptions = convertBigIntToString(rawPrescriptions);
 
@@ -137,7 +147,7 @@ exports.getPrescriptionsByDoctor = async (nid) => {
 
 function convertBigIntToString(obj) {
   if (typeof obj === "bigint") {
-    return obj.toString(); 
+    return obj.toString();
   } else if (Array.isArray(obj)) {
     return obj.map(convertBigIntToString);
   } else if (typeof obj === "object" && obj !== null) {
@@ -161,9 +171,14 @@ exports.issuePrescription = async (prescriptionData, doctorNid) => {
     const decryptedKey = decrypt(doctor.privateKey);
     const doctorAccount = web3.eth.accounts.privateKeyToAccount(decryptedKey);
     web3.eth.accounts.wallet.add(doctorAccount);
-    console.log(`🔄 [issuePrescription] Chequeando gas para doctor ${doctorAccount.address}`);
+
+    console.log(
+      `🔄 [issuePrescription] Chequeando gas para doctor ${doctorAccount.address}`
+    );
     await fundIfLow(doctorAccount.address);
-    console.log(`✅ [issuePrescription] Gas chequeado para ${doctorAccount.address}`);
+    console.log(
+      `✅ [issuePrescription] Gas chequeado para ${doctorAccount.address}`
+    );
 
     const patientStruct = {
       name: prescriptionData.patientName,
@@ -201,7 +216,7 @@ exports.issuePrescription = async (prescriptionData, doctorNid) => {
 };
 
 BigInt.prototype.toJSON = function () {
-  return this.toString(); 
+  return this.toString();
 };
 
 exports.getAllPrescriptions = async () => {
@@ -233,11 +248,11 @@ exports.getAllPrescriptions = async () => {
     issueDate: format(
       new Date(Number(prescription.issueDate) * 1000),
       "yyyy-MM-dd HH:mm:ss"
-    ), 
+    ),
     expirationDate: format(
       new Date(Number(prescription.expirationDate) * 1000),
       "yyyy-MM-dd HH:mm:ss"
-    ), 
+    ),
     used: prescription.used,
     invoiceNumber: prescription.invoiceNumber,
   }));
@@ -260,7 +275,7 @@ exports.updatePrescriptionPharmacyAddress = async (
 
     const signedTx = await web3.eth.accounts.signTransaction(
       {
-        from: systemAccount.address, 
+        from: systemAccount.address,
         to: prescriptionContract.options.address,
         data: tx.encodeABI(),
         gas,
@@ -299,7 +314,7 @@ exports.updatePrescriptionPharmacyAddress = async (
 function extractRevertReason(error) {
   try {
     if (error.cause?.message && error.cause.message.includes("revert")) {
-      return error.cause.message.split("revert ")[1]; 
+      return error.cause.message.split("revert ")[1];
     }
 
     if (error.message.includes("revert")) {
@@ -317,7 +332,7 @@ function extractRevertReason(error) {
     console.error("❌ Failed to extract revert reason:", parseError.message);
   }
 
-  return null; 
+  return null;
 }
 
 exports.getPrescriptionsByPharmacy = async (pharmacyAddress) => {
