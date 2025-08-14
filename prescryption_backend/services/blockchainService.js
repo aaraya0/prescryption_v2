@@ -27,35 +27,41 @@ const CONTRACTS_CANDIDATE_DIRS = [
   CONTRACTS_DIR,
 ];
 
-function readJSONFromCandidates(relPath, labelForError) {
+// --- arriba ya tenés CONTRACTS_DIR y CONTRACTS_CANDIDATE_DIRS definidos ---
+
+function readJSONFromCandidates(relPaths, labelForError) {
   const tried = [];
   for (const base of CONTRACTS_CANDIDATE_DIRS) {
-    const full = path.join(base, relPath);
-    tried.push(full);
-    if (fs.existsSync(full)) {
-      const txt = fs.readFileSync(full, "utf8");
-      console.log(`✔️ Cargado ${labelForError}: ${full}`);
-      return JSON.parse(txt);
+    for (const rel of (Array.isArray(relPaths) ? relPaths : [relPaths])) {
+      const full = path.join(base, rel);
+      tried.push(full);
+      if (fs.existsSync(full)) {
+        const txt = fs.readFileSync(full, "utf8");
+        console.log(`✔️ Cargado ${labelForError}: ${full}`);
+        return JSON.parse(txt);
+      }
     }
   }
-  const msg = `No se encontró ${labelForError}. Rutas probadas: ${tried.join(
-    " ; "
-  )}`;
+  const msg = `No se encontró ${labelForError}. Rutas probadas: ${tried.join(" ; ")}`;
   console.error(`❌ ${msg}`);
   throw new Error(msg);
 }
 
-// 1) Dirección del contrato
-const contractsData = readJSONFromCandidates(
-  "contracts_data.json",
-  "contracts_data.json"
-);
+// 1) Dirección del contrato (igual que ya te funciona)
+const contractsData = readJSONFromCandidates("contracts_data.json", "contracts_data.json");
 
-// 2) ABI del contrato
+// 2) ABI del contrato — ahora probamos ambas variantes
 const prescriptionContractJSON = readJSONFromCandidates(
-  path.join("build", "contracts", "PrescriptionContract.json"),
+  [
+    // empaquetado “plano” (lo más probable en tu imagen actual)
+    "PrescriptionContract.json",
+    // estructura de Truffle/Hardhat
+    path.join("build", "contracts", "PrescriptionContract.json"),
+  ],
   "PrescriptionContract.json (ABI)"
 );
+
+
 
 // Instancia del contrato
 let prescriptionContract = new web3.eth.Contract(
