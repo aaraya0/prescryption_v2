@@ -225,6 +225,7 @@ const PharmacyUser = () => {
 
       setTimeout(() => {
         setPurchaseMessage({ text: "", type: "" });
+        window.location.reload();
       }, 4000);
 
       fetchPrescriptions();

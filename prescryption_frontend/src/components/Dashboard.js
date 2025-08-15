@@ -1,13 +1,15 @@
+// src/components/Dashboard.js
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import Doctor from "./Doctor";
 import Patient from "./Patient";
 import PharmacyUser from "./PharmacyUser";
 import PharmacyAdmin from "./PharmacyAdmin";
 import Insurance from "./Insurance";
-import api from "../AxiosConfig";
+
+import api from "../AxiosConfig"; // instancia global con baseURL y token por interceptor
 import "../styles/styles.css";
-import { apiFetch } from "../api";
 
 function Dashboard() {
   const { userType } = useParams();
@@ -21,38 +23,36 @@ function Dashboard() {
       navigate("/");
       return;
     }
+
     const fetchNombre = async () => {
       try {
-        const token = localStorage.getItem("token");
-        let url;
-
-    if (userType === "pharmacy") {
-      url = await apiFetch("/api/pharmacies/pharmacy_profile");
-    } else {
-      const routeMap = {
-        patient: "patients",
-        doctor: "doctors",
-        pharmacyUser: "pharmacy-users",
-        insurance: "insurances",
-        admin: "admins",
-      };
-      const route = routeMap[userType];
-      url = await apiFetch(`/api/${route}/profile`);
-    }
-
-        const response = await api.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const { name, pharmacy_name, insurance_name } = response.data;
+        let endpoint = "";
 
         if (userType === "pharmacy") {
-          setNombre(pharmacy_name);
-        } else if (userType === "insurance") {
-          setNombre(insurance_name);
+          endpoint = "/api/pharmacies/pharmacy_profile";
         } else {
-          setNombre(name);
+          const routeMap = {
+            patient: "patients",
+            doctor: "doctors",
+            pharmacyUser: "pharmacy-users",
+            insurance: "insurances",
+            admin: "admins",
+          };
+          const route = routeMap[userType];
+          if (!route) {
+            console.error("❌ userType inválido:", userType);
+            return;
+          }
+          endpoint = `/api/${route}/profile`;
         }
+
+        // El interceptor de AxiosConfig agrega Authorization automáticamente
+        const { data } = await api.get(endpoint);
+
+        const { name, pharmacy_name, insurance_name } = data || {};
+        if (userType === "pharmacy") setNombre(pharmacy_name);
+        else if (userType === "insurance") setNombre(insurance_name);
+        else setNombre(name);
       } catch (err) {
         console.error("Error al obtener perfil:", err);
       }
@@ -106,7 +106,6 @@ function Dashboard() {
             <Insurance />
           </div>
         );
-
       case "admin":
         return (
           <div className="admin-menu-container">
@@ -118,21 +117,18 @@ function Dashboard() {
               >
                 Recetas
               </button>
-
               <button
                 className="admin-btn"
                 onClick={() => navigate("/dashboard/admin/verify-users")}
               >
                 Usuarios y Verificaciones
               </button>
-
               <button
                 className="admin-btn"
                 onClick={() => navigate("/dashboard/admin/settings")}
               >
                 Configuraciones
               </button>
-
               <button
                 className="admin-btn"
                 onClick={() => navigate("/dashboard/admin/other")}
@@ -142,7 +138,6 @@ function Dashboard() {
             </div>
           </div>
         );
-
       default:
         return <p>No se encontró el rol del usuario.</p>;
     }
