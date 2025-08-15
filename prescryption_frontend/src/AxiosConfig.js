@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const api = axios.create();
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_BASE_URL || "http://localhost:3001",
+});
 
 // 👉 Agrega el token automáticamente a cada request
 api.interceptors.request.use((config) => {
@@ -19,7 +21,6 @@ api.interceptors.response.use(
       console.warn("🔴 Token expirado. Cerrando sesión...");
       localStorage.removeItem("token");
       localStorage.setItem("sessionExpired", "true");
-
       window.location.href = "/";
     }
     return Promise.reject(error);

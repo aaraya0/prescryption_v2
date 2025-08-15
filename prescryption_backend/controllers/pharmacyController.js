@@ -10,7 +10,7 @@ const medicationScraper = require("../services/medicationScraper");
 const MedicationCache = require("../models/MedicationCache"); 
 const fundAccount = require("../utils/fundAccount");
 const PrescriptionValidation = require("../models/PrescriptionValidation");
-
+const { verifyLicense, verifyLicenseToken, verifyPrescription, invoiceService } = require("../utils/serviceUrls");
 
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 const crypto = require("crypto");
@@ -144,14 +144,14 @@ exports.registerPharmacyUser = async (req, res) => {
     }
 
     const verifyResponse = await axios.post(
-      "http://verify_license:5000/verify",
+      verifyLicense.url("/verify"),
       {
         nid,
         license,
         user_type: "pharmacist", 
       },
       {
-        headers: { Authorization: "Bearer securetoken123" }, 
+        headers: { Authorization:`Bearer ${verifyLicenseToken}` }, 
       }
     );
 
@@ -395,7 +395,7 @@ exports.validatePrescription = async (req, res) => {
 
       try {
         const coverageResponse = await axios.post(
-          "http://verify_prescription:5004/api/insurance/coverage",
+          verifyPrescription.url("/api/insurance/coverage"),
           {
             insurance_name: prescription.insurance.insuranceName,
             plan: prescription.insurance.insurancePlan,
@@ -589,7 +589,7 @@ exports.processPurchase = async (req, res) => {
     };
 
     const invoiceResponse = await axios.post(
-      "http://invoice_service:5005/api/invoice/generate",
+       invoiceService.url("/api/invoice/generate"),
       invoiceData
     );
     console.log(`💰 Monto total enviado en factura: ${totalAmount}`);

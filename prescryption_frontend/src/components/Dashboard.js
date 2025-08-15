@@ -7,6 +7,7 @@ import PharmacyAdmin from "./PharmacyAdmin";
 import Insurance from "./Insurance";
 import api from "../AxiosConfig";
 import "../styles/styles.css";
+import { apiFetch } from "./api";
 
 function Dashboard() {
   const { userType } = useParams();
@@ -25,19 +26,19 @@ function Dashboard() {
         const token = localStorage.getItem("token");
         let url;
 
-        if (userType === "pharmacy") {
-          url = "http://localhost:3001/api/pharmacies/pharmacy_profile";
-        } else {
-          const routeMap = {
-            patient: "patients",
-            doctor: "doctors",
-            pharmacyUser: "pharmacy-users",
-            insurance: "insurances",
-            admin: "admins",
-          };
-          const route = routeMap[userType];
-          url = `http://localhost:3001/api/${route}/profile`;
-        }
+    if (userType === "pharmacy") {
+      url = await apiFetch("/api/pharmacies/pharmacy_profile");
+    } else {
+      const routeMap = {
+        patient: "patients",
+        doctor: "doctors",
+        pharmacyUser: "pharmacy-users",
+        insurance: "insurances",
+        admin: "admins",
+      };
+      const route = routeMap[userType];
+      url = await apiFetch(`/api/${route}/profile`);
+    }
 
         const response = await api.get(url, {
           headers: { Authorization: `Bearer ${token}` },

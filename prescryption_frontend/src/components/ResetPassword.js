@@ -13,7 +13,7 @@ function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("http://localhost:3001/api/auth/reset-password", {
+      await api.post("/api/auth/reset-password", {
         token,
         newPassword,
       });

@@ -32,7 +32,7 @@ function Register() {
 
     try {
       const response = await api.post(
-        "http://verify_service:5003/get_affiliation",
+        `${process.env.REACT_APP_VERIFY_INSURANCE_URL}/get_affiliation`,
         {
           nid,
           insurance_name,

@@ -5,7 +5,7 @@ const Pharmacy = require("../models/Pharmacy");
 const Doctor = require("../models/Doctor");
 const { Web3 } = require("web3");
 const axios = require("axios");
-
+const { verifyInsurance } = require("../utils/serviceUrls");
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 
 exports.registerPatient = async (req, res) => {
@@ -40,7 +40,7 @@ exports.registerPatient = async (req, res) => {
     try {
       // API request
       const response = await axios.post(
-        "http://verify_insurance:5003/get_affiliation",
+        verifyInsurance.url("/get_affiliation"),
         { nid, insurance_name }
       );
 

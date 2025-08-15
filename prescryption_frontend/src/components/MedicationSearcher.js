@@ -42,7 +42,7 @@ function MedicationSearcher() {
       const token = localStorage.getItem("token");
       try {
         const response = await fetch(
-          `http://localhost:3001/api/prescriptions/search-medications?query=${encodeURIComponent(
+          `${process.env.REACT_APP_API_BASE_URL}/api/prescriptions/search-medications?query=${encodeURIComponent(
             query
           )}`,
           {

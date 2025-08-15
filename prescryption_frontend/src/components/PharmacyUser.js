@@ -44,7 +44,7 @@ const PharmacyUser = () => {
   const fetchPrescriptions = async () => {
     try {
       const response = await api.get(
-        "http://localhost:3001/api/pharmacy-users/prescriptions",
+        "/api/pharmacy-users/prescriptions",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -74,7 +74,7 @@ const PharmacyUser = () => {
       console.log("Prescription data:", prescription);
 
       response = await api.get(
-        `http://localhost:3001/api/pharmacy-users/medications/search/${prescription.prescriptionId.toString()}`,
+        `/api/pharmacy-users/medications/search/${prescription.prescriptionId.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -118,7 +118,7 @@ const PharmacyUser = () => {
       setLoading(true);
 
       const response = await api.post(
-        "http://localhost:3001/api/pharmacy-users/validate_prescription",
+        "/api/pharmacy-users/validate_prescription",
         {
           prescriptionId: selectedPrescription.prescriptionId,
           selectedMedicationIds,
@@ -173,7 +173,7 @@ const PharmacyUser = () => {
       const medsToSend = finalPrices.map((item) => item.medication);
 
       const response = await api.post(
-        "http://localhost:3001/api/pharmacy-users/process_purchase",
+        "/api/pharmacy-users/process_purchase",
         {
           prescriptionId: selectedPrescription.prescriptionId,
           selectedMedications: medsToSend,
@@ -297,7 +297,7 @@ const PharmacyUser = () => {
     try {
       setLoading(true);
       const response = await api.post(
-        "http://localhost:3001/api/pharmacy-users/cancel_validation",
+        "/api/pharmacy-users/cancel_validation",
         { prescriptionId: selectedPrescription.prescriptionId },
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -1,24 +1,22 @@
 import React, { useEffect, useState } from "react";
-import apii from "../AxiosConfig";
+import api from "../AxiosConfig"; // instancia global con baseURL desde .env y token por interceptor
 import { FaUser, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import "../styles/Pharmacy.css";
+
+const PH_BASE = "/api/pharmacies"; // prefijo de endpoints para este módulo
 
 const PharmacyAdmin = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const api = apii.create({
-    baseURL: "http://localhost:3001/api/pharmacies",
-    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-  });
-
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await api.get("/users");
+        const { data } = await api.get(`${PH_BASE}/users`);
         setUsers(data);
-      } catch {
+      } catch (e) {
+        console.error("❌ No se pudo cargar la lista de usuarios:", e);
         setError("No se pudo cargar la lista de usuarios");
       } finally {
         setLoading(false);
@@ -29,18 +27,18 @@ const PharmacyAdmin = () => {
   const toggleUser = async (id, active) => {
     const action = active ? "deactivate" : "activate";
     try {
-      await api.patch(`/users/${id}/${action}`);
-      setUsers(
-        users.map((u) => (u._id === id ? { ...u, isActive: !active } : u))
+      await api.patch(`${PH_BASE}/users/${id}/${action}`);
+      setUsers((prev) =>
+        prev.map((u) => (u._id === id ? { ...u, isActive: !active } : u))
       );
-    } catch {
+    } catch (e) {
+      console.error("❌ Error al cambiar estado del usuario:", e);
       alert("Error al cambiar estado del usuario");
     }
   };
 
   if (loading) return <p className="ph-admin__msg">Cargando usuarios…</p>;
-  if (error)
-    return <p className="ph-admin__msg ph-admin__msg--error">{error}</p>;
+  if (error) return <p className="ph-admin__msg ph-admin__msg--error">{error}</p>;
 
   return (
     <div className="ph-admin">

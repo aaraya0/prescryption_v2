@@ -97,7 +97,7 @@ function EmitirReceta() {
 
     try {
       const response = await api.get(
-        `http://localhost:3001/api/doctors/patients/${formData.patientNid}`,
+        `/api/doctors/patients/${formData.patientNid}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -156,7 +156,7 @@ function EmitirReceta() {
     try {
       setIsLoading(true);
       await api.post(
-        "http://localhost:3001/api/prescriptions/issue",
+        "/api/prescriptions/issue",
         {
           ...formData,
           med1,

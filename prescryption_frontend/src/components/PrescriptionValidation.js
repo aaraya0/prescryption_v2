@@ -15,7 +15,7 @@ const PrescriptionValidation = ({ prescription, onClose }) => {
   const handleValidate = async () => {
     try {
       const response = await api.post(
-        "http://localhost:3001/api/pr_validate",
+        "/api/pr_validate",
         {
           prescriptionId: prescription?.prescriptionId,
           brand1: brands.brand1 || "Genérico",
@@ -37,7 +37,7 @@ const PrescriptionValidation = ({ prescription, onClose }) => {
   const handleResetPharmacyAddress = async () => {
     try {
       await api.post(
-        "http://localhost:3001/api/address_reset",
+        "/api/address_reset",
         {
           prescriptionId: prescription?.prescriptionId,
         },
@@ -56,7 +56,7 @@ const PrescriptionValidation = ({ prescription, onClose }) => {
   const handleGenerateInvoice = async () => {
     try {
       const response = await api.post(
-        "http://localhost:3001/api/pr_invoice",
+        "/api/pr_invoice",
         {
           prescriptionId: prescription?.prescriptionId,
           patientName: prescription?.patient?.name,

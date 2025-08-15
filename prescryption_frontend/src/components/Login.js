@@ -53,7 +53,7 @@ function Login() {
     try {
       if (userType === "admin") {
         const response = await api.post(
-          "http://localhost:3001/api/public/admin/login",
+          "/api/public/admin/login",
           { nid, password },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -66,7 +66,7 @@ function Login() {
         }, 800);
         return;
       }
-      const response = await api.post("http://localhost:3001/api/auth/login", {
+      const response = await api.post("/api/auth/login", {
         nid,
         password,
         userType,

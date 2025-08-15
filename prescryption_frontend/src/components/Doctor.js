@@ -17,10 +17,10 @@ const Doctor = () => {
         const token = localStorage.getItem("token");
 
         const [recetasRes, doctorRes] = await Promise.all([
-          api.get("http://localhost:3001/api/doctors/prescriptions", {
+          api.get("/api/doctors/prescriptions", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          api.get("http://localhost:3001/api/doctors/profile", {
+          api.get("/api/doctors/profile", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

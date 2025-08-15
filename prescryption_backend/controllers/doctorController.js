@@ -6,7 +6,7 @@ const { Web3 } = require('web3');
 const { encrypt } = require('../utils/encryption');
 const fundNewAccount = require('../utils/fundAccount');
 const validateDoctorCordoba = require('../utils/validateDoctor_cba');
-
+const { verifyLicense, verifyLicenseToken } = require("../utils/serviceUrls");
 // web 3 config
 const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:7545"));
 
@@ -35,12 +35,12 @@ exports.registerDoctor = async (req, res) => {
 
         // Fallback to mock
         if (!isValid) {
-            const verifyResponse = await axios.post('http://verify_license:5000/verify', {
+            const verifyResponse = await axios.post(verifyLicense.url('/verify'), {
                 nid,
                 license,
                 user_type: "doctor"
             }, {
-                headers: { Authorization: "Bearer securetoken123" }
+                headers: { Authorization:`Bearer ${verifyLicenseToken}` }
             });
 
             if (verifyResponse.data.valid) {

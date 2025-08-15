@@ -38,7 +38,7 @@ const Patient = () => {
       try {
         setLoading(true);
         const response = await api.get(
-          "http://localhost:3001/api/patients/prescriptions",
+          "/api/patients/prescriptions",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -109,7 +109,7 @@ const Patient = () => {
       const fetchPharmacies = async () => {
         try {
           const response = await api.get(
-            "http://localhost:3001/api/patients/available",
+            "/api/patients/available",
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -138,7 +138,7 @@ const Patient = () => {
 
     try {
       const response = await api.post(
-        "http://localhost:3001/api/patients/send_prescription",
+        "/api/patients/send_prescription",
         {
           pharmacyNid,
           prescriptionId: selectedPrescriptionId,

@@ -27,7 +27,7 @@ function ForgotPassword() {
 
     setIsLoading(true);
     try {
-      await api.post("http://localhost:3001/api/auth/forgot-password", {
+      await api.post("/api/auth/forgot-password", {
         nid,
         userType,
       });

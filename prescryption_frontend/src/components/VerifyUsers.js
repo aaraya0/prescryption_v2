@@ -19,7 +19,7 @@ function VerifyUsers() {
           return;
         }
         const response = await api.get(
-          "http://localhost:3001/api/admin/insurances/pending",
+          "/api/admin/insurances/pending",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -47,7 +47,7 @@ function VerifyUsers() {
     try {
       // Llamada PATCH a /api/admin/insurances/:insurance_nid/verify
       await api.patch(
-        `http://localhost:3001/api/admin/insurances/${insuranceNid}/verify`,
+        `/api/admin/insurances/${insuranceNid}/verify`,
         {},
         {
           headers: {

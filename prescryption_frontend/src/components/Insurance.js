@@ -35,7 +35,7 @@ function Insurance() {
           return;
         }
         const response = await api.get(
-          "http://localhost:3001/api/insurances/prescriptions",
+          "/api/insurances/prescriptions",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setPrescriptions(response.data.prescriptions || []);

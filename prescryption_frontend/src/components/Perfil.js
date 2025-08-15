@@ -34,15 +34,15 @@ function Perfil() {
 
         let url = "";
         if (userType === "doctor") {
-          url = "http://localhost:3001/api/doctors/profile";
+          url = "/api/doctors/profile";
         } else if (userType === "patient") {
-          url = "http://localhost:3001/api/patients/profile";
+          url = "/api/patients/profile";
         } else if (userType === "pharmacyUser") {
-          url = "http://localhost:3001/api/pharmacy-users/profile";
+          url = "/api/pharmacy-users/profile";
         } else if (userType === "pharmacy") {
-          url = "http://localhost:3001/api/pharmacies/pharmacy_profile";
+          url = "/api/pharmacies/pharmacy_profile";
         } else if (userType === "insurance") {
-          url = "http://localhost:3001/api/insurances/profile";
+          url = "/api/insurances/profile";
         } else {
           setError("Tipo de usuario desconocido");
           setLoading(false);
