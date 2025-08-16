@@ -1,4 +1,3 @@
-// backend/services/blockchainService.js
 const { Web3 } = require("web3");
 const fs = require("fs");
 const path = require("path");
@@ -9,25 +8,16 @@ const { web3, systemAccount } = require("../utils/systemSigner");
 const { getPharmacySigner } = require("../utils/pharmacySigner");
 const { fundIfLow } = require("../utils/fundAccount");
 
-/**
- * 🔎 Resolución robusta de rutas para contratos
- * - Soporta empaquetar artefactos en /app/contracts (Cloud Run)
- * - Soporta volumen local en prescryption_solidity (docker-compose)
- * - Permite override via env: CONTRACTS_DIR
- */
 
 const CONTRACTS_DIR =
   process.env.CONTRACTS_DIR ||
   path.join(__dirname, "..", "..", "prescryption_solidity");
 
 const CONTRACTS_CANDIDATE_DIRS = [
-  // 1) empaquetado en imagen (recomendado para Cloud Run)
   path.join(process.cwd(), "contracts"),
-  // 2) por variable de entorno
   CONTRACTS_DIR,
 ];
 
-// --- arriba ya tenés CONTRACTS_DIR y CONTRACTS_CANDIDATE_DIRS definidos ---
 
 function readJSONFromCandidates(relPaths, labelForError) {
   const tried = [];
@@ -47,31 +37,22 @@ function readJSONFromCandidates(relPaths, labelForError) {
   throw new Error(msg);
 }
 
-// 1) Dirección del contrato (igual que ya te funciona)
 const contractsData = readJSONFromCandidates("contracts_data.json", "contracts_data.json");
 
-// 2) ABI del contrato — ahora probamos ambas variantes
 const prescriptionContractJSON = readJSONFromCandidates(
   [
-    // empaquetado “plano” (lo más probable en tu imagen actual)
+   
     "PrescriptionContract.json",
-    // estructura de Truffle/Hardhat
     path.join("build", "contracts", "PrescriptionContract.json"),
   ],
   "PrescriptionContract.json (ABI)"
 );
 
-
-
-// Instancia del contrato
 let prescriptionContract = new web3.eth.Contract(
   prescriptionContractJSON.abi,
   contractsData.PrescriptionContract
 );
 
-// ===================================================================
-// Funciones de contrato
-// ===================================================================
 
 exports.getPrescriptionsByPatient = async (patientAddress) => {
   const rawPrescriptions = await prescriptionContract.methods

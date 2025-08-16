@@ -4,18 +4,18 @@ require("dotenv").config();
 module.exports = {
   networks: {
     development: {
-      host: "127.0.0.1", // dirección donde corre Ganache
-      port: 7545,        // puerto de Ganache (puede variar)
-      network_id: "*",   // acepta cualquier network id
+      host: "127.0.0.1", // Ganache
+      port: 7545,        // Ganache port
+      network_id: "*",   // any network id
     },
     sepolia: {
       provider: () =>
         new HDWalletProvider(
-          process.env.FAUCET_PRIVATE_KEY, // clave privada de la cuenta con ETH testnet
+          process.env.FAUCET_PRIVATE_KEY, // private acc in ETH testnet
           `https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
         ),
-      network_id: 11155111, // ID de red de Sepolia
-      confirmations: 2,     // Espera 2 confirmaciones
+      network_id: 11155111, // Sepolia id
+      confirmations: 2,     
       timeoutBlocks: 200,
       skipDryRun: true,
     },
