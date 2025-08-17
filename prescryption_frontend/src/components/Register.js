@@ -32,11 +32,8 @@ function Register() {
 
     try {
       const response = await api.post(
-        `${process.env.REACT_APP_VERIFY_INSURANCE_URL}/get_affiliation`,
-        {
-          nid,
-          insurance_name,
-        }
+        `${process.env.REACT_APP_API_BASE_URL}/api/public/insurance/get_affiliation`,
+        { nid, insurance_name }
       );
 
       const plan = response.data.insurance_plan;
