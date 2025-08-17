@@ -1,4 +1,7 @@
 FROM node:20
+ENV NODE_ENV=production \
+    PUPPETEER_SKIP_DOWNLOAD=true \
+    PUPPETEER_CACHE_DIR=/tmp
 WORKDIR /app
 
 COPY package*.json ./
