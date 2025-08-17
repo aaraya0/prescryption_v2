@@ -8,7 +8,7 @@ const { Web3 } = require("web3");
 const blockchainService = require("../services/blockchainService");
 const medicationScraper = require("../services/medicationScraper"); 
 const MedicationCache = require("../models/MedicationCache"); 
-const fundAccount = require("../utils/fundAccount");
+const fundNewAccount = require("../utils/fundAccount");
 const PrescriptionValidation = require("../models/PrescriptionValidation");
 const { verifyLicense, verifyLicenseToken, verifyPrescription, invoiceService } = require("../utils/serviceUrls");
 
@@ -81,7 +81,7 @@ exports.registerPharmacy = async (req, res) => {
 
     // creates random unique code for each pharmacy (extra validation)
     const verificationCode = crypto.randomBytes(6).toString("hex");
-    await fundAccount(account.address);
+    await fundNewAccount(account.address);
 
     const newPharmacy = new Pharmacy({
       nid,
