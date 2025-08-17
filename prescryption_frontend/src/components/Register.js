@@ -60,7 +60,7 @@ function Register() {
   const handleRegister = async () => {
     try {
       let payload = formData;
-      let endpoint = `http://localhost:3001/api/public/${userType}s/register`;
+      let endpoint = `${process.env.REACT_APP_API_BASE_URL}/api/public/${userType}s/register`;
 
       if (userType === "insurance") {
         payload = {
@@ -72,7 +72,7 @@ function Register() {
       }
 
       if (userType === "pharmacy") {
-        endpoint = `http://localhost:3001/api/public/pharmacies/register`;
+        endpoint = `${process.env.REACT_APP_API_BASE_URL}/api/public/pharmacies/register`;
         const res = await api.post(endpoint, payload);
         setVerificationCode(res.data.verificationCode || "");
         setShowSuccess(true);
@@ -80,7 +80,7 @@ function Register() {
       }
 
       if (userType === "pharmacyUser") {
-        endpoint = `http://localhost:3001/api/public/pharmacies/users/register`;
+        endpoint = `${process.env.REACT_APP_API_BASE_URL}/api/public/pharmacies/users/register`;
       }
 
       await api.post(endpoint, payload);
