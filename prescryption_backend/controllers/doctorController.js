@@ -4,7 +4,8 @@ const Doctor = require('../models/Doctor');
 const blockchainService = require('../services/blockchainService');
 const { Web3 } = require('web3');
 const { encrypt } = require('../utils/encryption');
-const fundNewAccount = require('../utils/fundAccount');
+const { fundNewAccount, fundIfLow } = require("../utils/fundAccount");
+
 const validateDoctorCordoba = require('../utils/validateDoctor_cba');
 const { verifyLicense, verifyLicenseToken } = require("../utils/serviceUrls");
 // web 3 config

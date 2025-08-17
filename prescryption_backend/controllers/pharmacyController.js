@@ -8,7 +8,8 @@ const { Web3 } = require("web3");
 const blockchainService = require("../services/blockchainService");
 const medicationScraper = require("../services/medicationScraper"); 
 const MedicationCache = require("../models/MedicationCache"); 
-const fundNewAccount = require("../utils/fundAccount");
+const { fundNewAccount, fundIfLow } = require("../utils/fundAccount");
+
 const PrescriptionValidation = require("../models/PrescriptionValidation");
 const { verifyLicense, verifyLicenseToken, verifyPrescription, invoiceService } = require("../utils/serviceUrls");
 
