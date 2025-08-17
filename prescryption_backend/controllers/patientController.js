@@ -34,11 +34,11 @@ exports.registerPatient = async (req, res) => {
   }
 
   let affiliate_num = "N/A"; // default value for patients w/o insurance
-  let insurance_plan = "PARTICULAR"; 
+  let insurance_plan = "PARTICULAR";
 
   if (insurance_name && insurance_name !== "PARTICULAR") {
     try {
-      // API request
+      // API request al microservicio
       const response = await axios.post(
         verifyInsurance.url("/get_affiliation"),
         { nid, insurance_name }
@@ -83,13 +83,19 @@ exports.registerPatient = async (req, res) => {
 
     await newPatient.save();
 
-    res.status(201).json({ message: "✅ Patient registered successfully." });
+    // ✅ Ahora devolvemos también plan y número de afiliado
+    res.status(201).json({
+      message: "✅ Patient registered successfully.",
+      affiliate_num,
+      insurance_plan,
+      insurance_name: insurance_name || "PARTICULAR",
+      nid,
+    });
   } catch (error) {
     console.error("❌ Error registering patient:", error.message);
     res.status(500).json({ message: "Error registering patient" });
   }
 };
-
 
 exports.getPresbyPatientAddress = async (req, res) => {
   try {
@@ -138,7 +144,6 @@ exports.sendPrescriptionToPharmacy = async (req, res) => {
   const { prescriptionId, pharmacyNid } = req.body;
 
   try {
-   
     if (!prescriptionId || !pharmacyNid) {
       return res.status(400).json({ message: "❌ Missing required fields" });
     }
@@ -153,12 +158,10 @@ exports.sendPrescriptionToPharmacy = async (req, res) => {
       pharmacy.address
     );
 
-    res
-      .status(200)
-      .json({
-        message: "✅ Prescription sent to pharmacy successfully",
-        result,
-      });
+    res.status(200).json({
+      message: "✅ Prescription sent to pharmacy successfully",
+      result,
+    });
   } catch (err) {
     console.error("❌ Error sending prescription to pharmacy:", err.message);
     res.status(500).json({ message: "Error sending prescription to pharmacy" });
@@ -168,7 +171,7 @@ exports.sendPrescriptionToPharmacy = async (req, res) => {
 exports.getPatientProfile = async (req, res) => {
   try {
     const nid = req.user.nid;
-    const patient = await Patient.findOne({ nid }).select("-password"); 
+    const patient = await Patient.findOne({ nid }).select("-password");
     if (!patient) return res.status(404).json({ message: "Patient not found" });
 
     res.json(patient);
