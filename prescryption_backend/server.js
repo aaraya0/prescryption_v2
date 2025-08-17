@@ -27,7 +27,9 @@ const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
-connectDB();
+if (process.env.NODE_ENV !== 'test') {
+  connectDB();
+}
 
 app.use('/api/public/patients', publicPatientRoutes);
 app.use('/api/public/doctors', publicDoctorRoutes);
@@ -50,4 +52,8 @@ app.use("/api/auth", passwordRoutes);
 
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`✅ Server running on port ${PORT}`));
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, '0.0.0.0', () => console.log(`✅ Server running on port ${PORT}`));
+}
+
+module.exports = app;
