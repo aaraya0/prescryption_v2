@@ -1,11 +1,15 @@
+// src/pages/Register.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import api from "../AxiosConfig";
 
 function Register() {
-  const [formData, setFormData] = useState({});
-  const [insurancePlan, setInsurancePlan] = useState("");
+  const [formData, setFormData] = useState({
+    // Para pacientes, el backend requiere insurance_name,
+    // si el usuario no tiene obra social, usar "PARTICULAR".
+    insurance_name: "PARTICULAR",
+  });
   const [errorMessage, setErrorMessage] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -16,50 +20,58 @@ function Register() {
     .split("; ")
     .find((row) => row.startsWith("userType="))
     ?.split("=")[1];
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const fetchInsurancePlan = async () => {
-    const { nid, insurance_name } = formData;
-
-    if (!nid || !insurance_name) {
-      alert("Por favor, completa tus datos");
-      return;
-    }
-
-    try {
-      const response = await api.post(
-        `${process.env.REACT_APP_API_BASE_URL}/api/public/insurance/get_affiliation`,
-        { nid, insurance_name }
-      );
-
-      const plan = response.data.insurance_plan;
-      const affiliateNum = response.data.affiliate_number;
-
-      setInsurancePlan(plan);
-      setFormData({
-        ...formData,
-        insurance_plan: plan,
-        affiliate_num: affiliateNum,
-      });
-
-      setErrorMessage("");
-    } catch (error) {
-      console.error("Error fetching insurance plan:", error);
-      setInsurancePlan("");
-      setErrorMessage("No se encontró un plan para este afiliado.");
-    }
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleRegister = async () => {
     try {
-      let payload = formData;
+      setShowError(false);
+      setErrorMessage("");
+
+      // Endpoint base por tipo
       let endpoint = `${process.env.REACT_APP_API_BASE_URL}/api/public/${userType}s/register`;
+      let payload = { ...formData };
+
+      if (userType === "patient") {
+        // Enviar sólo lo que el backend espera y valida.
+        // El backend valida insurance_name y, si no es "PARTICULAR",
+        // consulta a verify_insurance y setea affiliate_num/insurance_plan adentro.
+        // (No enviamos affiliate_num ni insurance_plan desde el front).
+        const required = [
+          "name",
+          "surname",
+          "nid",
+          "birth_date",
+          "sex",
+          "insurance_name",
+          "password",
+          "mail",
+        ];
+
+        // Normaliza insurance_name vacío a "PARTICULAR"
+        if (!payload.insurance_name) payload.insurance_name = "PARTICULAR";
+
+        // Validación rápida en front para mejor UX
+        const missing = required.filter((k) => !payload[k]);
+        if (missing.length) {
+          setErrorMessage(
+            `Faltan campos obligatorios: ${missing.join(", ")}.`
+          );
+          setShowError(true);
+          return;
+        }
+
+        // Limpiar cualquier campo ajeno que pudiera venir del estado anterior
+        delete payload.affiliate_num;
+        delete payload.insurance_plan;
+      }
 
       if (userType === "insurance") {
+        // Seguro: mapear a lo que espera tu backend público de insurance
         payload = {
           insurance_name: formData.insurance_name,
           insurance_nid: formData.insurance_nid,
@@ -84,7 +96,13 @@ function Register() {
       setShowSuccess(true);
     } catch (error) {
       console.error("❌ Error al registrar:", error.response?.data || error);
-      setFormData({});
+      const backendMsg =
+        error.response?.data?.message ||
+        error.response?.data ||
+        "Error en el registro.";
+      setErrorMessage(
+        typeof backendMsg === "string" ? backendMsg : "Error en el registro."
+      );
       setShowError(true);
     }
   };
@@ -106,6 +124,7 @@ function Register() {
               placeholder="Nombre"
               onChange={handleChange}
             />
+
             <p className="inputTitle">Apellido</p>
             <input
               className="form-input"
@@ -114,6 +133,7 @@ function Register() {
               placeholder="Apellido"
               onChange={handleChange}
             />
+
             <p className="inputTitle">DNI</p>
             <input
               className="form-input"
@@ -122,6 +142,7 @@ function Register() {
               placeholder="DNI"
               onChange={handleChange}
             />
+
             <div className="form-radio">
               <label className="optionsTitle">Sexo</label>
               <label>
@@ -140,6 +161,7 @@ function Register() {
                   value="M"
                   onChange={handleChange}
                 />
+                M
               </label>
               <label>
                 <input
@@ -151,6 +173,7 @@ function Register() {
                 X
               </label>
             </div>
+
             <p className="inputTitle">Fecha de Nacimiento</p>
             <input
               className="form-input"
@@ -165,38 +188,14 @@ function Register() {
               className="form-input"
               type="text"
               name="insurance_name"
-              placeholder="Obra Social"
+              placeholder='Ej.: "PARTICULAR", "SWISS MEDICAL", etc.'
+              value={formData.insurance_name || ""}
               onChange={handleChange}
             />
-            <p className="inputTitle">Número de Afiliado</p>
-            <div className="affiliate-input-container">
-              <input
-                className="form-input"
-                type="text"
-                name="affiliate_num"
-                placeholder="Número de Afiliado"
-                onChange={handleChange}
-              />
-              <button
-                type="button"
-                onClick={fetchInsurancePlan}
-                className="fetch-plan-button"
-                title="Fetch Insurance Plan"
-              >
-                ➔ {/* Icono de flecha */}
-              </button>
-            </div>
-
-            <p className="inputTitle">Plan de Obra Social</p>
-            <input
-              className="form-input"
-              type="text"
-              name="insurance_plan"
-              placeholder="Plan de Obra Social"
-              value={insurancePlan}
-              readOnly
-            />
-            {errorMessage && <p className="error">{errorMessage}</p>}
+            <small className="hint">
+              Si no tenés obra social, dejá “PARTICULAR”. La afiliación y plan
+              se verifican automáticamente en el backend si corresponde.
+            </small>
 
             <p className="inputTitle">Correo Electrónico</p>
             <input
@@ -206,6 +205,7 @@ function Register() {
               placeholder="Email"
               onChange={handleChange}
             />
+
             <p className="inputTitle">Contraseña</p>
             <div className="password-container-register">
               <input
@@ -227,6 +227,7 @@ function Register() {
             </div>
           </>
         );
+
       case "doctor":
         return (
           <>
@@ -299,6 +300,7 @@ function Register() {
             </div>
           </>
         );
+
       case "insurance":
         return (
           <>
@@ -350,6 +352,7 @@ function Register() {
             </div>
           </>
         );
+
       case "pharmacy":
         return (
           <>
@@ -408,6 +411,7 @@ function Register() {
             />
           </>
         );
+
       case "pharmacyUser":
         return (
           <>
@@ -488,8 +492,9 @@ function Register() {
             />
           </>
         );
+
       default:
-        return <p>Por favor, selecciona un tipo de usuario.</p>;
+        return <p>Por favor, seleccioná un tipo de usuario.</p>;
     }
   };
 
@@ -499,11 +504,14 @@ function Register() {
         <div className="form-header">
           <h2>Formulario de Registro de {userType}</h2>
         </div>
+
         <div className="form-body">
           {renderFields()}
+
           <button className="register-button" onClick={handleRegister}>
             Registrarme
           </button>
+
           <p>
             ¿Ya tenés una cuenta?
             <button className="login-link" onClick={handleLogin}>
@@ -526,7 +534,8 @@ function Register() {
             <span className="checkmark">✓</span>
           </div>
           <h2>Registro exitoso</h2>
-          {userType === "pharmacy" && (
+
+          {userType === "pharmacy" ? (
             <>
               <p>¡Farmacia registrada!</p>
               <p>Tu código de verificación es:</p>
@@ -536,8 +545,9 @@ function Register() {
                 farmacia.
               </p>
             </>
+          ) : (
+            <p>Presioná la ❌ para continuar.</p>
           )}
-          {userType !== "pharmacy" && <p>Presioná la ❌ para continuar.</p>}
         </div>
       )}
 
@@ -550,7 +560,6 @@ function Register() {
             className="close-button"
             onClick={() => {
               setShowError(false);
-              setFormData({});
             }}
             title="Cerrar"
           >
@@ -563,7 +572,7 @@ function Register() {
             <span className="checkmark">✖</span>
           </div>
           <h2>Error en el registro</h2>
-          <p>Verificá los datos ingresados. </p>
+          <p>{errorMessage || "Verificá los datos ingresados."}</p>
         </div>
       )}
     </div>
