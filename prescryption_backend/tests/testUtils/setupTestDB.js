@@ -1,23 +1,32 @@
-const { MongoMemoryServer } = require('mongodb-memory-server');
+// tests/testUtils/setupTestDB.js
 const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongoServer;
 
-module.exports.connect = async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-};
+async function connect() {
+  // Si ya hay una conexión abierta, no hagas nada
+  if (mongoose.connection && mongoose.connection.readyState === 1) return;
 
-module.exports.closeDatabase = async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
-};
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
 
-module.exports.clearDatabase = async () => {
-    const collections = mongoose.connection.collections;
-    for (const key in collections) {
-        await collections[key].deleteMany({});
+  // Conectar SIN opciones deprecadas
+  await mongoose.connect(uri);
+}
+
+async function closeDatabase() {
+  try {
+    if (mongoose.connection && mongoose.connection.readyState !== 0) {
+      await mongoose.connection.dropDatabase().catch(() => {});
+      await mongoose.connection.close().catch(() => {});
     }
-};
+  } finally {
+    if (mongoServer) {
+      await mongoServer.stop().catch(() => {});
+      mongoServer = null;
+    }
+  }
+}
+
+module.exports = { connect, closeDatabase };

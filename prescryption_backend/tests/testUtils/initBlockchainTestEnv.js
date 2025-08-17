@@ -1,3 +1,4 @@
+// tests/testUtils/initBlockchainTestEnv.js
 const fs = require('fs');
 const path = require('path');
 const { Web3 } = require('web3');
@@ -6,38 +7,57 @@ let web3;
 let systemAccount;
 let prescriptionContract;
 
+function resolveExisting(...candidates) {
+  for (const rel of candidates) {
+    const abs = path.resolve(__dirname, rel);
+    if (fs.existsSync(abs)) return abs;
+  }
+  throw new Error('No se encontró la ruta indicada. Revisá prescryption_solidity/*');
+}
+
 async function initBlockchain() {
-    web3 = new Web3('http://127.0.0.1:8545');  
-    const accounts = await web3.eth.getAccounts();
-    systemAccount = {
-        address: accounts[0],
-        privateKey: null
-    };
+  const providerUrl = process.env.BLOCKCHAIN_PROVIDER_URL || 'http://127.0.0.1:7545';
+  web3 = new Web3(providerUrl);
 
-    const contractsDataPath = path.resolve(__dirname, '../../../prescryption_solidity/contracts_data.json');
-    const contractBuildPath = path.resolve(__dirname, '../../../prescryption_solidity/build/contracts/PrescriptionContract.json');
+  const netId = await web3.eth.net.getId().catch(() => 'NA');
+  console.log(`[CHAIN] provider=${providerUrl} netId=${netId}`);
 
-    const contractsData = JSON.parse(fs.readFileSync(contractsDataPath));
-    const contractJSON = JSON.parse(fs.readFileSync(contractBuildPath));
+  const accounts = await web3.eth.getAccounts();
+  systemAccount = { address: accounts[0], privateKey: null };
+  console.log(`[CHAIN] systemAccount=${systemAccount.address}`);
 
-    prescriptionContract = new web3.eth.Contract(contractJSON.abi, contractsData.PrescriptionContract);
+  // ABI (carpeta hermana a backend)
+  const abiPath = resolveExisting(
+    '../../../prescryption_solidity/build/contracts/PrescriptionContract.json',
+    '../../../../prescryption_solidity/build/contracts/PrescriptionContract.json'
+  );
+  const abi = JSON.parse(fs.readFileSync(abiPath, 'utf8')).abi;
+
+  // Dirección del contrato (leerá el contracts_data **parchado** por tests)
+  const cdPath = resolveExisting(
+    '../../../prescryption_solidity/contracts_data.json',
+    '../../../../prescryption_solidity/contracts_data.json'
+  );
+  const { PrescriptionContract } = JSON.parse(fs.readFileSync(cdPath, 'utf8'));
+  console.log(`[CHAIN] contractAddress=${PrescriptionContract}`);
+
+  const code = await web3.eth.getCode(PrescriptionContract);
+  console.log(`[CHAIN] codeAtAddress=${code && code.length > 2 ? 'present' : 'EMPTY'}`);
+
+  prescriptionContract = new web3.eth.Contract(abi, PrescriptionContract);
 }
 
 function getWeb3() {
-    return web3;
+  if (!web3) throw new Error('initBlockchain() no fue llamado');
+  return web3;
 }
-
 function getSystemAccount() {
-    return systemAccount;
+  if (!systemAccount) throw new Error('initBlockchain() no fue llamado');
+  return systemAccount;
+}
+function getContract() {
+  if (!prescriptionContract) throw new Error('initBlockchain() no fue llamado');
+  return prescriptionContract;
 }
 
-function getPrescriptionContract() {
-    return prescriptionContract;
-}
-
-module.exports = {
-    initBlockchain,
-    getWeb3,
-    getSystemAccount,
-    getPrescriptionContract
-};
+module.exports = { initBlockchain, getWeb3, getSystemAccount, getContract };
