@@ -5,11 +5,8 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 import api from "../AxiosConfig";
 
 function Register() {
-  const [formData, setFormData] = useState({
-    // Para pacientes, el backend requiere insurance_name,
-    // si el usuario no tiene obra social, usar "PARTICULAR".
-    insurance_name: "PARTICULAR",
-  });
+  const [formData, setFormData] = useState({});
+  const [insurancePlan, setInsurancePlan] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -22,6 +19,7 @@ function Register() {
     ?.split("=")[1];
 
   const navigate = useNavigate();
+  const BASE = (process.env.REACT_APP_API_BASE_URL || "").replace(/\/+$/, "");
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -32,46 +30,15 @@ function Register() {
       setShowError(false);
       setErrorMessage("");
 
-      // Endpoint base por tipo
-      let endpoint = `${process.env.REACT_APP_API_BASE_URL}/api/public/${userType}s/register`;
       let payload = { ...formData };
+      let endpoint = `${BASE}/api/public/${userType}s/register`;
 
+      // 👉 Forzamos el endpoint real de pacientes
       if (userType === "patient") {
-        // Enviar sólo lo que el backend espera y valida.
-        // El backend valida insurance_name y, si no es "PARTICULAR",
-        // consulta a verify_insurance y setea affiliate_num/insurance_plan adentro.
-        // (No enviamos affiliate_num ni insurance_plan desde el front).
-        const required = [
-          "name",
-          "surname",
-          "nid",
-          "birth_date",
-          "sex",
-          "insurance_name",
-          "password",
-          "mail",
-        ];
-
-        // Normaliza insurance_name vacío a "PARTICULAR"
-        if (!payload.insurance_name) payload.insurance_name = "PARTICULAR";
-
-        // Validación rápida en front para mejor UX
-        const missing = required.filter((k) => !payload[k]);
-        if (missing.length) {
-          setErrorMessage(
-            `Faltan campos obligatorios: ${missing.join(", ")}.`
-          );
-          setShowError(true);
-          return;
-        }
-
-        // Limpiar cualquier campo ajeno que pudiera venir del estado anterior
-        delete payload.affiliate_num;
-        delete payload.insurance_plan;
+        endpoint = `${BASE}/api/public/patients/register`;
       }
 
       if (userType === "insurance") {
-        // Seguro: mapear a lo que espera tu backend público de insurance
         payload = {
           insurance_name: formData.insurance_name,
           insurance_nid: formData.insurance_nid,
@@ -81,18 +48,32 @@ function Register() {
       }
 
       if (userType === "pharmacy") {
-        endpoint = `${process.env.REACT_APP_API_BASE_URL}/api/public/pharmacies/register`;
+        endpoint = `${BASE}/api/public/pharmacies/register`;
         const res = await api.post(endpoint, payload);
-        setVerificationCode(res.data.verificationCode || "");
+        setVerificationCode(res.data?.verificationCode || "");
         setShowSuccess(true);
         return;
       }
 
       if (userType === "pharmacyUser") {
-        endpoint = `${process.env.REACT_APP_API_BASE_URL}/api/public/pharmacies/users/register`;
+        endpoint = `${BASE}/api/public/pharmacies/users/register`;
       }
 
-      await api.post(endpoint, payload);
+      const res = await api.post(endpoint, payload);
+
+      // ⬇️ Si es paciente, refleja plan y afiliado que resolvió el backend
+      if (userType === "patient") {
+        const { insurance_plan, affiliate_num } = res?.data || {};
+        if (insurance_plan) setInsurancePlan(insurance_plan);
+        if (insurance_plan || affiliate_num) {
+          setFormData((prev) => ({
+            ...prev,
+            insurance_plan: insurance_plan ?? prev.insurance_plan,
+            affiliate_num: affiliate_num ?? prev.affiliate_num,
+          }));
+        }
+      }
+
       setShowSuccess(true);
     } catch (error) {
       console.error("❌ Error al registrar:", error.response?.data || error);
@@ -189,13 +170,28 @@ function Register() {
               type="text"
               name="insurance_name"
               placeholder='Ej.: "PARTICULAR", "SWISS MEDICAL", etc.'
-              value={formData.insurance_name || ""}
               onChange={handleChange}
             />
-            <small className="hint">
-              Si no tenés obra social, dejá “PARTICULAR”. La afiliación y plan
-              se verifican automáticamente en el backend si corresponde.
-            </small>
+
+            <p className="inputTitle">Número de Afiliado</p>
+            <input
+              className="form-input"
+              type="text"
+              name="affiliate_num"
+              placeholder="Número de Afiliado"
+              onChange={handleChange}
+              value={formData.affiliate_num || ""}
+            />
+
+            <p className="inputTitle">Plan de Obra Social</p>
+            <input
+              className="form-input"
+              type="text"
+              name="insurance_plan"
+              placeholder="Plan de Obra Social"
+              value={insurancePlan || formData.insurance_plan || ""}
+              readOnly
+            />
 
             <p className="inputTitle">Correo Electrónico</p>
             <input
@@ -546,7 +542,17 @@ function Register() {
               </p>
             </>
           ) : (
-            <p>Presioná la ❌ para continuar.</p>
+            <>
+              {userType === "patient" && (
+                <p>
+                  Plan asignado: <b>{insurancePlan || formData.insurance_plan || "N/A"}</b>
+                  {formData.affiliate_num ? (
+                    <> — Afiliado: <b>{formData.affiliate_num}</b></>
+                  ) : null}
+                </p>
+              )}
+              <p>Presioná la ❌ para continuar.</p>
+            </>
           )}
         </div>
       )}
