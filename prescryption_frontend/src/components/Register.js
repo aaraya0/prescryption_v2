@@ -1,7 +1,7 @@
 // src/pages/Register.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiArrowRightCircle } from "react-icons/fi";
 import api from "../AxiosConfig";
 
 function Register() {
@@ -12,6 +12,7 @@ function Register() {
   const [verificationCode, setVerificationCode] = useState("");
   const [showError, setShowError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [planHint, setPlanHint] = useState(""); // breve mensaje bajo el plan (opcional)
 
   const userType = document.cookie
     .split("; ")
@@ -23,6 +24,49 @@ function Register() {
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  // 👉 Detectar plan (botón al lado del afiliado): usa nid + insurance_name
+  const handleDetectPlan = async () => {
+    try {
+      setPlanHint("");
+      const nid = (formData.nid || "").trim();
+      const insurance_name = (formData.insurance_name || "").trim();
+
+      if (!nid || !insurance_name) {
+        setPlanHint("Completá DNI y Obra Social para detectar el plan.");
+        return;
+      }
+
+      const res = await fetch(`${BASE}/api/public/patients/insurance_preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nid, insurance_name }),
+      });
+
+      if (!res.ok) {
+        setPlanHint(res.status === 404 ? "No se encontró un plan con esos datos." : "No pudimos verificar el plan.");
+        return;
+      }
+
+      const data = await res.json().catch(() => ({}));
+      const plan = data.insurance_plan || data.plan || (typeof data === "string" ? data : "");
+      const affiliate = data.affiliate_number ?? data.affiliate_num ?? "";
+
+      if (plan) {
+        setFormData((prev) => ({
+          ...prev,
+          insurance_plan: plan,
+          affiliate_num: prev.affiliate_num || affiliate || prev.affiliate_num,
+        }));
+        setInsurancePlan(plan); // mantiene compat con modal de éxito existente
+        setPlanHint("Plan detectado y completado.");
+      } else {
+        setPlanHint("No se encontró un plan con esos datos.");
+      }
+    } catch (e) {
+      setPlanHint("Error al verificar el plan.");
+    }
   };
 
   const handleRegister = async () => {
@@ -174,14 +218,25 @@ function Register() {
             />
 
             <p className="inputTitle">Número de Afiliado</p>
-            <input
-              className="form-input"
-              type="text"
-              name="affiliate_num"
-              placeholder="Número de Afiliado"
-              onChange={handleChange}
-              value={formData.affiliate_num || ""}
-            />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
+              <input
+                className="form-input"
+                type="text"
+                name="affiliate_num"
+                placeholder="Número de Afiliado"
+                onChange={handleChange}
+                value={formData.affiliate_num || ""}
+              />
+              <button
+                type="button"
+                onClick={handleDetectPlan}
+                className="register-button"
+                style={{ minWidth: 44, padding: "0 12px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                title="Detectar plan"
+              >
+                <FiArrowRightCircle />
+              </button>
+            </div>
 
             <p className="inputTitle">Plan de Obra Social</p>
             <input
@@ -189,9 +244,14 @@ function Register() {
               type="text"
               name="insurance_plan"
               placeholder="Plan de Obra Social"
-              value={insurancePlan || formData.insurance_plan || ""}
-              readOnly
+              value={formData.insurance_plan || insurancePlan || ""}
+              onChange={handleChange}
             />
+            {planHint && (
+              <div style={{ marginTop: 6, marginBottom: 10, fontSize: 13, color: "#4a5568" }}>
+                {planHint}
+              </div>
+            )}
 
             <p className="inputTitle">Correo Electrónico</p>
             <input

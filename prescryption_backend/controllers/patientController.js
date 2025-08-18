@@ -192,3 +192,36 @@ exports.getAvailablePharmacies = async (req, res) => {
     res.status(500).json({ message: "Error retrieving pharmacies" });
   }
 };
+
+exports.verifyInsurancePreview = async (req, res) => {
+  try {
+    const { nid, insurance_name } = req.body || {};
+    if (!nid || !insurance_name) {
+      return res.status(400).json({ message: "Missing nid or insurance_name" });
+    }
+
+    const url = verifyInsurance.url("/get_affiliation");
+    const { data } = await axios.post(
+      url,
+      { nid, insurance_name },
+      { headers: { "Content-Type": "application/json" }, timeout: 10000 }
+    );
+
+    // Normalizo nombres de campos para el front
+    return res.status(200).json({
+      status: data.status || "ok",
+      affiliate_number: data.affiliate_number ?? data.affiliate_num ?? null,
+      insurance_plan: data.insurance_plan ?? data.plan ?? null,
+    });
+  } catch (err) {
+    const http = err?.response?.status || 500;
+
+    if (http === 404) {
+      // Caso "no afiliado / no encontrado" del micro
+      return res.status(404).json({ status: "not_found" });
+    }
+
+    console.error("[verifyInsurancePreview] error:", err.message);
+    return res.status(500).json({ message: "Error verifying insurance" });
+  }
+};
