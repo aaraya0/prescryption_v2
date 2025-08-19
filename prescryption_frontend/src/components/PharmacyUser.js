@@ -43,12 +43,9 @@ const PharmacyUser = () => {
 
   const fetchPrescriptions = async () => {
     try {
-      const response = await api.get(
-        "/api/pharmacy-users/prescriptions",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await api.get("/api/pharmacy-users/prescriptions", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setPrescriptions(response.data.prescriptions || []);
     } catch (error) {
       console.error(
@@ -82,7 +79,9 @@ const PharmacyUser = () => {
 
       console.log("🧪 Recibidos del backend:", response.data.results);
 
-      setMedOptions(Array.isArray(response.data.results) ? response.data.results : []);
+      setMedOptions(
+        Array.isArray(response.data.results) ? response.data.results : []
+      );
       console.log(
         "Opciones de medicamentos después de asignar:",
         response.data.results
@@ -402,7 +401,7 @@ const PharmacyUser = () => {
           )}
         </div>
 
-        <div className="receta-scroll">
+        <div className="receta-scroll-farmacia">
           {filteredPrescriptions.length === 0 ? (
             <p>No hay recetas asignadas aún.</p>
           ) : (
@@ -626,10 +625,18 @@ const PharmacyUser = () => {
 
                 {finalPrices &&
                   finalPrices.map((item, i) => {
-                    const { medication = {}, finalPrice, finalCoverage } = item || {};
+                    const {
+                      medication = {},
+                      finalPrice,
+                      finalCoverage,
+                    } = item || {};
                     // Campos defensivos
-                    const priceUnit = Number(medication.priceUnit ?? medication.price ?? 0);
-                    const grossPrice = Number(item.grossPrice ?? medication.grossPrice ?? 0);
+                    const priceUnit = Number(
+                      medication.priceUnit ?? medication.price ?? 0
+                    );
+                    const grossPrice = Number(
+                      item.grossPrice ?? medication.grossPrice ?? 0
+                    );
                     const final = Number(finalPrice ?? 0);
                     const descuento = Math.max(0, grossPrice - final);
                     const coverage = Number(finalCoverage ?? 0);
@@ -648,12 +655,10 @@ const PharmacyUser = () => {
                           {medication.details?.laboratory || "N/A"}
                         </p>
                         <p>
-                          <strong>Precio Unitario:</strong> $
-                          {money(priceUnit)}
+                          <strong>Precio Unitario:</strong> ${money(priceUnit)}
                         </p>
                         <p>
-                          <strong>Precio Total:</strong> $
-                          {money(grossPrice)}
+                          <strong>Precio Total:</strong> ${money(grossPrice)}
                         </p>
                         <p>
                           <strong>Cobertura Obra Social:</strong>{" "}

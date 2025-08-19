@@ -908,7 +908,13 @@ h4 {
 }
 
 .receta-scroll {
-  max-height: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-bottom: 20px;
+}
+.receta-scroll-farmacia {
+  max-height: 400px;
   overflow-y: auto;
   padding-right: 10px;
   margin-bottom: 20px;
