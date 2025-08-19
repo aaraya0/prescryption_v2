@@ -1282,8 +1282,20 @@ h4 {
 }
 
 /* Cada botón ocupa todo su celda del grid */
+.admin-btn-active {
+  background-color: rgb(163, 132, 142);
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
 .admin-btn {
-  background-color: #a6c4ca;
+  background-color: #3c3d3d38;
   color: white;
   font-size: 18px;
   font-weight: 600;
@@ -1295,11 +1307,11 @@ h4 {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.admin-btn:hover {
+.admin-btn-active:hover {
   background-color: #8a9fa3;
 }
 
-.admin-btn:active {
+.admin-btn-active:active {
   transform: scale(1.02);
 }
 
@@ -1651,4 +1663,15 @@ input[name="quantity2"] {
     flex-wrap: wrap;
     gap: 8px;
   }
+}
+
+.ph-admin__btn--verify {
+  background-color: #a6c4ca !important;
+}
+.ph-admin__btn--verify:hover {
+  font-weight: 500;
+}
+
+.ph-admin__btn--verify:active {
+  transform: scale(1.05);
 }

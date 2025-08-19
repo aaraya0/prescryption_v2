@@ -1,7 +1,7 @@
 // src/components/VerifyUsers.jsx
 import React, { useEffect, useState } from "react";
 import api from "../AxiosConfig";
-import "../styles/styles.css";
+import "../styles/styles.css"; // reutilizamos los estilos de PharmacyAdmin
 
 function VerifyUsers() {
   const [pendingList, setPendingList] = useState([]);
@@ -9,7 +9,6 @@ function VerifyUsers() {
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
 
-  // 1) Fetch inicial de las obras sociales pendientes
   useEffect(() => {
     const fetchPending = async () => {
       try {
@@ -18,21 +17,15 @@ function VerifyUsers() {
           setLoading(false);
           return;
         }
-        const response = await api.get(
-          "/api/admin/insurances/pending",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        // La API responde: { pending: [ ... ] }
-        setPendingList(response.data.pending || []);
+        const { data } = await api.get("/api/admin/insurances/pending", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setPendingList(data.pending || []);
       } catch (err) {
         console.error("Error trayendo pendientes:", err);
         setError(
           err.response?.data?.message ||
-            "Hubo un error al obtener las Insurances pendientes."
+            "Hubo un error al obtener las obras sociales pendientes."
         );
       } finally {
         setLoading(false);
@@ -42,10 +35,8 @@ function VerifyUsers() {
     fetchPending();
   }, [token]);
 
-  // 2) Función para verificar una obra social en particular
   const handleVerify = async (insuranceNid) => {
     try {
-      // Llamada PATCH a /api/admin/insurances/:insurance_nid/verify
       await api.patch(
         `/api/admin/insurances/${insuranceNid}/verify`,
         {},
@@ -56,7 +47,6 @@ function VerifyUsers() {
           },
         }
       );
-      // Suponemos éxito, recargamos la lista
       setPendingList((prev) =>
         prev.filter((item) => item.insurance_nid !== insuranceNid)
       );
@@ -69,44 +59,51 @@ function VerifyUsers() {
     }
   };
 
-  if (loading) {
-    return (
-      <p className="perfil-loading">Cargando obras sociales pendientes…</p>
-    );
-  }
-  if (error) {
-    return <p className="perfil-error">{error}</p>;
-  }
+  if (loading) return <p className="ph-admin__msg">Cargando pendientes…</p>;
+  if (error)
+    return <p className="ph-admin__msg ph-admin__msg--error">{error}</p>;
 
   return (
-    <div className="verify-users-container">
-      <h2>Obras Sociales Pendientes de Verificación</h2>
+    <div className="ph-admin">
+      <h2 className="ph-admin__title">
+        Obras Sociales Pendientes de Verificación
+      </h2>
+
       {pendingList.length === 0 ? (
-        <p>No hay obras sociales pendientes en este momento.</p>
+        <p className="ph-admin__msg">
+          No hay obras sociales pendientes en este momento.
+        </p>
       ) : (
-        <ul className="pending-list">
-          {pendingList.map((ins) => (
-            <li key={ins.insurance_nid} className="pending-item">
-              <div className="pending-details">
-                <p>
-                  <strong>Nombre:</strong> {ins.insurance_name || "–"}
-                </p>
-                <p>
-                  <strong>CUIT (NID):</strong> {ins.insurance_nid}
-                </p>
-                <p>
-                  <strong>Correo:</strong> {ins.mail}
-                </p>
-              </div>
-              <button
-                className="verify-button"
-                onClick={() => handleVerify(ins.insurance_nid)}
-              >
-                Verificar
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="ph-admin__table-wrap">
+          <table className="ph-admin__table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>CUIT (NID)</th>
+                <th>Correo</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendingList.map((ins) => (
+                <tr key={ins.insurance_nid}>
+                  <td>{ins.insurance_name || "–"}</td>
+                  <td>{ins.insurance_nid}</td>
+                  <td>{ins.mail || "–"}</td>
+                  <td className="ph-admin__center">
+                    <button
+                      className="ph-admin__btn ph-admin__btn--on ph-admin__btn--verify"
+                      onClick={() => handleVerify(ins.insurance_nid)}
+                      title="Verificar obra social"
+                    >
+                      Verificar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

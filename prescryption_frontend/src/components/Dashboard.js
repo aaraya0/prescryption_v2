@@ -112,16 +112,16 @@ function Dashboard() {
             <h3 className="admin-title">Panel de Administrador</h3>
             <div className="admin-buttons-grid">
               <button
+                className="admin-btn-active"
+                onClick={() => navigate("/dashboard/admin/verify-users")}
+              >
+                Usuarios y Verificaciones
+              </button>
+              <button
                 className="admin-btn"
                 onClick={() => navigate("/dashboard/admin/prescriptions")}
               >
                 Recetas
-              </button>
-              <button
-                className="admin-btn"
-                onClick={() => navigate("/dashboard/admin/verify-users")}
-              >
-                Usuarios y Verificaciones
               </button>
               <button
                 className="admin-btn"

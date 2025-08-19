@@ -45,12 +45,19 @@ function Register() {
       });
 
       if (!res.ok) {
-        setPlanHint(res.status === 404 ? "No se encontró un plan con esos datos." : "No pudimos verificar el plan.");
+        setPlanHint(
+          res.status === 404
+            ? "No se encontró un plan con esos datos."
+            : "No pudimos verificar el plan."
+        );
         return;
       }
 
       const data = await res.json().catch(() => ({}));
-      const plan = data.insurance_plan || data.plan || (typeof data === "string" ? data : "");
+      const plan =
+        data.insurance_plan ||
+        data.plan ||
+        (typeof data === "string" ? data : "");
       const affiliate = data.affiliate_number ?? data.affiliate_num ?? "";
 
       if (plan) {
@@ -218,7 +225,13 @@ function Register() {
             />
 
             <p className="inputTitle">Número de Afiliado</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8 }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr auto",
+                gap: 8,
+              }}
+            >
               <input
                 className="form-input"
                 type="text"
@@ -231,7 +244,13 @@ function Register() {
                 type="button"
                 onClick={handleDetectPlan}
                 className="register-button"
-                style={{ minWidth: 44, padding: "0 12px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                style={{
+                  minWidth: 44,
+                  padding: "0 12px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
                 title="Detectar plan"
               >
                 <FiArrowRightCircle />
@@ -248,7 +267,14 @@ function Register() {
               onChange={handleChange}
             />
             {planHint && (
-              <div style={{ marginTop: 6, marginBottom: 10, fontSize: 13, color: "#4a5568" }}>
+              <div
+                style={{
+                  marginTop: 6,
+                  marginBottom: 10,
+                  fontSize: 13,
+                  color: "#4a5568",
+                }}
+              >
                 {planHint}
               </div>
             )}
@@ -375,6 +401,8 @@ function Register() {
               type="text"
               name="insurance_nid"
               placeholder="CUIT"
+              maxLength="11"
+              pattern="\d{11}"
               onChange={handleChange}
             />
 
@@ -605,9 +633,13 @@ function Register() {
             <>
               {userType === "patient" && (
                 <p>
-                  Plan asignado: <b>{insurancePlan || formData.insurance_plan || "N/A"}</b>
+                  Plan asignado:{" "}
+                  <b>{insurancePlan || formData.insurance_plan || "N/A"}</b>
                   {formData.affiliate_num ? (
-                    <> — Afiliado: <b>{formData.affiliate_num}</b></>
+                    <>
+                      {" "}
+                      — Afiliado: <b>{formData.affiliate_num}</b>
+                    </>
                   ) : null}
                 </p>
               )}
