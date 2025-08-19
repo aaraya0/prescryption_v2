@@ -400,10 +400,18 @@ function Register() {
               className="form-input"
               type="text"
               name="insurance_nid"
-              placeholder="CUIT"
-              maxLength="11"
-              pattern="\d{11}"
-              onChange={handleChange}
+              placeholder="CUIT (11 dígitos)"
+              inputMode="numeric"
+              autoComplete="off"
+              value={formData.insurance_nid || ""}
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
+                setFormData((prev) => ({ ...prev, insurance_nid: digits }));
+              }}
+              onKeyDown={(e) => {
+                if (["+", "-", "e", "E", ".", ","].includes(e.key))
+                  e.preventDefault();
+              }}
             />
 
             <p className="inputTitle">Correo Electrónico</p>
