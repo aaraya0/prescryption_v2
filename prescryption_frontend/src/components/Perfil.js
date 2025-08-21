@@ -17,6 +17,7 @@ function Perfil() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Read userType from cookie to decide which endpoint to call
   const userType = document.cookie
     .split("; ")
     .find((row) => row.startsWith("userType="))
@@ -32,6 +33,7 @@ function Perfil() {
           return;
         }
 
+        // Map role → profile endpoint
         let url = "";
         if (userType === "doctor") {
           url = "/api/doctors/profile";
@@ -49,6 +51,7 @@ function Perfil() {
           return;
         }
 
+        // Fetch profile with auth header
         const response = await api.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -77,6 +80,7 @@ function Perfil() {
   if (loading) return <p className="perfil-loading">Cargando perfil...</p>;
   if (error) return <p className="perfil-error">{error}</p>;
 
+  // Small presentational component: label + icon + value
   const Field = ({ icon, label, value }) => (
     <div className="perfil-item">
       <span className="perfil-icon">{icon}</span>
@@ -84,6 +88,7 @@ function Perfil() {
     </div>
   );
 
+  // Render role-specific fields
   const renderFields = () => {
     switch (userType) {
       case "patient":

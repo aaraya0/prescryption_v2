@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import api from "../AxiosConfig";
-import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
 import { Modal, Button, Form, Accordion } from "react-bootstrap";
 import "../styles/Patient.css";
 import Loader from "./Loader";
 import PrescriptionPDF from "./PrescriptionPDF";
 
 const Patient = () => {
+  //State management
   const [recetas, setRecetas] = useState([]);
   const [pharmacyNid, setPharmacyNid] = useState("");
   const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null);
@@ -17,32 +16,33 @@ const Patient = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
+
+  // Filters and sorting
   const [statusFilter, setStatusFilter] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
+
+  // Available data for filters / modal
   const [availableSpecialties, setAvailableSpecialties] = useState([]);
   const [availablePharmacies, setAvailablePharmacies] = useState([]);
   const [selectedPharmacyName, setSelectedPharmacyName] = useState("");
   const [matchedPharmacies, setMatchedPharmacies] = useState([]);
+
+  // Transfer state
   const [isSending, setIsSending] = useState(false);
   const [transferMessage, setTransferMessage] = useState({
     text: "",
     type: "",
   });
 
-  const navigate = useNavigate();
-
   useEffect(() => {
     if (!token) return;
     const fetchPrescriptions = async () => {
       try {
         setLoading(true);
-        const response = await api.get(
-          "/api/patients/prescriptions",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const response = await api.get("/api/patients/prescriptions", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         let filteredPrescriptions = Array.isArray(response.data)
           ? response.data
@@ -108,12 +108,9 @@ const Patient = () => {
     if (showModal) {
       const fetchPharmacies = async () => {
         try {
-          const response = await api.get(
-            "/api/patients/available",
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
+          const response = await api.get("/api/patients/available", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           setAvailablePharmacies(response.data || []);
         } catch (err) {
           console.error("Error al obtener farmacias:", err.message);
@@ -124,11 +121,12 @@ const Patient = () => {
     }
   }, [showModal, token]);
 
+  // Handle prescription transfer (open modal)
   const handleTransfer = (prescriptionId) => {
     setSelectedPrescriptionId(prescriptionId);
     setShowModal(true);
   };
-
+  // Submit transfer to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -178,7 +176,7 @@ const Patient = () => {
       setIsSending(false);
     }
   };
-
+  // Helpers for CSS classes by status
   const getStatusClass = (status) => {
     switch (status) {
       case "Valid":
@@ -221,6 +219,7 @@ const Patient = () => {
     return date.toLocaleDateString("es-AR");
   };
 
+  // Conditional render states
   if (loading) return <p className="perfil-loading">Cargando recetas...</p>;
   if (error) return <p className="perfil-error">{error}</p>;
   if (recetas.length === 0)
@@ -239,6 +238,7 @@ const Patient = () => {
       {successMessage && <div className="success-alert">{successMessage}</div>}
       {errorMessage && <div className="error-alert">{errorMessage}</div>}
 
+      {/* Filters */}
       <div className="filtros-container">
         <label>
           Filtrar por Especialidad:
@@ -280,11 +280,11 @@ const Patient = () => {
         </label>
       </div>
 
+      {/* Prescriptions accordion */}
       <div className="receta-scroll">
         <Accordion defaultActiveKey="">
           {recetas.map((receta, index) => (
             <React.Fragment key={index}>
-              {/*console.log("Receta:", receta)*/}
               <Accordion.Item
                 eventKey={index.toString()}
                 className={`receta-item ${getStatusBackground(receta.status)}`}
@@ -336,6 +336,7 @@ const Patient = () => {
                     {formatDate(receta.expirationDate)}
                   </p>
 
+                  {/* Transfer option only if prescription is valid */}
                   {!receta.isPendingValidation &&
                     (receta.status === "Valid" ||
                       receta.status === "Válida") && (
@@ -346,6 +347,8 @@ const Patient = () => {
                         Transferir Receta
                       </button>
                     )}
+
+                  {/* Download PDF */}
                   <div className="download-button-container">
                     <PrescriptionPDF receta={receta} />
                   </div>

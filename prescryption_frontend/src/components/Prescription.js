@@ -26,6 +26,7 @@ function EmitirReceta() {
 
   const navigate = useNavigate();
 
+  // Restore saved form and medication data from localStorage when returning from search
   useEffect(() => {
     const med1Saved = localStorage.getItem("med1");
     const med2Saved = localStorage.getItem("med2");
@@ -47,6 +48,7 @@ function EmitirReceta() {
     }
   }, []);
 
+  // Navigate to medication search page and save current form state
   const handleGoToSearch = (campo) => {
     const updatedFormData = { ...formData };
 
@@ -66,6 +68,7 @@ function EmitirReceta() {
     navigate(`/buscar-medicamento?campo=${campo}`);
   };
 
+  // Handle input changes and restrict medication quantities between 1 and 2
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -87,6 +90,7 @@ function EmitirReceta() {
     }
   };
 
+  // Fetch patient information from API by DNI (NID)
   const handleSearchPatient = async () => {
     console.log("Buscando paciente con NID:", formData.patientNid);
     const token = localStorage.getItem("token");
@@ -119,6 +123,7 @@ function EmitirReceta() {
     }
   };
 
+  // Submit prescription to API after validation
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
@@ -405,6 +410,7 @@ function EmitirReceta() {
           <Notification message={message.text} type={message.type} />
         </>
       )}
+      {/* Loading overlay */}
       {isLoading && (
         <div className="loader-overlay-modal">
           <Loader mensaje="Generando receta..." />
@@ -414,6 +420,7 @@ function EmitirReceta() {
   );
 }
 
+// Reusable Notification component
 function Notification({ message, type }) {
   if (type === "success") {
     return (

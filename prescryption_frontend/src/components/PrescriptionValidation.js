@@ -11,7 +11,7 @@ const PrescriptionValidation = ({ prescription, onClose }) => {
   const [showModal, setShowModal] = useState(true);
   const [brands, setBrands] = useState({ brand1: "", brand2: "" });
 
-  // Función para validar la receta
+  // Function to validate the prescription
   const handleValidate = async () => {
     try {
       const response = await api.post(
@@ -33,7 +33,7 @@ const PrescriptionValidation = ({ prescription, onClose }) => {
     }
   };
 
-  // Función para resetear la dirección de la farmacia
+  // Function to reset pharmacy address (cancel the dispensing process)
   const handleResetPharmacyAddress = async () => {
     try {
       await api.post(
@@ -45,14 +45,13 @@ const PrescriptionValidation = ({ prescription, onClose }) => {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
-      // Cerrar el modal y refrescar la lista de recetas
       handleCloseAndRefresh();
     } catch (error) {
       console.error("Error al resetear la dirección de la farmacia:", error);
     }
   };
 
-  // Función para generar la factura
+  // Function to generate the invoice after validation
   const handleGenerateInvoice = async () => {
     try {
       const response = await api.post(
@@ -73,7 +72,7 @@ const PrescriptionValidation = ({ prescription, onClose }) => {
     }
   };
 
-  // Función para generar el PDF
+  // Function to generate and download the invoice as PDF
   const handleGeneratePDF = () => {
     const doc = new jsPDF("p", "pt", "a4");
     const content = (
@@ -94,7 +93,7 @@ const PrescriptionValidation = ({ prescription, onClose }) => {
     });
   };
 
-  // Función para cerrar el modal y actualizar la lista de recetas
+  // Function to close modal and refresh prescriptions list
   const handleCloseAndRefresh = () => {
     setShowModal(false);
     onClose();

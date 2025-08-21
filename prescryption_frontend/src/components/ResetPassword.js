@@ -10,6 +10,7 @@ function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [message, setMessage] = useState("");
 
+  // Handle form submission: send new password + token to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -23,6 +24,7 @@ function ResetPassword() {
     }
   };
 
+  // Render: password input form + success/error message
   return (
     <div className="formLogin">
       <h2>Ingresá tu nueva contraseña</h2>

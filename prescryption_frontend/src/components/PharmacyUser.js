@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import api from "../AxiosConfig";
 import Loader from "./Loader";
-import { Accordion, Modal, Button, Form, Spinner } from "react-bootstrap";
+import { Accordion, Modal, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import html2pdf from "html2pdf.js";
 import "../styles/Pharmacy.css";
@@ -24,7 +24,6 @@ const PharmacyUser = () => {
 
   const decoded = token ? jwtDecode(token) : {};
   const isAdmin = decoded.userType === "pharmacy";
-  //const validationRef = useRef();
 
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
@@ -41,6 +40,7 @@ const PharmacyUser = () => {
   const [isConsultaMode, setIsConsultaMode] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
+  // Fetch prescriptions assigned to this pharmacy user
   const fetchPrescriptions = async () => {
     try {
       const response = await api.get("/api/pharmacy-users/prescriptions", {
@@ -59,10 +59,12 @@ const PharmacyUser = () => {
     fetchPrescriptions();
   }, [token]);
 
+  // Handle search input changes
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
 
+  // Open validation modal with available medication options
   const handleOpenValidationModal = async (prescription, consulta = false) => {
     let response;
     try {
@@ -96,6 +98,7 @@ const PharmacyUser = () => {
     }
   };
 
+  // Close validation modal and reset states
   const handleCloseValidationModal = () => {
     setShowValidationModal(false);
     setFinalPrices(null);
@@ -104,6 +107,7 @@ const PharmacyUser = () => {
     setSelectedPrescription(null);
   };
 
+  // Validate prescription with selected medications
   const handleValidatePrescription = async (e) => {
     e.preventDefault();
     console.log("Enviando validación...", selectedMedicationIds);
@@ -131,6 +135,7 @@ const PharmacyUser = () => {
         ? response.data.finalPrices
         : [];
 
+      // Update state with validation results
       setFinalPrices(normalized);
       setSelectedPrescription((prev) => ({
         ...prev,
@@ -163,6 +168,7 @@ const PharmacyUser = () => {
     }
   };
 
+  // Process purchase (mark prescription as used and generate invoice)
   const handleProcessPurchase = async () => {
     if (!selectedPrescription || !finalPrices) return;
 
@@ -189,7 +195,7 @@ const PharmacyUser = () => {
 
       console.log("✅ Respuesta de la compra:", response);
 
-      // ✅ Usamos el totalAmount real del backend
+      // Save invoice data for later PDF generation
       setInvoiceData({
         ...response.data.invoice,
         totalAmount: response.data.totalAmount,
@@ -198,7 +204,7 @@ const PharmacyUser = () => {
 
       handleCloseValidationModal();
 
-      // ✅ Actualizar lista de recetas localmente con datos completos
+      // Update prescriptions locally with invoice info
       setPrescriptions((prev) =>
         prev.map((p) =>
           p.prescriptionId === selectedPrescription.prescriptionId
@@ -206,7 +212,7 @@ const PharmacyUser = () => {
                 ...p,
                 used: true,
                 finalPrices: response.data.finalPrices,
-                invoiceNumber: response.data.invoice.invoiceNumber, // corregido
+                invoiceNumber: response.data.invoice.invoiceNumber,
                 invoiceData: {
                   ...response.data.invoice,
                   totalAmount: response.data.totalAmount,
@@ -216,7 +222,6 @@ const PharmacyUser = () => {
         )
       );
 
-      // ✅ Mostrar mensaje de éxito
       setPurchaseMessage({
         text: "¡La compra se procesó correctamente! Ya podés descargar el comprobante.",
         type: "success",
@@ -236,6 +241,7 @@ const PharmacyUser = () => {
     }
   };
 
+  // Download validation proof as PD
   const downloadValidationProof = (prescriptionId) => {
     const element = invoiceRef.current[prescriptionId];
 
@@ -293,6 +299,7 @@ const PharmacyUser = () => {
     });
   }
 
+  // Cancel prescription to the patient
   const handleCancelValidation = async () => {
     try {
       setLoading(true);
@@ -323,7 +330,7 @@ const PharmacyUser = () => {
     }
   };
 
-  // Helper para formatear dinero sin romper si falta el valor
+  // Helper format money safety
   const money = (v) => {
     const n = Number(v);
     return Number.isFinite(n) ? n.toFixed(2) : "0.00";
@@ -466,7 +473,7 @@ const PharmacyUser = () => {
                       <strong>Fecha de Expiración:</strong>{" "}
                       {formatDate(prescription.expirationDate)}
                     </p>
-                    {/* Botón principal */}
+                    {/* Validation button */}
                     {!prescription.used && (
                       <button
                         className="validate-button"
@@ -479,7 +486,7 @@ const PharmacyUser = () => {
                     )}
 
                     <div className="actions-container">
-                      {/* Consultar precios */}
+                      {/* Consulting button */}
                       {!prescription.used && (
                         <button
                           className="consulta-button"
@@ -491,12 +498,11 @@ const PharmacyUser = () => {
                         </button>
                       )}
 
-                      {/* Descargar receta */}
+                      {/* Download PDF proof */}
                       <div className="download-button-container-pharmacy-btn">
                         <PrescriptionPDF receta={prescription} />
                       </div>
 
-                      {/* Descargar documentos */}
                       <Button
                         onClick={() => {
                           if (prescription.used) {
@@ -514,7 +520,6 @@ const PharmacyUser = () => {
                       >
                         Descargar comprobante
                       </Button>
-                      {/* Contenedor oculto para impresión */}
                       <div style={{ display: "none" }}>
                         <div
                           ref={(el) =>
@@ -530,7 +535,7 @@ const PharmacyUser = () => {
                         </div>
                       </div>
 
-                      {/* Devolver al paciente */}
+                      {/* Return prescription to patient */}
                       {!prescription.used &&
                         prescription.isPendingValidation && (
                           <button
@@ -615,6 +620,7 @@ const PharmacyUser = () => {
                   })}
                 </div>
 
+                {/* Submit button to validate */}
                 {!finalPrices && (
                   <Button type="submit" className="validate-button-rosa">
                     {isConsultaMode
@@ -623,6 +629,7 @@ const PharmacyUser = () => {
                   </Button>
                 )}
 
+                {/* Show validation results if available */}
                 {finalPrices &&
                   finalPrices.map((item, i) => {
                     const {
@@ -630,7 +637,6 @@ const PharmacyUser = () => {
                       finalPrice,
                       finalCoverage,
                     } = item || {};
-                    // Campos defensivos
                     const priceUnit = Number(
                       medication.priceUnit ?? medication.price ?? 0
                     );
@@ -675,7 +681,7 @@ const PharmacyUser = () => {
                       </div>
                     );
                   })}
-
+                {/* Purchasing button */}
                 {finalPrices &&
                   !isConsultaMode &&
                   selectedPrescription?.isPendingValidation &&
@@ -694,6 +700,8 @@ const PharmacyUser = () => {
           </Modal.Body>
         </Modal>
       </div>
+
+      {/* Return to patient confirmation modal */}
       <Modal
         show={showCancelModal}
         onHide={() => setShowCancelModal(false)}
@@ -714,7 +722,7 @@ const PharmacyUser = () => {
 
       {loading && <Loader mensaje="Cargando..." />}
 
-      {/* ✅ Notificación */}
+      {/* Notification */}
       {purchaseMessage.text && (
         <>
           {purchaseMessage.type === "success" && (
@@ -729,7 +737,7 @@ const PharmacyUser = () => {
     </>
   );
 };
-// ✅ Componente Notification reutilizable
+// Reusable Notification component
 function Notification({ message, type }) {
   if (type === "success") {
     return (

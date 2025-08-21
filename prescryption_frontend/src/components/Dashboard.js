@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
 import Doctor from "./Doctor";
 import Patient from "./Patient";
 import PharmacyUser from "./PharmacyUser";
 import PharmacyAdmin from "./PharmacyAdmin";
 import Insurance from "./Insurance";
-
 import api from "../AxiosConfig";
 import "../styles/styles.css";
 
@@ -16,6 +14,7 @@ function Dashboard() {
   const [nombre, setNombre] = useState("");
 
   useEffect(() => {
+    // If there's no auth token, redirect to home
     const token = localStorage.getItem("token");
     if (!token) {
       alert("No estás autenticado. Por favor, inicia sesión.");
@@ -27,10 +26,12 @@ function Dashboard() {
       try {
         let endpoint = "";
 
+        // Pharmacy admin uses a special endpoint
         if (userType === "pharmacy") {
           endpoint = "/api/pharmacies/pharmacy_profile";
         } else {
           const routeMap = {
+            // Map URL userType to API resource segment
             patient: "patients",
             doctor: "doctors",
             pharmacyUser: "pharmacy-users",
@@ -45,8 +46,10 @@ function Dashboard() {
           endpoint = `/api/${route}/profile`;
         }
 
+        // Axios instance (with auth headers) defined in AxiosConfig
         const { data } = await api.get(endpoint);
 
+        // Normalize which field to show in header per role
         const { name, pharmacy_name, insurance_name } = data || {};
         if (userType === "pharmacy") setNombre(pharmacy_name);
         else if (userType === "insurance") setNombre(insurance_name);
@@ -59,12 +62,14 @@ function Dashboard() {
     fetchNombre();
   }, [navigate, userType]);
 
+  // Clear auth and send back to landing
   const handleLogout = () => {
     localStorage.removeItem("token");
     document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     navigate("/");
   };
 
+  // Role-based module switch: mounts the correct sub-dashboard per userType
   const renderMenu = () => {
     switch (userType) {
       case "patient":

@@ -2,14 +2,17 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/styles.css";
 
+// Component for selecting pharmacy login type (Admin or Pharmacist)
 function PharmacyTypeSelection() {
   const navigate = useNavigate();
 
+  // Handle login as Pharmacy (Admin)
   const handleAdminLogin = () => {
     document.cookie = "userType=pharmacy; path=/";
     navigate("/login");
   };
 
+  // Handle login as Pharmacist (User of a pharmacy)
   const handleUserLogin = () => {
     document.cookie = "userType=pharmacyUser; path=/";
     navigate("/login");

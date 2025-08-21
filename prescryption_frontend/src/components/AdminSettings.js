@@ -1,4 +1,3 @@
-// src/components/ReportsSettings.jsx
 import React from "react";
 
 const AdminSettings = () => {

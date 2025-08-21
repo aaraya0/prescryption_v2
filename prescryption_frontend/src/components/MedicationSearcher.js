@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Modal } from "react-bootstrap";
-import api from "../AxiosConfig";
 import "../styles/styles.css";
 
+// Each group holds a list of available presentations
 const agruparMedicamentos = (lista) => {
   const mapa = new Map();
 
@@ -41,8 +41,11 @@ function MedicationSearcher() {
 
       const token = localStorage.getItem("token");
       try {
+        // Fetch search results from backend
         const response = await fetch(
-          `${process.env.REACT_APP_API_BASE_URL}/api/prescriptions/search-medications?query=${encodeURIComponent(
+          `${
+            process.env.REACT_APP_API_BASE_URL
+          }/api/prescriptions/search-medications?query=${encodeURIComponent(
             query
           )}`,
           {
@@ -53,6 +56,7 @@ function MedicationSearcher() {
         );
         const data = await response.json();
         if (data && data.results) {
+          // Group results and limit to first 50 items
           const agrupados = agruparMedicamentos(data.results.slice(0, 50));
           setResults(agrupados);
         } else {
@@ -67,6 +71,7 @@ function MedicationSearcher() {
     return () => clearTimeout(delayDebounce);
   }, [query]);
 
+  // Stores selected presentation in localStorage and redirects back to prescription form
   const handleFinalSelection = (presentacion) => {
     localStorage.setItem(campo, JSON.stringify(presentacion));
     setModalData(null);

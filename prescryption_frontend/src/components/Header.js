@@ -8,10 +8,13 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Handle back navigation depending on current path
   const handleBackClick = () => {
     if (location.pathname === "/login" || location.pathname === "/register") {
+      // From login/register → go back to main menu
       navigate("/");
     } else if (location.pathname === "/issue-prescription") {
+      // From issue-prescription → go back to doctor dashboard
       navigate("/dashboard/doctor");
     } else {
       window.history.back();

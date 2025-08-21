@@ -26,7 +26,7 @@ function Insurance() {
   const token = localStorage.getItem("token");
   const invoiceRef = useRef({});
 
-  // ✅ Traer recetas usadas
+  // Fetch used prescriptions
   useEffect(() => {
     const fetchUsedPrescriptions = async () => {
       try {
@@ -34,10 +34,9 @@ function Insurance() {
           redirectOnAuthFail("No estás autenticado");
           return;
         }
-        const response = await api.get(
-          "/api/insurances/prescriptions",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const response = await api.get("/api/insurances/prescriptions", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setPrescriptions(response.data.prescriptions || []);
       } catch (err) {
         console.error("Error fetching used prescriptions:", err);
@@ -55,10 +54,11 @@ function Insurance() {
     fetchUsedPrescriptions();
   }, [token]);
 
-  // ✅ Filtrar y ordenar
+  // Client-side filter + sort whenever inputs change
   useEffect(() => {
     let temp = [...prescriptions];
 
+    // Patient filter: name, surname, or DNI
     if (searchPaciente.trim() !== "") {
       const term = searchPaciente.toLowerCase();
       temp = temp.filter((p) => {
@@ -71,6 +71,7 @@ function Insurance() {
       });
     }
 
+    // Sort by issue date
     temp.sort((a, b) => {
       const dateA = new Date(a.issueDate);
       const dateB = new Date(b.issueDate);
@@ -80,13 +81,14 @@ function Insurance() {
     setFilteredPrescriptions(temp);
   }, [prescriptions, searchPaciente, sortOrder]);
 
+  // Format dates for display
   const formatDate = (isoDate) => {
     if (!isoDate) return "N/A";
     const date = new Date(isoDate);
     return date.toLocaleDateString("es-AR");
   };
 
-  // 👇 helpers selección
+  // Selection helpers
   const toggle = (id) => setSelected((s) => ({ ...s, [id]: !s[id] }));
 
   const allIds = useMemo(
@@ -110,6 +112,8 @@ function Insurance() {
   const deselectAll = () => setSelected({});
 
   const masterRef = useRef(null);
+
+  // Show indeterminate state for partial selection
   useEffect(() => {
     if (masterRef.current) {
       masterRef.current.indeterminate =
@@ -117,12 +121,13 @@ function Insurance() {
     }
   }, [selectedCount, allIds.length]);
 
+  // Fallback to all filtered if nothing selected for export
   const currentSelection = useMemo(
     () => filteredPrescriptions.filter((p) => selected[p.id]),
     [filteredPrescriptions, selected]
   );
 
-  // 👇 mapeo de una receta al “row exportable”
+  // Row normalization for exports (CSV/XLSX)
   const mapToRow = (p) => {
     const totalFinal = Array.isArray(p.finalPrices)
       ? p.finalPrices.reduce(
@@ -131,7 +136,7 @@ function Insurance() {
         )
       : "";
 
-    // Extraer pharmacyUserNID del invoiceNumber
+    // Extract pharmacyUserNID from invoiceNumber "FACT|pharmaNID"
     const pharmacyUserNID = p.invoiceNumber?.includes("|")
       ? p.invoiceNumber.split("|")[1]
       : "";
@@ -149,14 +154,14 @@ function Insurance() {
       affiliateNum: p.insurance?.affiliateNum || "",
       insurancePlan: p.insurance?.insurancePlan || "",
       pharmacyNID: p.pharmacy?.nid || "",
-      pharmacyUserNID, // nueva columna
+      pharmacyUserNID,
       med1: p.meds?.med1 || "",
       med2: p.meds?.med2 || "",
       invoiceNumber: p.invoiceNumber || "",
       totalFinal,
     };
 
-    // Eliminar campos vacíos
+    // Strip empty fields to keep exports clean
     Object.keys(row).forEach((key) => {
       if (row[key] === "" || row[key] === null) {
         delete row[key];
@@ -165,13 +170,14 @@ function Insurance() {
 
     return row;
   };
+  // Parse invoice string into display parts
   const splitInvoice = (invoice) => {
     if (!invoice) return { factura: "", pharmaNID: "" };
     const [factura, pharmaNID] = String(invoice).split("|");
     return { factura, pharmaNID };
   };
 
-  // 👇 export CSV
+  // Export CSV
   const exportCSV = () => {
     const source = currentSelection.length
       ? currentSelection
@@ -194,7 +200,7 @@ function Insurance() {
     URL.revokeObjectURL(a.href);
   };
 
-  // 👇 export Excel
+  // Export Excel
   const exportExcel = () => {
     const source = currentSelection.length
       ? currentSelection
@@ -207,6 +213,7 @@ function Insurance() {
     XLSX.writeFile(wb, `reporte_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
+  // Generates a PDF validation proof for a given prescription.
   const downloadValidationProof = (prescriptionId) => {
     const element = invoiceRef.current[prescriptionId];
     if (element) {
@@ -231,8 +238,6 @@ function Insurance() {
   return (
     <div className="receta-list-container">
       <h3>Historial de Recetas</h3>
-
-      {/* 🔎 Filtros + botones export */}
       <div className="filtros-container-insurance">
         <label>
           Buscar por paciente:

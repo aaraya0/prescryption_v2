@@ -16,6 +16,7 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Determine userType from path or cookie
   useEffect(() => {
     if (location.pathname === "/login/admin") {
       setUserType("admin");
@@ -26,6 +27,7 @@ function Login() {
         .find((row) => row.startsWith("userType="))
         ?.split("=")[1];
 
+      // If userType not set → redirect back to main menu
       if (!cookieType) {
         setMessage({
           text: "No se seleccionó un tipo de usuario. Volvé al menú principal.",
@@ -51,6 +53,7 @@ function Login() {
 
     setIsLoading(true);
     try {
+      // Admin login uses a different endpoint
       if (userType === "admin") {
         const response = await api.post(
           "/api/public/admin/login",
@@ -66,6 +69,7 @@ function Login() {
         }, 800);
         return;
       }
+      // Regular login
       const response = await api.post("/api/auth/login", {
         nid,
         password,
@@ -107,10 +111,12 @@ function Login() {
     }
   };
 
+  // Redirect to register page
   const handleRegister = () => {
     navigate("/register");
   };
 
+  // Show loader while logging in
   if (isLoading) {
     return <Loader />;
   }

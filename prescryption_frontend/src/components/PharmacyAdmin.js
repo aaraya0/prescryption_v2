@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import api from "../AxiosConfig"; // instancia global con baseURL desde .env y token por interceptor
-import { FaUser, FaToggleOn, FaToggleOff } from "react-icons/fa";
+import api from "../AxiosConfig";
 import "../styles/Pharmacy.css";
 
 const PH_BASE = "/api/pharmacies"; // prefijo de endpoints para este módulo
@@ -10,6 +9,7 @@ const PharmacyAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Load pharmacy users when component mounts
   useEffect(() => {
     (async () => {
       try {
@@ -24,6 +24,7 @@ const PharmacyAdmin = () => {
     })();
   }, []);
 
+  // Function to activate/deactivate a user
   const toggleUser = async (id, active) => {
     const action = active ? "deactivate" : "activate";
     try {
@@ -38,8 +39,10 @@ const PharmacyAdmin = () => {
   };
 
   if (loading) return <p className="ph-admin__msg">Cargando usuarios…</p>;
-  if (error) return <p className="ph-admin__msg ph-admin__msg--error">{error}</p>;
+  if (error)
+    return <p className="ph-admin__msg ph-admin__msg--error">{error}</p>;
 
+  // Render the admin panel
   return (
     <div className="ph-admin">
       <h2 className="ph-admin__title">Gestión de Usuarios de Farmacia</h2>

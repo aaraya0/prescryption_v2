@@ -16,6 +16,7 @@ function Register() {
   const [planHint, setPlanHint] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Detect user type from cookies
   const userType = document.cookie
     .split("; ")
     .find((row) => row.startsWith("userType="))
@@ -24,6 +25,7 @@ function Register() {
   const navigate = useNavigate();
   const BASE = (process.env.REACT_APP_API_BASE_URL || "").replace(/\/+$/, "");
 
+  // Handle input changes and normalize insurance_name to uppercase
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -33,7 +35,7 @@ function Register() {
     }));
   };
 
-  // 👉 Detectar plan (botón al lado del afiliado): usa nid + insurance_name
+  // Detect insurance plan from backend using DNI + insurance name
   const handleDetectPlan = async () => {
     try {
       setPlanHint("");
@@ -74,7 +76,7 @@ function Register() {
           insurance_plan: plan,
           affiliate_num: prev.affiliate_num || affiliate || prev.affiliate_num,
         }));
-        setInsurancePlan(plan); // mantiene compat con modal de éxito existente
+        setInsurancePlan(plan);
         setPlanHint("Plan detectado y completado.");
       } else {
         setPlanHint("No se encontró un plan con esos datos.");
@@ -86,6 +88,7 @@ function Register() {
     }
   };
 
+  // Handle registration logic, building the correct payload depending on user type
   const handleRegister = async () => {
     try {
       setShowError(false);
@@ -95,7 +98,6 @@ function Register() {
       let payload = { ...formData };
       let endpoint = `${BASE}/api/public/${userType}s/register`;
 
-      // 👉 Forzamos el endpoint real de pacientes
       if (userType === "patient") {
         endpoint = `${BASE}/api/public/patients/register`;
       }
@@ -123,7 +125,6 @@ function Register() {
 
       const res = await api.post(endpoint, payload);
 
-      // ⬇️ Si es paciente, refleja plan y afiliado que resolvió el backend
       if (userType === "patient") {
         const { insurance_plan, affiliate_num } = res?.data || {};
         if (insurance_plan) setInsurancePlan(insurance_plan);
@@ -152,6 +153,7 @@ function Register() {
     }
   };
 
+  // Navigate back to login page
   const handleLogin = () => {
     navigate("/login");
   };

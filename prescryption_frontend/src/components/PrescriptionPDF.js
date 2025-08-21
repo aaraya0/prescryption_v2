@@ -14,28 +14,28 @@ const PrescriptionPDF = ({ receta }) => {
     img.onload = () => {
       let y = 20;
 
-      // 🔹 Mantener proporciones originales del logo
+      // Keep original proportions of the logo
       const originalWidth = img.width;
       const originalHeight = img.height;
 
-      const pdfWidth = 40; // ancho en el PDF
-      const pdfHeight = (originalHeight / originalWidth) * pdfWidth; // proporcional
+      const pdfWidth = 40; //
+      const pdfHeight = (originalHeight / originalWidth) * pdfWidth;
 
-      // Agregar logo
+      // Add logo
       doc.addImage(img, "PNG", 20, 0, pdfWidth, pdfHeight);
 
-      // Título a la derecha
+      // Title on the right
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
       doc.text("Receta Médica", 190, y, { align: "right" });
 
-      // Línea divisoria
+      // Divider line
       y += 10;
       doc.setLineWidth(0.2);
       doc.line(20, y, 190, y);
       y += 10;
 
-      // Fechas
+      // Dates
       const issueDate = new Date(receta.issueDate);
       const expDate = new Date(receta.expirationDate);
       const issueText = isNaN(issueDate)
@@ -57,7 +57,7 @@ const PrescriptionPDF = ({ receta }) => {
       doc.text(expText, 160, y);
       y += 20;
 
-      // Datos del paciente (izquierda)
+      // Patient data
       let yLeft = y;
       doc.setFont("helvetica", "bold");
       doc.text("DNI del paciente:", 20, yLeft);
@@ -95,7 +95,7 @@ const PrescriptionPDF = ({ receta }) => {
       doc.text(`${receta.insurance?.insurancePlan || "N/A"}`, 64, yLeft);
       yLeft += 12;
 
-      // Medicamentos (derecha)
+      // Medications
       let yRight = y;
       doc.setFont("helvetica", "bold");
       doc.text("Medicamento 1:", 110, yRight);
@@ -110,7 +110,6 @@ const PrescriptionPDF = ({ receta }) => {
       doc.text(`${receta.meds.quantity1}`, 150, yRight);
       yRight += 10;
 
-      // Medicamento 2 (si existe)
       if (receta.meds.med2 && receta.meds.quantity2 > 0) {
         doc.setFont("helvetica", "bold");
         doc.text("Medicamento 2:", 110, yRight);
@@ -126,11 +125,10 @@ const PrescriptionPDF = ({ receta }) => {
         yRight += 10;
       }
 
-      // --- Diagnóstico y Observaciones ---
+      // Diagnosis y Observations
       let yFirma;
 
       if (receta.meds.med2 && receta.meds.quantity2 > 0) {
-        // ✅ Si hay 2 medicamentos: mostramos en ancho completo debajo
         let yBottom = Math.max(yLeft, yRight) + 10;
 
         doc.setFont("helvetica", "bold");
@@ -157,7 +155,6 @@ const PrescriptionPDF = ({ receta }) => {
 
         yFirma = yBottom + 20;
       } else {
-        // ✅ Caso 1 medicamento: seguimos en la columna derecha
         doc.setFont("helvetica", "bold");
         doc.text("Diagnóstico:", 110, yRight);
         doc.setFont("helvetica", "normal");
@@ -183,7 +180,7 @@ const PrescriptionPDF = ({ receta }) => {
         yFirma = Math.max(yLeft, yRight) + 20;
       }
 
-      // --- Firma del profesional ---
+      // Doctor signature
       doc.setFont("helvetica", "normal");
       doc.text(
         `Dr. ${receta.doctorName} ${receta.doctorSurname}`,
@@ -205,14 +202,13 @@ const PrescriptionPDF = ({ receta }) => {
       );
       yFirma += 6;
 
-      // Línea de firma
+      // Signature line
       doc.line(120, yFirma, 190, yFirma);
       yFirma += 5;
 
       doc.setFont("helvetica", "italic");
       doc.text("Firma del Profesional", 155, yFirma, { align: "center" });
 
-      // Guardar PDF
       doc.save(`Receta_${receta.patientSurname}_${issueText}.pdf`);
     };
   };

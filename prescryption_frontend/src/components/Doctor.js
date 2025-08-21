@@ -9,9 +9,9 @@ const Doctor = () => {
   const [searchPaciente, setSearchPaciente] = useState("");
   const [searchObraSocial, setSearchObraSocial] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-  //const token = localStorage.getItem("token");
 
   useEffect(() => {
+    // Fetch prescriptions and doctor profile on mount
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -28,7 +28,7 @@ const Doctor = () => {
         const doctor = doctorRes.data;
 
         if (Array.isArray(recetasRes.data)) {
-          // Agregamos los datos del doctor a cada receta
+          // Attach doctor info to each prescription (enrichment step)
           const enrichedRecetas = recetasRes.data.map((r) => ({
             ...r,
             doctorName: doctor.name,
@@ -50,6 +50,7 @@ const Doctor = () => {
     fetchData();
   }, []);
 
+  // Apply search and sort filters to prescriptions
   const filteredRecetas = recetas
     .filter(
       (receta) =>
@@ -72,6 +73,7 @@ const Doctor = () => {
       return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
     });
 
+  // Format ISO date to human-readable (Argentina locale)
   const formatDate = (isoDate) => {
     if (!isoDate) return "N/A";
     const date = new Date(isoDate);
@@ -114,7 +116,6 @@ const Doctor = () => {
         </label>
       </div>
 
-      {/* 👇 Scroll solo para el listado */}
       <div className="receta-scroll">
         {filteredRecetas.length === 0 ? (
           <p>No hay recetas emitidas aún.</p>
@@ -127,7 +128,6 @@ const Doctor = () => {
                 className="receta-item"
               >
                 <Accordion.Header>
-                  {/*console.log("Receta:", receta)*/}
                   <div className="receta-header-info">
                     <strong>Paciente:</strong> {receta.patientName}{" "}
                     {receta.patientSurname}

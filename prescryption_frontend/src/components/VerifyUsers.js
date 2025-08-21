@@ -1,7 +1,6 @@
-// src/components/VerifyUsers.jsx
 import React, { useEffect, useState } from "react";
 import api from "../AxiosConfig";
-import "../styles/styles.css"; // reutilizamos los estilos de PharmacyAdmin
+import "../styles/styles.css";
 
 function VerifyUsers() {
   const [pendingList, setPendingList] = useState([]);
@@ -10,6 +9,7 @@ function VerifyUsers() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
+    // Fetch all pending insurances from backend
     const fetchPending = async () => {
       try {
         if (!token) {
@@ -17,9 +17,13 @@ function VerifyUsers() {
           setLoading(false);
           return;
         }
+
+        // Call backend: GET /api/admin/insurances/pending
         const { data } = await api.get("/api/admin/insurances/pending", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        // Save pending list (fallback to empty if undefined)
         setPendingList(data.pending || []);
       } catch (err) {
         console.error("Error trayendo pendientes:", err);
@@ -35,6 +39,7 @@ function VerifyUsers() {
     fetchPending();
   }, [token]);
 
+  // Handle verification action for a single insurance
   const handleVerify = async (insuranceNid) => {
     try {
       await api.patch(

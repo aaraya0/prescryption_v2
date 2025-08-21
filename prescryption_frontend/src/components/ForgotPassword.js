@@ -1,18 +1,19 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import api from "../AxiosConfig";
-import Loader from "./Loader"; // ✅ Importamos Loader
+import Loader from "./Loader";
 import "../styles/styles.css";
 
 function ForgotPassword() {
   const location = useLocation();
-  const initialType = location.state?.userType || ""; // Traído desde Login
+  const initialType = location.state?.userType || ""; // userType comes from the Login component via router state
   const [nid, setNid] = useState("");
-  const [userType] = useState(initialType); // ✅ Lo usamos pero NO lo mostramos
+  const [userType] = useState(initialType);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // ✅ Controlamos Loader
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Submit handler: validates input and calls backend
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -59,9 +60,6 @@ function ForgotPassword() {
           value={nid}
           onChange={(e) => setNid(e.target.value)}
         />
-
-        {/* ✅ Eliminamos el select y NO mostramos el tipo de usuario */}
-        {/* userType sigue existiendo en el state y se envía al backend */}
 
         <button className="loginButton" type="submit">
           Enviar

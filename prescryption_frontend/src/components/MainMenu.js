@@ -5,10 +5,12 @@ import "../styles/styles.css";
 function MainMenu() {
   const navigate = useNavigate();
 
+  // Handle role selection and redirect
   const handleSelection = (userType) => {
     if (userType === "pharmacy") {
       navigate("/pharmacy/type");
     } else {
+      // Save selected role in cookie and go to login
       document.cookie = `userType=${userType}; path=/`;
       navigate("/login");
     }
