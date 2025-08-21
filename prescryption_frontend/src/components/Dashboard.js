@@ -1,4 +1,3 @@
-// src/components/Dashboard.js
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -8,7 +7,7 @@ import PharmacyUser from "./PharmacyUser";
 import PharmacyAdmin from "./PharmacyAdmin";
 import Insurance from "./Insurance";
 
-import api from "../AxiosConfig"; // instancia global con baseURL y token por interceptor
+import api from "../AxiosConfig";
 import "../styles/styles.css";
 
 function Dashboard() {
@@ -46,7 +45,6 @@ function Dashboard() {
           endpoint = `/api/${route}/profile`;
         }
 
-        // El interceptor de AxiosConfig agrega Authorization automáticamente
         const { data } = await api.get(endpoint);
 
         const { name, pharmacy_name, insurance_name } = data || {};

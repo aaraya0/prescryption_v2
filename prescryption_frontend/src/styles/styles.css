@@ -318,7 +318,8 @@ body {
 
 .register-container {
   width: 100%;
-  max-width: 900px;
+  width: min(600px, 92vw) !important;
+  max-width: 700px !important;
   background-color: #ffffff;
   margin: 35px auto 20px auto;
   padding: 8px 30px;
@@ -329,8 +330,8 @@ body {
   background-color: white;
   padding: 40px;
   border-radius: 10px;
-  width: 90%;
-  max-width: 800px;
+  width: 100%;
+  max-width: none;
   margin: 40px auto;
   box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
   max-height: calc(100vh - 120px);
@@ -341,6 +342,7 @@ body {
   text-align: center;
   font-size: 24px;
   margin-bottom: 20px;
+  white-space: nowrap;
 }
 .form-body {
   display: flex;
@@ -449,38 +451,59 @@ body {
   text-align: left;
 }
 
+input[name="insurance_name"] {
+  text-transform: uppercase;
+}
+
 .affiliate-input-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   gap: 8px;
+  align-items: center;
   height: 40px;
 }
 
 .form-input {
-  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #9f9f9f;
+  border-radius: 5px;
+  font-size: 14px;
+  height: 40px;
 }
+
 .affiliate-input-container .form-input {
   height: 100%;
 }
 
 .fetch-plan-button {
-  padding: 8px 12px;
-  background-color: #d8b7af;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+  min-width: 44px;
+  height: 100%;
+  padding: 0 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #d8b7af;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
-
 .fetch-plan-button:hover {
-  background-color: #9f9f9f;
+  background-color: #caa7a0;
 }
-
 .fetch-plan-button:active {
   transform: scale(1.02);
+}
+
+.plan-hint {
+  margin-top: 6px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #4a5568;
 }
 
 /*Header styles*/

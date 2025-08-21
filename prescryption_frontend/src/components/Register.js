@@ -1,8 +1,9 @@
-// src/pages/Register.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff, FiArrowRightCircle } from "react-icons/fi";
 import api from "../AxiosConfig";
+import Loader from "../components/Loader";
+import "../styles/styles.css";
 
 function Register() {
   const [formData, setFormData] = useState({});
@@ -12,7 +13,8 @@ function Register() {
   const [verificationCode, setVerificationCode] = useState("");
   const [showError, setShowError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [planHint, setPlanHint] = useState(""); // breve mensaje bajo el plan (opcional)
+  const [planHint, setPlanHint] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const userType = document.cookie
     .split("; ")
@@ -23,13 +25,19 @@ function Register() {
   const BASE = (process.env.REACT_APP_API_BASE_URL || "").replace(/\/+$/, "");
 
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "insurance_name" ? value.toUpperCase() : value,
+    }));
   };
 
   // 👉 Detectar plan (botón al lado del afiliado): usa nid + insurance_name
   const handleDetectPlan = async () => {
     try {
       setPlanHint("");
+      setIsLoading(true);
       const nid = (formData.nid || "").trim();
       const insurance_name = (formData.insurance_name || "").trim();
 
@@ -73,6 +81,8 @@ function Register() {
       }
     } catch (e) {
       setPlanHint("Error al verificar el plan.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -80,6 +90,7 @@ function Register() {
     try {
       setShowError(false);
       setErrorMessage("");
+      setIsLoading(true);
 
       let payload = { ...formData };
       let endpoint = `${BASE}/api/public/${userType}s/register`;
@@ -136,6 +147,8 @@ function Register() {
         typeof backendMsg === "string" ? backendMsg : "Error en el registro."
       );
       setShowError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -225,13 +238,7 @@ function Register() {
             />
 
             <p className="inputTitle">Número de Afiliado</p>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr auto",
-                gap: 8,
-              }}
-            >
+            <div className="affiliate-input-container">
               <input
                 className="form-input"
                 type="text"
@@ -243,14 +250,7 @@ function Register() {
               <button
                 type="button"
                 onClick={handleDetectPlan}
-                className="register-button"
-                style={{
-                  minWidth: 44,
-                  padding: "0 12px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+                className="fetch-plan-button"
                 title="Detectar plan"
               >
                 <FiArrowRightCircle />
@@ -265,19 +265,9 @@ function Register() {
               placeholder="Plan de Obra Social"
               value={formData.insurance_plan || insurancePlan || ""}
               onChange={handleChange}
+              readOnly
             />
-            {planHint && (
-              <div
-                style={{
-                  marginTop: 6,
-                  marginBottom: 10,
-                  fontSize: 13,
-                  color: "#4a5568",
-                }}
-              >
-                {planHint}
-              </div>
-            )}
+            {planHint && <div className="plan-hint">{planHint}</div>}
 
             <p className="inputTitle">Correo Electrónico</p>
             <input
@@ -594,7 +584,7 @@ function Register() {
     <div className="register-wrapper">
       <div className="register-container register-scrollable">
         <div className="form-header">
-          <h2>Formulario de Registro de {userType}</h2>
+          <h2> Formulario de Registro </h2>
         </div>
 
         <div className="form-body">
@@ -612,7 +602,6 @@ function Register() {
           </p>
         </div>
       </div>
-
       {showSuccess && (
         <div className="login-success">
           <button
@@ -639,24 +628,12 @@ function Register() {
             </>
           ) : (
             <>
-              {userType === "patient" && (
-                <p>
-                  Plan asignado:{" "}
-                  <b>{insurancePlan || formData.insurance_plan || "N/A"}</b>
-                  {formData.affiliate_num ? (
-                    <>
-                      {" "}
-                      — Afiliado: <b>{formData.affiliate_num}</b>
-                    </>
-                  ) : null}
-                </p>
-              )}
+              {userType === "patient" && <p></p>}
               <p>Presioná la ❌ para continuar.</p>
             </>
           )}
         </div>
       )}
-
       {showError && (
         <div
           className="login-success"
@@ -681,6 +658,11 @@ function Register() {
           <p>{errorMessage || "Verificá los datos ingresados."}</p>
         </div>
       )}
+      {isLoading && (
+        <div className="loader-overlay-modal">
+          <Loader mensaje="Generando receta..." />
+        </div>
+      )}{" "}
     </div>
   );
 }
