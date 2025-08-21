@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "prescryption_frontend": "file:.."
+  }
+}
