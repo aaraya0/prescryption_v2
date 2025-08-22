@@ -1,14 +1,12 @@
-// tests/unit/encryption.test.js
 const path = require('path');
 
-// Cargamos variables de test (si existiera .env.test)
+
 require('dotenv').config({ path: path.resolve(__dirname, '../acceptance/.env.test'), override: false });
 
 describe('utils/encryption', () => {
   const ORIGINAL_SECRET = process.env.ENCRYPTION_SECRET;
 
   beforeAll(() => {
-    // Aseguramos un secreto durante el test
     process.env.ENCRYPTION_SECRET = process.env.ENCRYPTION_SECRET || 'unit-tests-secret';
   });
 
@@ -45,12 +43,8 @@ describe('utils/encryption', () => {
     } catch (e) {
       threw = true;
     } finally {
-      process.env.ENCRYPTION_SECRET = prev; // restaurar
+      process.env.ENCRYPTION_SECRET = prev; 
     }
-
-    // Aceptamos dos comportamientos posibles:
-    // - que lance (AES-GCM suele lanzar con auth tag inválida)
-    // - o que no lance pero NO devuelva el original
     expect(threw || result !== plain).toBe(true);
   });
 });

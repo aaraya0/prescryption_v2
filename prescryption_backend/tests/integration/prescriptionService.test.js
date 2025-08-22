@@ -1,8 +1,7 @@
-// tests/integration/prescriptionService.test.js
 console.log('### USING NEW INTEGRATION TEST v9i (ensure before require service + BigInt) ###');
 require('dotenv').config({ path: '.env.test' });
 
-// Mock faucet externo
+// Mock faucet 
 jest.mock('../../utils/fundAccount', () => ({
   __esModule: true,
   default: async () => ({ txHash: '0xMOCK' }),
@@ -26,14 +25,11 @@ describe('Blockchain Service – Integración (flujo completo)', () => {
     const web3 = getWeb3();
     const system = getSystemAccount();
 
-    // ⚠️ Asegurar contrato y patch ANTES de cargar el service
     await ensureTestContract();
     patchContractsPath();
 
-    // Recién ahora requerimos el service (ya lee el contracts_data.test.json)
     const blockchainService = require('../../services/blockchainService');
 
-    // Cuentas y docs (bypass hooks)
     const doctorAcc = web3.eth.accounts.create();
     await web3.eth.sendTransaction({ from: system.address, to: doctorAcc.address, value: web3.utils.toWei('0.1', 'ether') });
     const doctorDoc = {
@@ -62,7 +58,6 @@ describe('Blockchain Service – Integración (flujo completo)', () => {
     const recPh = web3.eth.accounts.privateKeyToAccount(decrypt(pharmacy.privateKey)).address;
     expect(lc(recPh)).toBe(lc(pharmacy.address));
 
-    // Datos
     const meds = { med1: 'Paracetamol 500mg', quantity1: 1, med2: '', quantity2: 0, diagnosis: '', observations: '' };
     const insurance = { affiliateNum: '', insuranceName: 'OSDE', insurancePlan: '210' };
 

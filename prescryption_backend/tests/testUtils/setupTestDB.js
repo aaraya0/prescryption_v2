@@ -1,17 +1,15 @@
-// tests/testUtils/setupTestDB.js
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongoServer;
 
 async function connect() {
-  // Si ya hay una conexión abierta, no hagas nada
+  
   if (mongoose.connection && mongoose.connection.readyState === 1) return;
 
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
 
-  // Conectar SIN opciones deprecadas
   await mongoose.connect(uri);
 }
 

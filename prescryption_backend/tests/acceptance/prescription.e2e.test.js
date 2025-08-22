@@ -1,15 +1,12 @@
-// tests/acceptance/prescription.e2e.test.js
-/* eslint-disable no-console */
 console.log('### E2E — simple (service end-to-end, patch antes de server) ###');
 
 const path = require('path');
 
-// Cargar variables de test (sin pisar las ya presentes en el entorno)
 require('dotenv').config({ path: path.resolve(__dirname, './.env.test'), override: false });
 
-// ---- Mocks de test (deben declararse ANTES de requerir el server) ----
 
-// 1) Mock del faucet: evitamos dependencias externas durante E2E
+
+// 1) Faucet mock
 jest.mock('../../utils/fundAccount', () => ({
   __esModule: true,
   default: async () => ({ txHash: '0xMOCK' }),
@@ -17,8 +14,7 @@ jest.mock('../../utils/fundAccount', () => ({
   fundIfLow: async () => ({ funded: false }),
 }));
 
-// 2) Mock del authMiddleware: valida el JWT con SECRET_KEY, respeta el rol requerido,
-//    y cuelga req.user y req.doctor (si role === 'doctor') para que pasen los controladores.
+// 2) Middleware mock
 jest.mock('../../middleware/authMiddleware', () => {
   const jwt = require('jsonwebtoken');
   return (requiredRole) => (req, res, next) => {
@@ -30,7 +26,6 @@ jest.mock('../../middleware/authMiddleware', () => {
 
       req.user = decoded;
       if (decoded.role === 'doctor') {
-        // muchos controladores esperan req.doctor además de req.user
         req.doctor = { _id: decoded.id, nid: decoded.nid };
       }
 
@@ -44,7 +39,6 @@ jest.mock('../../middleware/authMiddleware', () => {
   };
 });
 
-// ----------------------------------------------------------------------
 
 const jwt = require('jsonwebtoken');
 const request = require('supertest');
@@ -58,7 +52,7 @@ const Patient = require('../../models/Patient');
 const Pharmacy = require('../../models/Pharmacy');
 const { encrypt, decrypt } = require('../../utils/encryption');
 
-// Cuenta de sistema que usa el service en prod (firma updatePrescriptionPharmacyAddress)
+// signer from prod
 const systemSigner = require('../../utils/systemSigner');
 
 const lc = (s) => (s || '').toLowerCase();
@@ -71,13 +65,11 @@ beforeAll(async () => {
   web3 = getWeb3();
   system = getSystemAccount();
 
-  // 1) Desplegar SIEMPRE contrato fresco (mismo build/ABI que usa prod)
-  await ensureTestContract(); // escribe tests/.tmp/contracts_data.test.json
+  await ensureTestContract(); // writes tests/.tmp/contracts_data.test.json
 
-  // 2) Parchear lectura de contracts_data para que el backend use el JSON de tests
-  patchContractsPath(); // debe ir ANTES de cargar server/service
+  // patches contract path to test
+  patchContractsPath(); 
 
-  // 3) Cargar server y service (ya leen la address de tests)
   app = require('../../server');
   blockchainService = require('../../services/blockchainService');
 });
@@ -96,7 +88,6 @@ describe('E2E – Emite (service) + asigna farmacia (service) + valida (service)
   const insurance = { affiliateNum: '', insuranceName: 'OSDE', insurancePlan: '210' };
 
   beforeAll(async () => {
-    // Doctor con cuenta y PK encriptada
     const docAcc = web3.eth.accounts.create();
     web3.eth.accounts.wallet.add(docAcc.privateKey);
     await web3.eth.sendTransaction({
@@ -119,11 +110,9 @@ describe('E2E – Emite (service) + asigna farmacia (service) + valida (service)
     const docRes = await Doctor.collection.insertOne(doctorDoc);
     doctor = { ...doctorDoc, _id: docRes.insertedId };
 
-    // Verificar round-trip de la PK
     const recDocAddr = web3.eth.accounts.privateKeyToAccount(decrypt(doctor.privateKey)).address;
     if (lc(recDocAddr) !== lc(doctor.address)) throw new Error('ENCRYPTION_SECRET inválido (doctor)');
 
-    // Paciente
     const patAcc = web3.eth.accounts.create();
     const patientDoc = {
       nid: 'PAT001',
@@ -136,7 +125,6 @@ describe('E2E – Emite (service) + asigna farmacia (service) + valida (service)
     const patRes = await Patient.collection.insertOne(patientDoc);
     patient = { ...patientDoc, _id: patRes.insertedId };
 
-    // Farmacia con cuenta y PK encriptada
     const phAcc = web3.eth.accounts.create();
     web3.eth.accounts.wallet.add(phAcc.privateKey);
     await web3.eth.sendTransaction({
@@ -163,7 +151,7 @@ describe('E2E – Emite (service) + asigna farmacia (service) + valida (service)
   });
 
   it('debería emitir, asignar farmacia, validar y listar (doctor)', async () => {
-    // 1) ISSUE — igual que prod (service usa structs como objetos y uint como Number)
+    // 1) ISSUE
     const issueRes = await blockchainService.issuePrescription(
       {
         patientName: patient.name,
@@ -178,7 +166,7 @@ describe('E2E – Emite (service) + asigna farmacia (service) + valida (service)
     const prescriptionId = issueRes.prescriptionId;
     expect(prescriptionId).toBeDefined();
 
-    // 2) Fondear la cuenta del systemSigner de prod (la usa updatePrescriptionPharmacyAddress)
+    // 2) Fund
     console.log(
       '[TEST FUND] sending ETH from',
       system.address,
@@ -191,17 +179,16 @@ describe('E2E – Emite (service) + asigna farmacia (service) + valida (service)
       value: web3.utils.toWei('1', 'ether'),
     });
 
-    // 3) Asignar farmacia ON-CHAIN (pending validation) vía service
+    // 3) Assign pharmacy
     await blockchainService.updatePrescriptionPharmacyAddress(prescriptionId, pharmacy.address);
 
-    // 4) Validar ON-CHAIN vía service
+    // 4) Validate
     await blockchainService.validatePrescriptionOnBlockchain(
       prescriptionId,
       pharmacy.nid,
       pharmacy.address
     );
 
-    // 5) Listado por DOCTOR (HTTP) — regenero token con el SECRET efectivo
     const doctorToken = signWithSecret({
       id: String(doctor._id),
       role: 'doctor',

@@ -1,4 +1,3 @@
-// tests/unit/patchContractsPath.test.js
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -7,7 +6,6 @@ describe('tests/testUtils/patchContractsPath', () => {
   const REAL_READ = fs.readFileSync;
 
   afterEach(() => {
-    // Restauramos readFileSync tras cada test por seguridad
     fs.readFileSync = REAL_READ;
     delete process.env.CONTRACTS_DATA_TEST_PATH;
   });
@@ -38,12 +36,11 @@ describe('tests/testUtils/patchContractsPath', () => {
     const someFile = path.join(os.tmpdir(), `plain.${Date.now()}.txt`);
     fs.writeFileSync(someFile, 'hola', 'utf8');
 
-    process.env.CONTRACTS_DATA_TEST_PATH = someFile; // aunque lo setee, no debería afectar rutas distintas
+    process.env.CONTRACTS_DATA_TEST_PATH = someFile; 
 
     const { patchContractsPath } = require('../testUtils/patchContractsPath');
     patchContractsPath();
 
-    // Leemos otro path distinto (no termina en /prescryption_solidity/contracts_data.json)
     const content = fs.readFileSync(someFile, 'utf8');
     expect(content).toBe('hola');
   });
