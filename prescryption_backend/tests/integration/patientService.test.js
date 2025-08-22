@@ -1,11 +1,9 @@
-// tests/integration/patientService.test.js
-// ✔ Sin setupIntegrationTest: la conexión a Mongo la maneja jest.setupAfterEnv.js
 const Patient = require('../../models/Patient');
 const { getWeb3 } = require('../testUtils/initBlockchainTestEnv');
 
 describe('Patient Service Integration Test', () => {
   it('debería registrar un paciente correctamente', async () => {
-    const web3 = getWeb3();                    // reutiliza el web3 inicializado para tests
+    const web3 = getWeb3();                    
     const account = web3.eth.accounts.create();
 
     const newPatient = await Patient.create({

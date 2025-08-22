@@ -38,7 +38,6 @@ exports.registerPatient = async (req, res) => {
 
   if (insurance_name && insurance_name !== "PARTICULAR") {
     try {
-      // API request al microservicio
       const response = await axios.post(
         verifyInsurance.url("/get_affiliation"),
         { nid, insurance_name }
@@ -83,7 +82,6 @@ exports.registerPatient = async (req, res) => {
 
     await newPatient.save();
 
-    // ✅ Ahora devolvemos también plan y número de afiliado
     res.status(201).json({
       message: "✅ Patient registered successfully.",
       affiliate_num,
@@ -207,7 +205,6 @@ exports.verifyInsurancePreview = async (req, res) => {
       { headers: { "Content-Type": "application/json" }, timeout: 10000 }
     );
 
-    // Normalizo nombres de campos para el front
     return res.status(200).json({
       status: data.status || "ok",
       affiliate_number: data.affiliate_number ?? data.affiliate_num ?? null,
@@ -217,7 +214,6 @@ exports.verifyInsurancePreview = async (req, res) => {
     const http = err?.response?.status || 500;
 
     if (http === 404) {
-      // Caso "no afiliado / no encontrado" del micro
       return res.status(404).json({ status: "not_found" });
     }
 

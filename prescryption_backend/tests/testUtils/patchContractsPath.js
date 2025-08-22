@@ -1,4 +1,3 @@
-// tests/testUtils/patchContractsPath.js
 const fs = require('fs');
 
 function patchContractsPath() {

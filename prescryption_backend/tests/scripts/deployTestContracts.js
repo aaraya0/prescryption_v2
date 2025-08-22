@@ -1,4 +1,3 @@
-// tests/scripts/deployTestContracts.js
 const fs = require('fs');
 const path = require('path');
 const { Web3 } = require('web3');
@@ -21,7 +20,7 @@ async function deploy() {
 
   const deployed = await Contract.deploy({
     data: contractJSON.bytecode,
-    arguments: [] // si tu ctor no lleva args
+    arguments: [] 
   }).send({
     from: deployer,
     gas: 5_000_000

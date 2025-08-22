@@ -1,4 +1,3 @@
-// tests/testUtils/initBlockchainTestEnv.js
 const fs = require('fs');
 const path = require('path');
 const { Web3 } = require('web3');
@@ -26,14 +25,13 @@ async function initBlockchain() {
   systemAccount = { address: accounts[0], privateKey: null };
   console.log(`[CHAIN] systemAccount=${systemAccount.address}`);
 
-  // ABI (carpeta hermana a backend)
+  // ABI
   const abiPath = resolveExisting(
     '../../../prescryption_solidity/build/contracts/PrescriptionContract.json',
     '../../../../prescryption_solidity/build/contracts/PrescriptionContract.json'
   );
   const abi = JSON.parse(fs.readFileSync(abiPath, 'utf8')).abi;
 
-  // Dirección del contrato (leerá el contracts_data **parchado** por tests)
   const cdPath = resolveExisting(
     '../../../prescryption_solidity/contracts_data.json',
     '../../../../prescryption_solidity/contracts_data.json'

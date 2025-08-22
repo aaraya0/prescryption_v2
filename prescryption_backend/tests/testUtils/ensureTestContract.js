@@ -1,4 +1,3 @@
-// tests/testUtils/ensureTestContract.js
 const fs = require('fs');
 const path = require('path');
 const { getWeb3, getSystemAccount } = require('./initBlockchainTestEnv');
@@ -32,7 +31,6 @@ async function ensureTestContract() {
   const buildPath = resolveBuildJsonPath();
   const buildJSON = JSON.parse(fs.readFileSync(buildPath, 'utf8'));
 
-  // ⚠️ SIEMPRE desplegar un contrato de test para asegurar ABI=bytecode
   console.log('[ensureTestContract] deploying fresh test contract...');
   const Contract = new web3.eth.Contract(buildJSON.abi);
   const instance = await Contract.deploy({ data: buildJSON.bytecode })
@@ -42,7 +40,6 @@ async function ensureTestContract() {
   const code = await web3.eth.getCode(addr);
   console.log('[ensureTestContract] deployed at', addr, 'code len =', (code || '').length);
 
-  // Persistimos el path de tests, sin tocar prod
   const tmpDir = path.resolve(__dirname, '../.tmp');
   if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
   const tmpPath = path.join(tmpDir, 'contracts_data.test.json');

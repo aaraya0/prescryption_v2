@@ -47,7 +47,6 @@ exports.login = async (req, res) => {
       return res.status(401).send("❌ User not found");
     }
 
-    // 🔒 Bloquear obras sociales no verificadas
     if (userType === "insurance") {
       const verified =
         user.isVerified === true ||

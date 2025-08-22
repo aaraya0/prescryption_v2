@@ -10,7 +10,7 @@ const deploy = require('./scripts/deployTestContracts');
 module.exports = async () => {
   const outPath = path.resolve(__dirname, '.tmp/contracts_data.test.json');
   if (!fs.existsSync(outPath)) {
-    await deploy(); // genera el test json con el provider de .env.test
+    await deploy();
   }
-  process.env.CONTRACTS_DATA_TEST_PATH = outPath; // opcional (tenés fallback en el patch)
+  process.env.CONTRACTS_DATA_TEST_PATH = outPath; 
 };

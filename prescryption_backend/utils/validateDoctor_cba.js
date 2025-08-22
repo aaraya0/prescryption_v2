@@ -9,7 +9,7 @@ async function validateDoctorCordoba(dni, license) {
 
     browser = await puppeteer.launch({
       executablePath,
-      headless: chromium.headless,         // <-- usa el headless de sparticuz
+      headless: chromium.headless,         
       args: [
         ...chromium.args,
         '--no-sandbox',
